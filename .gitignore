@@ -1,0 +1,4 @@
+**/bin
+**/obj
+/Backend/.vs
+/Backend/appsettings.json
