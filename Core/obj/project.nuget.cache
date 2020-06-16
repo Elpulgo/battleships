@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Uhb9Wc5qelTr2YEs6MqSxdSbsQ0W3keLg5JD286nD/PCcTXxiVavJ+duCVuKSplmnz+aKP1rkLc2DhgPRvFv2w==",
+  "success": true,
+  "projectFilePath": "/home/lars/projects/battleships/Core/Core.csproj",
+  "expectedPackageFiles": [
+    "/home/lars/.nuget/packages/microsoft.aspnetcore.app.ref/3.1.2/microsoft.aspnetcore.app.ref.3.1.2.nupkg.sha512"
+  ],
+  "logs": []
+}
