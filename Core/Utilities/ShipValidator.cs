@@ -22,7 +22,7 @@ namespace Core.Utilities
             if (length != ShipType.NrOfBoxes())
             {
                 throw new ShipValidationException(
-                    $"Ship of type {this.ShipType.ToString()} must have {ShipType.NrOfBoxes()} coordinates! Only {length} coordinates were passed.");
+                    $"Ship of type {this.ShipType.ToString()} must have {ShipType.NrOfBoxes()} coordinates! {length} coordinates were passed.");
             }
 
             ValidateCoordinatesAreInLine(coordinates);
