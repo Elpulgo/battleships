@@ -4,9 +4,9 @@ namespace Core.Models
 {
     public class CoordinateContainer
     {
-        private int Row { get; }
+        public int Row { get; }
 
-        private Column Column { get; }
+        public Column Column { get; }
 
         public bool HasShip { get; private set; }
 
