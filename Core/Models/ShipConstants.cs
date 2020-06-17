@@ -15,15 +15,26 @@ namespace Core.Models
             yield return ShipType.SubMarine;
             yield return ShipType.SubMarine;
         }
+
+        public static int NrOfBoxes(this ShipType type) =>
+            type switch
+            {
+                ShipType.AirCraft => 5,
+                ShipType.BattleShip => 4,
+                ShipType.Cruiser => 3,
+                ShipType.Destroyer => 2,
+                ShipType.SubMarine => 2,
+                _ => 0
+            };
     }
 
     public enum ShipType
     {
-        SubMarine = 1,
-        Destroyer = 2,
-        Cruiser = 3,
-        BattleShip = 4,
-        AirCraft = 5,
+        SubMarine,
+        Destroyer,
+        Cruiser,
+        BattleShip,
+        AirCraft
     }
 }
 

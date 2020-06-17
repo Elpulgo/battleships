@@ -7,11 +7,6 @@ namespace Core.Models
     {
         public string Name { get; }
         public PlayerType Type { get; }
-        public int HitsOnOpponent { get; private set; }
-        public int HitsOnPlayer { get; private set; }
-        
-        public Dictionary<ShipType, bool> OpponentShipStatus { get; set; }
-        public Dictionary<ShipType, bool> PlayerShipStatus { get; set; }
 
         public Player(string name, PlayerType type)
         {

@@ -16,8 +16,8 @@ namespace Core.Models
 
         public PlayerStatus(Player player)
         {
-            OpponentShipStatus = ShipConstants.GetShipTypesPerPlayer.ToDictionary(ship => ship, false);
-            PlayerShipStatus = ShipConstants.GetShipTypesPerPlayer.ToDictionary(ship => ship, false);
+            OpponentShipStatus = ShipConstants.GetShipTypesPerPlayer().ToDictionary(ship => ship, value => false);
+            PlayerShipStatus = ShipConstants.GetShipTypesPerPlayer().ToDictionary(ship => ship, value => false);
             Player = player;
         }
 

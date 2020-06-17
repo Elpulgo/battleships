@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
 {
@@ -7,20 +9,25 @@ namespace Core.Models
     {
         public List<CoordinateContainer> Coordinates { get; } = new List<CoordinateContainer>();
 
-        public bool IsDestroyed => Coordinates.All(coord => coord.IsHit);
+        public bool IsDestroyed => Coordinates.All(coord => coord.IsMarked);
 
         public ShipType ShipType { get; }
 
-        public int Boxes => ShipType as int;
+        public int Boxes => ShipType.NrOfBoxes();
 
-        public ShipContainer(IEnumerable<(Column column, int row)> coordinates, ShipType shipType)
+        public ShipContainer(ShipType shipType) => ShipType = shipType;
+
+        public bool HasCoordinate(string key) => Coordinates.Any(coord => coord.Key == key);
+
+        public void MarkCoordinate(string key) => Coordinates.Single(coord => coord.Key == key).WasMarked();
+
+        public void SetCoordinates(IEnumerable<(Column column, int row)> coordinates)
         {
-            ShipType = shipType;
             ValidateCoordinates(coordinates.ToList());
 
             foreach (var coord in coordinates)
             {
-                Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip(shipType));
+                Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip());
             }
         }
 
@@ -32,10 +39,10 @@ namespace Core.Models
                 throw new CoordinatesHelper.CoordinateException("One or more of the coordinates are outside bounds.");
             }
 
-            if (length != shipType as int)
+            if (length != ShipType.NrOfBoxes())
             {
                 throw new ShipValidationException(
-                    $"Ship of type {this.ShipType.ToString()} must have {this.ShipType as int} coordinates! Only {length} coordinates were passed.");
+                    $"Ship of type {this.ShipType.ToString()} must have {ShipType.NrOfBoxes()} coordinates! Only {length} coordinates were passed.");
             }
         }
     }

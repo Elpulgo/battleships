@@ -1,3 +1,5 @@
+using static Core.Models.CoordinatesHelper;
+
 namespace Core.Models
 {
     public class CoordinateContainer
@@ -8,7 +10,7 @@ namespace Core.Models
 
         public bool HasShip { get; private set; }
 
-        public bool IsHit { get; private set; }
+        public bool IsMarked { get; private set; }
 
         public string Key => $"{Column.ToString()}{Row}";
 
@@ -24,9 +26,9 @@ namespace Core.Models
             return this;
         }
 
-        public void WasHit()
+        public void WasMarked()
         {
-            IsHit = true;
+            IsMarked = true;
         }
     }
 }
