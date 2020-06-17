@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
@@ -15,7 +16,13 @@ namespace Core.Models
 
         public int Boxes => ShipType.NrOfBoxes();
 
-        public ShipContainer(ShipType shipType) => ShipType = shipType;
+        private ShipValidator _shipValidator;
+
+        public ShipContainer(ShipType shipType)
+        {
+            ShipType = shipType;
+            _shipValidator = new ShipValidator(ShipType);
+        }
 
         public bool HasCoordinate(string key) => Coordinates.Any(coord => coord.Key == key);
 
@@ -23,52 +30,12 @@ namespace Core.Models
 
         public void SetCoordinates(IEnumerable<(Column column, int row)> coordinates)
         {
-            ValidateCoordinates(coordinates.ToList());
+            _shipValidator.ValidateCoordinates(coordinates.ToList());
 
             foreach (var coord in coordinates)
             {
                 Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip());
             }
-        }
-
-        private void ValidateCoordinates(List<(Column column, int row)> coordinates)
-        {
-            var length = coordinates.Count;
-            if (coordinates.Any(coord => coord.row > CoordinatesHelper.GetRowCount()))
-            {
-                throw new CoordinatesHelper.CoordinateException("One or more of the coordinates are outside bounds.");
-            }
-
-            if (length != ShipType.NrOfBoxes())
-            {
-                throw new ShipValidationException(
-                    $"Ship of type {this.ShipType.ToString()} must have {ShipType.NrOfBoxes()} coordinates! Only {length} coordinates were passed.");
-            }
-
-            ValidateCoordinatesAreInLine(coordinates);
-        }
-
-        private void ValidateCoordinatesAreInLine(List<(Column column, int row)> coordinates)
-        {
-
-            var isVertical = coordinates.Select(coord => coord.column).Distinct().Count() == 1;
-
-            if (!isVertical)
-            {
-                var isHorizontal = coordinates.Select(coord => coord.row).Distinct().Count() == 1;
-                if (!isHorizontal)
-                {
-                    throw new ShipValidationException($"Ship {ShipType.ToString()} is not vertical or horizontal. Check the coordinates again!");
-                }
-            }
-        }
-    }
-
-    public class ShipValidationException : Exception
-    {
-        public ShipValidationException(string message) : base(message)
-        {
-
         }
     }
 }
