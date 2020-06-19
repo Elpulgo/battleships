@@ -22,6 +22,8 @@ namespace Core.Utilities
 
         private IEnumerable<ShipContainer> GenerateShips()
         {
+
+            // TODO: Clean this
             var random = new Random();
 
             var shipContainers = new List<ShipContainer>();
@@ -120,7 +122,7 @@ namespace Core.Utilities
                     }
                 }
 
-                System.Console.WriteLine($"{tries} tries for shiptype {ship.ToString()}");
+                // System.Console.WriteLine($"{tries} tries for shiptype {ship.ToString()}");
                 takenCoodinateKeys.AddRange(innerCoordinateKeys);
                 shipContainer.SetCoordinates(coordinates.Select(s => (s.Column, s.Row)));
                 shipContainers.Add(shipContainer);

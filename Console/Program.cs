@@ -4,106 +4,195 @@ using System.Collections.Generic;
 using System.Linq;
 using static Core.Models.CoordinatesHelper;
 using Core.Utilities;
+using System.Threading;
 
 namespace Console
 {
     class Program
     {
+        private string LastBoxChar { get; set; } = string.Empty;
+        private List<ShipContainer> _shipContainers = new List<ShipContainer>();
+        private static Dictionary<(int, int), string> _coordMapChar = new Dictionary<(int, int), string>();
         static void Main(string[] args)
         {
             var pro = new Program();
-            pro.CreateShipsForPlayer();
+            var exit = false;
+
+            // while (!exit)
+            // {
+            //     System.Console.WriteLine(System.Console.BufferHeight);
+            //     System.Console.WriteLine(System.Console.BufferWidth);
+            //     Thread.Sleep(3000);
+            //     exit = System.Console.ReadKey().Key == ConsoleKey.Q;
+            // }
+
+            while (!exit)
+            {
+                System.Console.Clear();
+                pro.CreateShipsForPlayer();
+                exit = GamePlay();
+            }
+
+            System.Console.Clear();
+            System.Console.WriteLine("Will exit!");
+        }
+
+        private static void PrintMessage(string message)
+        {
+            int currentLeft = System.Console.CursorLeft;
+            int currentTop = System.Console.CursorTop;
+
+            System.Console.SetCursorPosition(0, System.Console.BufferHeight);
+            System.Console.WriteLine(message);
+            System.Console.SetCursorPosition(currentLeft, currentTop);
+            System.Console.Write("*");
+        }
+
+        private static bool GamePlay()
+        {
+            var cursorLeft = System.Console.CursorLeft + 4;
+            var cursorTop = System.Console.CursorTop - 2;
+
+            var initBufferHeight = System.Console.BufferHeight;
+            var initBufferWidth = System.Console.BufferWidth;
+
+
+            if (cursorLeft > System.Console.BufferWidth && cursorTop > System.Console.BufferHeight)
+            {
+                System.Console.WriteLine("Init coords is greater than buff");
+                System.Console.SetCursorPosition(cursorLeft + 4, cursorTop);
+            }
+            else
+            {
+                System.Console.SetCursorPosition(cursorLeft, cursorTop);
+            }
+
+            var exit = false;
+            int x = cursorLeft, y = cursorTop;
+            System.Console.Write("*");
+            int ySteps = 10;
+            int xSteps = 1;
+            int maxYSteps = 10;
+            int maxXSteps = 10;
+            while (!exit)
+            {
+                if (initBufferHeight != System.Console.BufferHeight || initBufferWidth != System.Console.BufferWidth)
+                {
+                    System.Console.Clear();
+                    return false;
+                }
+
+                var oldXStep = xSteps;
+                var oldYStep = ySteps;
+                var oldY = y;
+                var oldX = x;
+                var command = System.Console.ReadKey().Key;
+                switch (command)
+                {
+                    case ConsoleKey.DownArrow:
+                        {
+                            if (ySteps < maxYSteps)
+                            {
+                                y = y + 2;
+                                ySteps++;
+                            }
+                            // if (y <= 28)
+                            // {
+                            //     y = y + 2;
+                            // }
+                            break;
+                        }
+                    case ConsoleKey.UpArrow:
+                        {
+                            if (ySteps > 1 && y > 1)
+                            {
+                                y = y - 2;
+                                ySteps--;
+                            }
+                            // if (y >= 2)
+                            // {
+                            //     y = y - 2;
+                            // }
+                            break;
+                        }
+                    case ConsoleKey.LeftArrow:
+                        {
+                            if (xSteps > 1 && x > 3)
+                            {
+                                x = x - 4;
+                                xSteps--;
+                            }
+                            // if (x >= 8)
+                            // {
+                            //     x = x - 4;
+                            // }
+                            break;
+                        }
+                    case ConsoleKey.RightArrow:
+                        {
+                            if (xSteps < maxXSteps)
+                            {
+                                x = x + 4;
+                                xSteps++;
+                            }
+                            // if (x <= 38)
+                            // {
+                            //     x = x + 4;
+                            // }
+                            break;
+                        }
+                    case ConsoleKey.Q:
+                        {
+                            // exit = true;
+                            return true;
+                        }
+                    default: break;
+                }
+
+                if (x > System.Console.BufferWidth || y > System.Console.BufferHeight)
+                {
+                    System.Console.WriteLine("Coords are greater than buffer!");
+                    System.Console.Clear();
+                    return false;
+                }
+                else
+                {
+                    if (_coordMapChar.TryGetValue((oldXStep, oldYStep), out string oldChar))
+                    {
+                        System.Console.SetCursorPosition(oldX, oldY);
+                        System.Console.Write(oldChar);
+                    }
+                    System.Console.SetCursorPosition(x, y);
+                    System.Console.Write("*");
+                }
+
+                Thread.Sleep(10);
+            }
+
+            return true;
         }
 
         private void CreateShipsForPlayer()
         {
             var shipGenerator = new ShipGenerator();
             var shipContainers = shipGenerator.Generate();
+            _shipContainers = shipContainers.ToList();
 
-
-            foreach (var item in shipContainers)
-            {
-                System.Console.WriteLine($"Shiptype: {item.ShipType}\t IsDestroyed: {item.IsDestroyed}");
-                foreach (var coord in item.Coordinates)
-                {
-                    System.Console.WriteLine($"\tCoord: {coord.Key}\t IsMarked: {coord.IsMarked} \t Has ship: {coord.HasShip}");
-                }
-            }
-
-            System.Console.WriteLine();
-            System.Console.WriteLine("-----------------------------------");
-            System.Console.WriteLine();
-
-            var boardPrinter = new BoardPrinter();
-            boardPrinter.Print(shipContainers.ToList());
-
-
-            // var flattenedCordKeys = shipContainers
-            //     .SelectMany(s => s.Coordinates.Select(p => p.Key))
-            //     .ToDictionary(d => d);
-
-            // // System.Console.WriteLine("\tA\tB\tC\tD\tE\tF\tG\tH\tI\tJ\t");
-            // System.Console.WriteLine("    A | B | C | D | E | F | G | H | I | J |");
-            // System.Console.WriteLine("   ----------------------------------------");
-
-
-            // foreach (var row in Enumerable.Range(1, CoordinatesHelper.GetRowCount()))
+            // foreach (var item in shipContainers)
             // {
-            //     // System.Console.Write($"{row}\t");
-            //     System.Console.Write($"{row}");
-            //     if (row < 10)
+            //     System.Console.WriteLine($"Shiptype: {item.ShipType}\t IsDestroyed: {item.IsDestroyed}");
+            //     foreach (var coord in item.Coordinates)
             //     {
-            //         System.Console.Write(" |");
+            //         System.Console.WriteLine($"\tCoord: {coord.Key}\t IsMarked: {coord.IsMarked} \t Has ship: {coord.HasShip}");
             //     }
-            //     else
-            //     {
-            //         System.Console.Write("|");
-            //     }
-
-            //     foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
-            //     {
-            //         // FOR TESTING
-            //         if (column == CoordinatesHelper.Column.C && flattenedCordKeys.ContainsKey($"{column.ToString()}{row}"))
-            //         {
-            //             System.Console.ForegroundColor = ConsoleColor.Red;
-
-            //             System.Console.Write(" ✔ ");
-            //             System.Console.ResetColor();
-            //             System.Console.Write("|");
-
-            //             continue;
-            //         }
-
-            //         if (flattenedCordKeys.ContainsKey($"{column.ToString()}{row}"))
-            //         {
-            //             System.Console.ForegroundColor = ConsoleColor.Green;
-
-            //             System.Console.Write(" ✔ ");
-            //             // ☑
-            //             // ✔
-            //             System.Console.ResetColor();
-            //         }
-            //         // For testing!!
-            //         else if (row == 10)
-            //         {
-            //             System.Console.Write(" ✘ ");
-            //         }
-            //         else
-            //         {
-            //             System.Console.Write("   ");
-            //         }
-
-            //         System.Console.Write("|");
-
-            //     }
-
-            //     System.Console.WriteLine();
-            //     System.Console.WriteLine("   ----------------------------------------");
-
             // }
 
+            // System.Console.WriteLine();
+            // System.Console.WriteLine("-----------------------------------");
+            // System.Console.WriteLine();
 
-
+            var boardPrinter = new BoardPrinter();
+            _coordMapChar = boardPrinter.Print(shipContainers.ToList());
         }
     }
 }

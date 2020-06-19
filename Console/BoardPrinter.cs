@@ -7,18 +7,20 @@ namespace Console
 {
     public class BoardPrinter
     {
-        private readonly List<ShipContainer> _shipContainers;
+        // private readonly List<ShipContainer> _shipContainers;
         private static string HorizontalDivier = "   ----------------------------------------";
         private static string ShipIcon = " ✔ ";
-        private static string MarkIcon = " ✘ ";
+        // private static string MarkIcon = " ✘ ";
 
         public BoardPrinter() { }
 
-        public void Print(List<ShipContainer> shipContainers)
+        public Dictionary<(int, int), string> Print(List<ShipContainer> shipContainers)
         {
-            var flattenedCoordKeys = shipContainers
-                            .SelectMany(s => s.Coordinates.Select(p => p.Key))
-                            .ToDictionary(d => d);
+            var coordinateMapChar = new Dictionary<(int, int), string>();
+
+            var shipCoordinates = shipContainers
+                            .SelectMany(s => s.Coordinates.Select(s => s))
+                            .ToDictionary(d => d.Key);
 
             PrintColumns();
 
@@ -29,42 +31,46 @@ namespace Console
 
                 foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
                 {
-                    // FOR TESTING
-                    if (column == CoordinatesHelper.Column.C && flattenedCoordKeys.ContainsKey($"{column.ToString()}{row}"))
+                    // // FOR TESTING
+                    // if (column == CoordinatesHelper.Column.C && shipCoordinates.ContainsKey($"{column.ToString()}{row}"))
+                    // {
+                    //     System.Console.ForegroundColor = ConsoleColor.Red;
+
+                    //     System.Console.Write(ShipIcon);
+                    //     System.Console.ResetColor();
+                    //     System.Console.Write("|");
+
+                    //     continue;
+                    // }
+
+                    if (shipCoordinates.TryGetValue($"{column.ToString()}{row}", out CoordinateContainer coord))
                     {
-                        System.Console.ForegroundColor = ConsoleColor.Red;
+
+                        // TODO: Add shipcolors?
+                        System.Console.ForegroundColor = coord.IsMarked && coord.HasShip ? ConsoleColor.Red : ConsoleColor.Green;
 
                         System.Console.Write(ShipIcon);
+                        coordinateMapChar[(row, (int)column)] = "✔";
                         System.Console.ResetColor();
                         System.Console.Write("|");
-
                         continue;
                     }
+                    // // For testing!!
+                    // else if (row == 10)
+                    // {
+                    //     System.Console.Write(MarkIcon);
+                    // }
 
-                    if (flattenedCoordKeys.ContainsKey($"{column.ToString()}{row}"))
-                    {
-                        System.Console.ForegroundColor = ConsoleColor.Green;
+                    coordinateMapChar[(row, (int)column)] = " ";
 
-                        System.Console.Write(ShipIcon);
-                        // ☑
-                        // ✔
-                        System.Console.ResetColor();
-                    }
-                    // For testing!!
-                    else if (row == 10)
-                    {
-                        System.Console.Write(MarkIcon);
-                    }
-                    else
-                    {
-                        System.Console.Write("   ");
-                    }
-
+                    System.Console.Write("   ");
                     System.Console.Write("|");
 
                 }
                 PrintDivider();
             }
+
+            return coordinateMapChar;
         }
 
         private void PrintColumns()
