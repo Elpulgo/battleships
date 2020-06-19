@@ -43,9 +43,8 @@ namespace Console
             int currentTop = System.Console.CursorTop;
 
             System.Console.SetCursorPosition(0, System.Console.BufferHeight);
-            System.Console.WriteLine(message);
+            System.Console.Write(message);
             System.Console.SetCursorPosition(currentLeft, currentTop);
-            System.Console.Write("*");
         }
 
         private static bool GamePlay()
@@ -82,6 +81,11 @@ namespace Console
                     return false;
                 }
 
+                if (ySteps < 5)
+                {
+                    PrintMessage($"Y step right now is: {ySteps}");
+                }
+
                 var oldXStep = xSteps;
                 var oldYStep = ySteps;
                 var oldY = y;
@@ -96,10 +100,6 @@ namespace Console
                                 y = y + 2;
                                 ySteps++;
                             }
-                            // if (y <= 28)
-                            // {
-                            //     y = y + 2;
-                            // }
                             break;
                         }
                     case ConsoleKey.UpArrow:
@@ -109,10 +109,6 @@ namespace Console
                                 y = y - 2;
                                 ySteps--;
                             }
-                            // if (y >= 2)
-                            // {
-                            //     y = y - 2;
-                            // }
                             break;
                         }
                     case ConsoleKey.LeftArrow:
@@ -122,10 +118,6 @@ namespace Console
                                 x = x - 4;
                                 xSteps--;
                             }
-                            // if (x >= 8)
-                            // {
-                            //     x = x - 4;
-                            // }
                             break;
                         }
                     case ConsoleKey.RightArrow:
@@ -135,15 +127,10 @@ namespace Console
                                 x = x + 4;
                                 xSteps++;
                             }
-                            // if (x <= 38)
-                            // {
-                            //     x = x + 4;
-                            // }
                             break;
                         }
                     case ConsoleKey.Q:
                         {
-                            // exit = true;
                             return true;
                         }
                     default: break;
@@ -157,7 +144,7 @@ namespace Console
                 }
                 else
                 {
-                    if (_coordMapChar.TryGetValue((oldXStep, oldYStep), out string oldChar))
+                    if (_coordMapChar.TryGetValue((oldYStep, oldXStep), out string oldChar))
                     {
                         System.Console.SetCursorPosition(oldX, oldY);
                         System.Console.Write(oldChar);
@@ -178,21 +165,26 @@ namespace Console
             var shipContainers = shipGenerator.Generate();
             _shipContainers = shipContainers.ToList();
 
-            // foreach (var item in shipContainers)
-            // {
-            //     System.Console.WriteLine($"Shiptype: {item.ShipType}\t IsDestroyed: {item.IsDestroyed}");
-            //     foreach (var coord in item.Coordinates)
-            //     {
-            //         System.Console.WriteLine($"\tCoord: {coord.Key}\t IsMarked: {coord.IsMarked} \t Has ship: {coord.HasShip}");
-            //     }
-            // }
-
-            // System.Console.WriteLine();
-            // System.Console.WriteLine("-----------------------------------");
-            // System.Console.WriteLine();
+            // PrintInfoAboutContainers(_shipContainers);
 
             var boardPrinter = new BoardPrinter();
             _coordMapChar = boardPrinter.Print(shipContainers.ToList());
+        }
+
+        private void PrintInfoAboutContainers(List<ShipContainer> shipContainers)
+        {
+            foreach (var item in shipContainers)
+            {
+                System.Console.WriteLine($"Shiptype: {item.ShipType}\t IsDestroyed: {item.IsDestroyed}");
+                foreach (var coord in item.Coordinates)
+                {
+                    System.Console.WriteLine($"\tCoord: {coord.Key}\t IsMarked: {coord.IsMarked} \t Has ship: {coord.HasShip}");
+                }
+            }
+
+            System.Console.WriteLine();
+            System.Console.WriteLine("-----------------------------------");
+            System.Console.WriteLine();
         }
     }
 }
