@@ -22,13 +22,13 @@ namespace Console
 
             // TODO:
             // - Eventloop for key input 
-            //      - Exit
-            //      - Move
+            //      X Exit
+            //      X Move
             //      - Enter(hit/mark)
             //      - P (Place mark)?
             //      - F (Finish place ship)?
             //      - S (Start game)? Only when all ships finished
-            // - Use PositionState interface instead of x properties in KeyInputHandler
+            // X Use PositionState interface instead of x properties in KeyInputHandler
 
             // - GameMode -> Setup/Play
 
