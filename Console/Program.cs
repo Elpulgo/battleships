@@ -21,30 +21,32 @@ namespace Console
         {
 
             // TODO:
-            // - Eventloop for key input 
-            //      X Exit
-            //      X Move
-            //      - Enter(hit/mark)
-            //      - P (Place mark)?
-            //      - F (Finish place ship)?
-            //      - S (Start game)? Only when all ships finished
-            // X Use PositionState interface instead of x properties in KeyInputHandler
+            /*
+             [] Eventloop for key input 
+                  [X] Exit
+                  [X] Move
+                  [ ] Enter(hit/mark)
+                  [ ] P (Place mark)?
+                  [ ] F (Finish place ship)?
+                  [ ] S (Start game)? Only when all ships finished
+             [X] Use PositionState interface instead of x properties in KeyInputHandler
 
-            // - GameMode -> Setup/Play
+             [ ] GameMode -> Setup/Play
 
-            // - Interface for Ship/ShipContainer (rename?)
-            // - Abstract Factory to create ships
-            //      - Color
-            //      - Boxes
-            //      - Name
+             [ ] Interface for Ship/ShipContainer (rename?)
+             [ ] Abstract Factory to create ships
+                  [ ] Color
+                  [ ] Boxes
+                  [ ] Name
 
-            // - GameEngine/Manager/GamePlay?
-            //      - Fire Action (include playerid)-> Return ActionResult containing:
-            //          - Coord (x,y)
-            //          - ShipWasHit
-            //          - ShipWasSunk
-            //          - Message To Display e.g "Player missed.", "Player hit! Destroyer was sunk.", "Player won!"
-            //          - Player
+             [ ] GameEngine/Manager/GamePlay?
+                  [ ] Fire Action (include playerid)-> Return ActionResult containing:
+                      [ ] Coord (x,y)
+                      [ ] ShipWasHit
+                      [ ] ShipWasSunk
+                      [ ] Message To Display e.g "Player missed.", "Player hit! Destroyer was sunk.", "Player won!"
+                      [ ] Player
+            */
 
             var pro = new Program();
             pro.Run();
