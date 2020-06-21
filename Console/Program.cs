@@ -5,6 +5,7 @@ using System.Linq;
 using static Core.Models.CoordinatesHelper;
 using Core.Utilities;
 using System.Threading;
+using Console.Models;
 
 namespace Console
 {
@@ -13,150 +14,103 @@ namespace Console
         private string LastBoxChar { get; set; } = string.Empty;
         private List<ShipContainer> _shipContainers = new List<ShipContainer>();
         private static Dictionary<(int, int), string> _coordMapChar = new Dictionary<(int, int), string>();
+
+        private bool Exit { get; set; } = false;
+        public KeyInputHandler _keyInputHandler;
         static void Main(string[] args)
         {
+
+            // TODO:
+            // - Eventloop for key input 
+            //      - Exit
+            //      - Move
+            //      - Enter(hit/mark)
+            //      - P (Place mark)?
+            //      - F (Finish place ship)?
+            //      - S (Start game)? Only when all ships finished
+            // - Use PositionState interface instead of x properties in KeyInputHandler
+
+            // - GameMode -> Setup/Play
+
+            // - Interface for Ship/ShipContainer (rename?)
+            // - Abstract Factory to create ships
+            //      - Color
+            //      - Boxes
+            //      - Name
+
+            // - GameEngine/Manager/GamePlay?
+            //      - Fire Action (include playerid)-> Return ActionResult containing:
+            //          - Coord (x,y)
+            //          - ShipWasHit
+            //          - ShipWasSunk
+            //          - Message To Display e.g "Player missed.", "Player hit! Destroyer was sunk.", "Player won!"
+            //          - Player
+
             var pro = new Program();
-            var exit = false;
-
-            // while (!exit)
-            // {
-            //     System.Console.WriteLine(System.Console.BufferHeight);
-            //     System.Console.WriteLine(System.Console.BufferWidth);
-            //     Thread.Sleep(3000);
-            //     exit = System.Console.ReadKey().Key == ConsoleKey.Q;
-            // }
-
-            while (!exit)
-            {
-                System.Console.Clear();
-                pro.CreateShipsForPlayer();
-                exit = GamePlay();
-            }
-
-            System.Console.Clear();
-            System.Console.WriteLine("Will exit!");
+            pro.Run();
         }
 
-        private static void PrintMessage(string message)
+        public void Run()
+        {
+            // Need to be done before keyInputHandler is created.
+            // Since handler calculate positions after board
+            // which is created in this method.
+            CreateShipsForPlayer();
+
+            _keyInputHandler = new KeyInputHandler()
+                .WithGameMode(GameMode.Setup);
+
+            _keyInputHandler.ExitEvent += OnExit;
+            _keyInputHandler.KeyActionEvent += OnKeyFired;
+
+            _keyInputHandler.Listen();
+        }
+
+        private static void PrintMessage(string message, bool bringBackCursor = true)
         {
             int currentLeft = System.Console.CursorLeft;
             int currentTop = System.Console.CursorTop;
 
             System.Console.SetCursorPosition(0, System.Console.BufferHeight);
             System.Console.Write(message);
+            if (bringBackCursor)
+            {
+                System.Console.SetCursorPosition(currentLeft, currentTop);
+            }
+        }
+
+        private void OverwritePrintedChar()
+        {
+            int currentLeft = System.Console.CursorLeft;
+            int currentTop = System.Console.CursorTop;
+
+            System.Console.SetCursorPosition(currentLeft - 1, currentTop);
+
+            System.Console.Write(" ");
             System.Console.SetCursorPosition(currentLeft, currentTop);
         }
 
-        private static bool GamePlay()
+        private void OnExit(object sender, bool shouldExit)
         {
-            var cursorLeft = System.Console.CursorLeft + 4;
-            var cursorTop = System.Console.CursorTop - 2;
-
-            var initBufferHeight = System.Console.BufferHeight;
-            var initBufferWidth = System.Console.BufferWidth;
-
-
-            if (cursorLeft > System.Console.BufferWidth && cursorTop > System.Console.BufferHeight)
+            if (shouldExit)
             {
-                System.Console.WriteLine("Init coords is greater than buff");
-                System.Console.SetCursorPosition(cursorLeft + 4, cursorTop);
+                OverwritePrintedChar();
+                PrintMessage("Player decided to quit!", false);
+                Environment.Exit(0);
             }
-            else
-            {
-                System.Console.SetCursorPosition(cursorLeft, cursorTop);
-            }
+        }
 
-            var exit = false;
-            int x = cursorLeft, y = cursorTop;
+        private void OnKeyFired(object sender, KeyAction keyAction)
+        {
+            if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out string oldChar))
+            {
+                System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
+                System.Console.Write(oldChar);
+            }
+            System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
+
+            // TODO: Should also indicate on game mode and so on what should be written..
             System.Console.Write("*");
-            int ySteps = 10;
-            int xSteps = 1;
-            int maxYSteps = 10;
-            int maxXSteps = 10;
-            while (!exit)
-            {
-                if (initBufferHeight != System.Console.BufferHeight || initBufferWidth != System.Console.BufferWidth)
-                {
-                    System.Console.Clear();
-                    return false;
-                }
-
-                if (ySteps < 5)
-                {
-                    PrintMessage($"Y step right now is: {ySteps}");
-                }
-
-                var oldXStep = xSteps;
-                var oldYStep = ySteps;
-                var oldY = y;
-                var oldX = x;
-                var command = System.Console.ReadKey().Key;
-                switch (command)
-                {
-                    case ConsoleKey.DownArrow:
-                        {
-                            if (ySteps < maxYSteps)
-                            {
-                                y = y + 2;
-                                ySteps++;
-                            }
-                            break;
-                        }
-                    case ConsoleKey.UpArrow:
-                        {
-                            if (ySteps > 1 && y > 1)
-                            {
-                                y = y - 2;
-                                ySteps--;
-                            }
-                            break;
-                        }
-                    case ConsoleKey.LeftArrow:
-                        {
-                            if (xSteps > 1 && x > 3)
-                            {
-                                x = x - 4;
-                                xSteps--;
-                            }
-                            break;
-                        }
-                    case ConsoleKey.RightArrow:
-                        {
-                            if (xSteps < maxXSteps)
-                            {
-                                x = x + 4;
-                                xSteps++;
-                            }
-                            break;
-                        }
-                    case ConsoleKey.Q:
-                        {
-                            return true;
-                        }
-                    default: break;
-                }
-
-                if (x > System.Console.BufferWidth || y > System.Console.BufferHeight)
-                {
-                    System.Console.WriteLine("Coords are greater than buffer!");
-                    System.Console.Clear();
-                    return false;
-                }
-                else
-                {
-                    if (_coordMapChar.TryGetValue((oldYStep, oldXStep), out string oldChar))
-                    {
-                        System.Console.SetCursorPosition(oldX, oldY);
-                        System.Console.Write(oldChar);
-                    }
-                    System.Console.SetCursorPosition(x, y);
-                    System.Console.Write("*");
-                }
-
-                Thread.Sleep(10);
-            }
-
-            return true;
         }
 
         private void CreateShipsForPlayer()
