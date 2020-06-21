@@ -15,121 +15,84 @@ namespace Core.Utilities
 
         public IEnumerable<ShipContainer> Generate() => GenerateShips();
 
-
-        // Direction. TODO: Make this better
-        // 0 = Horizontal
-        // 1 = Vertical
-
         private IEnumerable<ShipContainer> GenerateShips()
         {
-
-            // TODO: Clean this
-            var random = new Random();
-
-            var shipContainers = new List<ShipContainer>();
-            var takenCoodinateKeys = new List<string>();
+            var takenCoodinateKeys = new Dictionary<string, string>();
 
             foreach (var ship in ShipConstants.GetShipTypesPerPlayer())
             {
-                var shipContainer = new ShipContainer(ship);
+                yield return GenerateShipFor(ship, ref takenCoodinateKeys);
+            }
+        }
 
-                var coordinates = new List<CoordinateContainer>();
-                var innerCoordinateKeys = new List<string>();
-                int tries = 0;
-                while (coordinates.Count != ship.NrOfBoxes())
+        private ShipContainer GenerateShipFor(
+            ShipType ship,
+            ref Dictionary<string, string> takenCoordinates)
+        {
+            var random = new Random();
+
+            var coordinates = new List<CoordinateContainer>();
+
+            while (coordinates.Count != ship.NrOfBoxes())
+            {
+                coordinates.Clear();
+
+                var startingRow = random.Next(1, CoordinatesHelper.GetRowCount() - ship.NrOfBoxes());
+                var startingColumn = random.Next(1, CoordinatesHelper.GetColumnCount() - ship.NrOfBoxes());
+
+                if (takenCoordinates.ContainsKey($"{(CoordinatesHelper.Column)startingColumn}{startingRow}"))
                 {
-                    tries++;
-
-                    coordinates.Clear();
-                    innerCoordinateKeys.Clear();
-                    var orientation = random.Next(2);
-                    // System.Console.WriteLine("Random: " + orientation);
-                    if (orientation == 0)
-                    {
-                        // System.Console.WriteLine("orientation == 0 (horizontal)");
-
-                        var startingRow = random.Next(1, CoordinatesHelper.GetRowCount() - ship.NrOfBoxes());
-                        var startingColumn = random.Next(1, CoordinatesHelper.GetColumnCount() - ship.NrOfBoxes());
-                        var firstCoord = new CoordinateContainer((CoordinatesHelper.Column)startingColumn, startingRow);
-
-                        if (takenCoodinateKeys.Any(coord => coord == $"{(CoordinatesHelper.Column)startingColumn}{startingRow}"))
-                        {
-                            // System.Console.WriteLine("Will break");
-
-                            continue;
-                        }
-
-                        var coordinateTaken = false;
-
-                        for (var index = startingColumn; index < startingColumn + ship.NrOfBoxes(); index++)
-                        {
-                            if (coordinateTaken)
-                            {
-                                continue;
-                            }
-
-                            var newCoord = new CoordinateContainer((CoordinatesHelper.Column)index, startingRow);
-
-                            if (takenCoodinateKeys.Any(coord => coord == $"{(CoordinatesHelper.Column)index}{startingRow}"))
-                            {
-                                // System.Console.WriteLine("Will break inner loop");
-                                coordinateTaken = true;
-                                continue;
-                            }
-
-                            // System.Console.WriteLine("Wont break");
-
-                            coordinates.Add(newCoord);
-                            innerCoordinateKeys.Add($"{(CoordinatesHelper.Column)index}{startingRow}");
-                        }
-                    }
-                    else
-                    {
-                        // System.Console.WriteLine("orientation == 1 (vertical)");
-
-                        var startingRow = random.Next(1, CoordinatesHelper.GetRowCount() - ship.NrOfBoxes());
-                        var startingColumn = random.Next(1, CoordinatesHelper.GetColumnCount() - ship.NrOfBoxes());
-                        var firstCoord = new CoordinateContainer((CoordinatesHelper.Column)startingColumn, startingRow);
-
-                        if (takenCoodinateKeys.Any(coord => coord == $"{(CoordinatesHelper.Column)startingColumn}{startingRow}"))
-                        {
-                            // System.Console.WriteLine("Will break");
-                            continue;
-                        }
-
-                        var coordinateTaken = false;
-                        for (var index = startingRow; index < startingRow + ship.NrOfBoxes(); index++)
-                        {
-                            if (coordinateTaken)
-                            {
-                                continue;
-                            }
-
-                            var newCoord = new CoordinateContainer((CoordinatesHelper.Column)startingColumn, index);
-
-                            if (takenCoodinateKeys.Any(coord => coord == $"{(CoordinatesHelper.Column)startingColumn}{index}"))
-                            {
-                                // System.Console.WriteLine("Will break inner loop");
-                                coordinateTaken = true;
-                                continue;
-                            }
-
-                            // System.Console.WriteLine("Wont break");
-
-                            coordinates.Add(newCoord);
-                            innerCoordinateKeys.Add($"{(CoordinatesHelper.Column)startingColumn}{index}");
-                        }
-                    }
+                    continue;
                 }
 
-                // System.Console.WriteLine($"{tries} tries for shiptype {ship.ToString()}");
-                takenCoodinateKeys.AddRange(innerCoordinateKeys);
-                shipContainer.SetCoordinates(coordinates.Select(s => (s.Column, s.Row)));
-                shipContainers.Add(shipContainer);
+                var direction = (Direction)random.Next(2);
+
+                var startingCount = direction switch
+                {
+                    Direction.Horizontal => startingColumn,
+                    Direction.Vertical => startingRow,
+                    _ => throw new Exception("Passed ship direction does not exist!")
+                };
+
+                for (var index = startingCount; index < startingCount + ship.NrOfBoxes(); index++)
+                {
+                    var column = direction == Direction.Horizontal ? index : startingColumn;
+                    var row = direction == Direction.Vertical ? index : startingRow;
+
+                    if (!TryAddCoordinateForBox(column, row, ref takenCoordinates, out var coord))
+                        continue;
+
+                    coordinates.Add(coord);
+                }
             }
 
-            return shipContainers;
+            return new ShipContainer(ship)
+                .WithCoordinates(coordinates.Select(s => (s.Column, s.Row)));
         }
+
+        private bool TryAddCoordinateForBox(
+            int column,
+            int row,
+            ref Dictionary<string, string> takenCoordinates,
+            out CoordinateContainer coord)
+        {
+            coord = null;
+            var key = $"{(CoordinatesHelper.Column)column}{row}";
+
+            if (takenCoordinates.TryAdd(key, key))
+            {
+                coord = new CoordinateContainer((CoordinatesHelper.Column)column, row);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    enum Direction
+    {
+        Horizontal = 0,
+        Vertical = 1
     }
 }
 

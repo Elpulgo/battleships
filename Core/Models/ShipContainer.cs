@@ -24,6 +24,12 @@ namespace Core.Models
             _shipValidator = new ShipValidator(ShipType);
         }
 
+        public ShipContainer WithCoordinates(IEnumerable<(Column column, int row)> coordinates)
+        {
+            SetCoordinates(coordinates);
+            return this;
+        }
+
         public bool HasCoordinate(string key) => Coordinates.Any(coord => coord.Key == key);
 
         public void MarkCoordinate(string key) => Coordinates.Single(coord => coord.Key == key).WasMarked();
