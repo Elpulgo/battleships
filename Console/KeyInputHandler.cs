@@ -1,9 +1,5 @@
 using System;
 using Core.Models;
-using System.Collections.Generic;
-using System.Linq;
-using static Core.Models.CoordinatesHelper;
-using Core.Utilities;
 using System.Threading;
 using Console.Models;
 
@@ -11,24 +7,11 @@ namespace Console
 {
     public class KeyInputHandler
     {
-        private const int MaxYSteps = 10;
-        private const int MaxXSteps = 10;
-
         #region Members
 
-
-        // TOOO: Use PositionState
-        private int _position_Y;
-        private int _position_X;
-
-        private int _oldPosition_Y;
-        private int _oldPosition_X;
+        private PositionSate _positionState;
         private int _initBufferHeight;
         private int _initBufferWidth;
-        private int _steps_X = 1;
-        private int _steps_Y = 10;
-        private int _oldSteps_X = 1;
-        private int _oldSteps_Y = 10;
 
         #endregion
 
@@ -40,7 +23,10 @@ namespace Console
         public KeyInputHandler()
         {
             SetupBufferHeight();
-            SetupPositions();
+            _positionState = new PositionSate(
+                System.Console.CursorLeft + 4,
+                System.Console.CursorTop - 2
+            );
             SetInitCursorPositions();
         }
 
@@ -58,7 +44,7 @@ namespace Console
             while (Mode == GameMode.Setup)
             {
                 ListenForInput();
-                ValidateCurrentCursorPosition();
+                _positionState.Validate();
                 FireKeyActionEvent();
                 Thread.Sleep(10);
             }
@@ -73,35 +59,23 @@ namespace Console
                 // return false;
             }
 
-            if (_steps_Y < 5)
-            {
-
-                int currentLeft = System.Console.CursorLeft;
-                int currentTop = System.Console.CursorTop;
-
-                System.Console.SetCursorPosition(0, System.Console.BufferHeight);
-                System.Console.Write($"Y step right now is: {_steps_Y}");
-                System.Console.SetCursorPosition(currentLeft, currentTop);
-                // PrintMessage($"Y step right now is: {_ySteps}");
-            }
-
-            CacheOldPositions();
+            _positionState.CacheCurrentState();
 
             var command = System.Console.ReadKey().Key;
 
             switch (command)
             {
                 case ConsoleKey.DownArrow:
-                    DownArrow();
+                    _positionState.Increment_Y();
                     break;
                 case ConsoleKey.UpArrow:
-                    UpArrow();
+                    _positionState.Decrement_Y();
                     break;
                 case ConsoleKey.LeftArrow:
-                    LeftArrow();
+                    _positionState.Decrement_X();
                     break;
                 case ConsoleKey.RightArrow:
-                    RightArrow();
+                    _positionState.Increment_X();
                     break;
                 case ConsoleKey.Q:
                     ExitEvent.Invoke(this, true);
@@ -109,66 +83,25 @@ namespace Console
                     break;
                 default: break;
             }
-
-            void UpArrow()
-            {
-                if (_steps_Y > 1 && _position_Y > 1)
-                {
-                    _position_Y = _position_Y - 2;
-                    _steps_Y--;
-                }
-            }
-            void DownArrow()
-            {
-                if (_steps_Y < MaxYSteps)
-                {
-                    _position_Y = _position_Y + 2;
-                    _steps_Y++;
-                }
-            }
-            void LeftArrow()
-            {
-                if (_steps_X > 1 && _position_X > 3)
-                {
-                    _position_X = _position_X - 4;
-                    _steps_X--;
-                }
-            }
-            void RightArrow()
-            {
-                if (_steps_X < MaxXSteps)
-                {
-                    _position_X = _position_X + 4;
-                    _steps_X++;
-                }
-            }
         }
 
         private void SetInitCursorPositions()
         {
-            if (_position_X > _initBufferWidth && _position_Y > _initBufferHeight)
+            if (_positionState.Position_X > _initBufferWidth && _positionState.Position_Y > _initBufferHeight)
             {
                 System.Console.SetCursorPosition(System.Console.CursorLeft + 4, System.Console.CursorTop);
                 return;
             }
 
-            System.Console.SetCursorPosition(_position_X, _position_Y);
+            System.Console.SetCursorPosition(_positionState.Position_X, _positionState.Position_Y);
         }
 
-        private void ValidateCurrentCursorPosition()
-        {
-            if (_position_X > System.Console.BufferWidth || _position_Y > System.Console.BufferHeight)
-            {
-                System.Console.Clear();
-                System.Console.WriteLine("Coords are greater than buffer!");
-            }
-        }
         private void FireKeyActionEvent()
         {
             var keyAction = new KeyAction()
-                .WithOldStep(_oldSteps_X, _oldSteps_Y)
-                .WithOldPostion(_oldPosition_X, _oldPosition_Y)
-                .WithNewPosition(_position_X, _position_Y);
+                .WithOldStep(_positionState.OldStep_X, _positionState.OldStep_Y)
+                .WithOldPostion(_positionState.OldPosition_X, _positionState.OldPosition_Y)
+                .WithNewPosition(_positionState.Position_X, _positionState.Position_Y);
 
             KeyActionEvent.Invoke(this, keyAction);
         }
@@ -177,22 +110,6 @@ namespace Console
         {
             _initBufferHeight = System.Console.BufferHeight;
             _initBufferWidth = System.Console.BufferWidth;
-        }
-
-        private void SetupPositions()
-        {
-            _position_X = System.Console.CursorLeft + 4;
-            _position_Y = System.Console.CursorTop - 2;
-            _oldPosition_X = _position_X;
-            _oldPosition_Y = _position_Y;
-        }
-
-        private void CacheOldPositions()
-        {
-            _oldSteps_X = _steps_X;
-            _oldSteps_Y = _steps_Y;
-            _oldPosition_Y = _position_Y;
-            _oldPosition_X = _position_X;
         }
     }
 }
