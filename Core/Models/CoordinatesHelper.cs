@@ -4,8 +4,6 @@ namespace Core.Models
 {
     public static class CoordinatesHelper
     {
-        public static int GetRowCount() => 10;
-        public static int GetColumnCount() => 10;
         public enum Column
         {
             A = 1,

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Models;
+using Core.Utilities;
 
 namespace Console
 {
@@ -24,7 +25,7 @@ namespace Console
 
             PrintColumns();
 
-            foreach (var row in Enumerable.Range(1, CoordinatesHelper.GetRowCount()))
+            foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
             {
                 System.Console.Write($"{row}");
                 PrintRowDigitDivider(row);

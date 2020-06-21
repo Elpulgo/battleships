@@ -14,7 +14,7 @@ namespace Core.Utilities
         public void ValidateCoordinates(List<(Column column, int row)> coordinates)
         {
             var length = coordinates.Count;
-            if (coordinates.Any(coord => coord.row > CoordinatesHelper.GetRowCount()))
+            if (coordinates.Any(coord => coord.row > GameConstants.MaxRowCount))
             {
                 throw new CoordinatesHelper.CoordinateException("One or more of the coordinates are outside bounds.");
             }

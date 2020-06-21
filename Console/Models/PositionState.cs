@@ -1,12 +1,9 @@
-using System;
+using Core.Utilities;
 
 namespace Console.Models
 {
     public class PositionSate
     {
-        private const int MaxYSteps = 10;
-        private const int MaxXSteps = 10;
-
         #region Fields
 
         public int Position_X { get; private set; }
@@ -40,7 +37,7 @@ namespace Console.Models
         
         public void Increment_Y()
         {
-            if (Step_Y < MaxYSteps)
+            if (Step_Y < GameConstants.MaxRowCount)
             {
                 Position_Y = Position_Y + 2;
                 Step_Y++;
@@ -58,7 +55,7 @@ namespace Console.Models
 
         public void Increment_X()
         {
-            if (Step_X < MaxXSteps)
+            if (Step_X < GameConstants.MaxColumnCount)
             {
                 Position_X = Position_X + 4;
                 Step_X++;

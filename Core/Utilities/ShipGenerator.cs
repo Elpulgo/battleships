@@ -37,8 +37,8 @@ namespace Core.Utilities
             {
                 coordinates.Clear();
 
-                var startingRow = random.Next(1, CoordinatesHelper.GetRowCount() - ship.NrOfBoxes());
-                var startingColumn = random.Next(1, CoordinatesHelper.GetColumnCount() - ship.NrOfBoxes());
+                var startingRow = random.Next(1, GameConstants.MaxRowCount - ship.NrOfBoxes());
+                var startingColumn = random.Next(1, GameConstants.MaxColumnCount - ship.NrOfBoxes());
 
                 if (takenCoordinates.ContainsKey($"{(CoordinatesHelper.Column)startingColumn}{startingRow}"))
                 {

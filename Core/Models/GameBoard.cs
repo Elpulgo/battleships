@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
@@ -52,7 +53,7 @@ namespace Core.Models
         {
             foreach (Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
             {
-                foreach (var row in Enumerable.Range(1, CoordinatesHelper.GetRowCount()))
+                foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
                 {
                     var key = $"{column.ToString()}{row}";
                     _matrix.TryAdd(key, new CoordinateContainer(column, row));
