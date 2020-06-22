@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Models.Ships;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
@@ -9,7 +10,7 @@ namespace Core.Models
     public class GameBoard
     {
         private Dictionary<string, CoordinateContainer> _matrix;
-        private List<ShipContainer> _ships;
+        private List<IShip> _ships;
         public Player Player { get; }
         public GameBoard(Player player)
         {
@@ -18,8 +19,7 @@ namespace Core.Models
             FillMatrix();
         }
 
-
-        public GameBoard WithShips(List<ShipContainer> ships)
+        public GameBoard WithShips(List<IShip> ships)
         {
 
             _ships = ships;

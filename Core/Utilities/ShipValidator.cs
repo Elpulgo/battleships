@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Models;
+using Core.Models.Ships;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Utilities
 {
-    public class ShipValidator
+    public static class ShipValidator
     {
-        private ShipType ShipType { get; }
-        public ShipValidator(ShipType shipType) => ShipType = shipType;
-
-        public void ValidateCoordinates(List<(Column column, int row)> coordinates)
+        public static void ValidateCoordinates<T>(this T ship, List<(Column column, int row)> coordinates)
+            where T : IShip
         {
             var length = coordinates.Count;
             if (coordinates.Any(coord => coord.row > GameConstants.MaxRowCount))
@@ -19,16 +18,17 @@ namespace Core.Utilities
                 throw new CoordinatesHelper.CoordinateException("One or more of the coordinates are outside bounds.");
             }
 
-            if (length != ShipType.NrOfBoxes())
+            if (length != ship.Boxes)
             {
                 throw new ShipValidationException(
-                    $"Ship of type {this.ShipType.ToString()} must have {ShipType.NrOfBoxes()} coordinates! {length} coordinates were passed.");
+                    $"Ship of type {ship.Name} must have {ship.Boxes} coordinates! {length} coordinates were passed.");
             }
 
-            ValidateCoordinatesAreInLine(coordinates);
+            ValidateCoordinatesAreInLine<T>(ship, coordinates);
         }
 
-        private void ValidateCoordinatesAreInLine(List<(Column column, int row)> coordinates)
+        private static void ValidateCoordinatesAreInLine<T>(this T ship, List<(Column column, int row)> coordinates)
+            where T : IShip
         {
 
             var isVertical = coordinates.Select(coord => coord.column).Distinct().Count() == 1;
@@ -38,7 +38,7 @@ namespace Core.Utilities
                 var isHorizontal = coordinates.Select(coord => coord.row).Distinct().Count() == 1;
                 if (!isHorizontal)
                 {
-                    throw new ShipValidationException($"Ship {ShipType.ToString()} is not vertical or horizontal. Check the coordinates again!");
+                    throw new ShipValidationException($"Ship {ship.Name} is not vertical or horizontal. Check the coordinates again!");
                 }
             }
         }

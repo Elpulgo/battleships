@@ -2,20 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Models;
+using Core.Models.Ships;
+using Core.Factories;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Utilities
 {
     public class ShipGenerator
     {
+        private readonly ShipFactory _shipFactory;
         public ShipGenerator()
         {
-
+            _shipFactory = new ShipFactory();
         }
 
-        public IEnumerable<ShipContainer> Generate() => GenerateShips();
+        public IEnumerable<IShip> Generate() => GenerateShips();
 
-        private IEnumerable<ShipContainer> GenerateShips()
+        private IEnumerable<IShip> GenerateShips()
         {
             var takenCoodinateKeys = new Dictionary<string, string>();
 
@@ -25,20 +28,20 @@ namespace Core.Utilities
             }
         }
 
-        private ShipContainer GenerateShipFor(
-            ShipType ship,
+        private IShip GenerateShipFor(
+            ShipType shipType,
             ref Dictionary<string, string> takenCoordinates)
         {
             var random = new Random();
 
-            var coordinates = new List<CoordinateContainer>();
+            var coordinates = new List<(Column, int)>();
 
-            while (coordinates.Count != ship.NrOfBoxes())
+            while (coordinates.Count != shipType.NrOfBoxes())
             {
                 coordinates.Clear();
 
-                var startingRow = random.Next(1, GameConstants.MaxRowCount - ship.NrOfBoxes());
-                var startingColumn = random.Next(1, GameConstants.MaxColumnCount - ship.NrOfBoxes());
+                var startingRow = random.Next(1, GameConstants.MaxRowCount - shipType.NrOfBoxes());
+                var startingColumn = random.Next(1, GameConstants.MaxColumnCount - shipType.NrOfBoxes());
 
                 if (takenCoordinates.ContainsKey($"{(CoordinatesHelper.Column)startingColumn}{startingRow}"))
                 {
@@ -54,36 +57,30 @@ namespace Core.Utilities
                     _ => throw new Exception("Passed ship direction does not exist!")
                 };
 
-                for (var index = startingCount; index < startingCount + ship.NrOfBoxes(); index++)
+                for (var index = startingCount; index < startingCount + shipType.NrOfBoxes(); index++)
                 {
                     var column = direction == Direction.Horizontal ? index : startingColumn;
                     var row = direction == Direction.Vertical ? index : startingRow;
 
-                    if (!TryAddCoordinateForBox(column, row, ref takenCoordinates, out var coord))
+                    if (!TryAddCoordinateForBox(column, row, ref takenCoordinates))
                         continue;
-
-                    coordinates.Add(coord);
+        
+                    coordinates.Add(((CoordinatesHelper.Column)column, row));
                 }
             }
 
-            return new ShipContainer(ship)
-                .WithCoordinates(coordinates.Select(s => (s.Column, s.Row)));
+            return _shipFactory.Build(shipType, coordinates);
         }
 
         private bool TryAddCoordinateForBox(
             int column,
             int row,
-            ref Dictionary<string, string> takenCoordinates,
-            out CoordinateContainer coord)
+            ref Dictionary<string, string> takenCoordinates)
         {
-            coord = null;
             var key = $"{(CoordinatesHelper.Column)column}{row}";
 
             if (takenCoordinates.TryAdd(key, key))
-            {
-                coord = new CoordinateContainer((CoordinatesHelper.Column)column, row);
                 return true;
-            }
 
             return false;
         }

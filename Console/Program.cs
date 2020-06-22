@@ -2,20 +2,18 @@
 using Core.Models;
 using System.Collections.Generic;
 using System.Linq;
-using static Core.Models.CoordinatesHelper;
 using Core.Utilities;
-using System.Threading;
 using Console.Models;
+using Core.Models.Ships;
 
 namespace Console
 {
     class Program
     {
         private string LastBoxChar { get; set; } = string.Empty;
-        private List<ShipContainer> _shipContainers = new List<ShipContainer>();
+        private List<IShip> _ships = new List<IShip>();
         private static Dictionary<(int, int), string> _coordMapChar = new Dictionary<(int, int), string>();
 
-        private bool Exit { get; set; } = false;
         public KeyInputHandler _keyInputHandler;
         static void Main(string[] args)
         {
@@ -32,12 +30,15 @@ namespace Console
              [X] Use PositionState interface instead of x properties in KeyInputHandler
 
              [ ] GameMode -> Setup/Play
+             [ ] Add writer, Extention ShipWriter in console proj. And writer to write the different marks (* / x etc..)
 
-             [ ] Interface for Ship/ShipContainer (rename?)
-             [ ] Abstract Factory to create ships
-                  [ ] Color
-                  [ ] Boxes
-                  [ ] Name
+             [X] Interface for Ship/ShipContainer (rename?)
+             [ ] Utility to create coord key => pass column, row, get key entity. Use everywhere so
+                 built in the same way
+             [X] Abstract Factory to create ships
+                  [X] Color
+                  [X] Boxes
+                  [X] Name
 
              [ ] GameEngine/Manager/GamePlay?
                   [ ] Fire Action (include playerid)-> Return ActionResult containing:
@@ -118,21 +119,21 @@ namespace Console
         private void CreateShipsForPlayer()
         {
             var shipGenerator = new ShipGenerator();
-            var shipContainers = shipGenerator.Generate();
-            _shipContainers = shipContainers.ToList();
+            var ships = shipGenerator.Generate();
+            _ships = ships.ToList();
 
-            // PrintInfoAboutContainers(_shipContainers);
+            // PrintInfoAboutShips(_ships);
 
             var boardPrinter = new BoardPrinter();
-            _coordMapChar = boardPrinter.Print(shipContainers.ToList());
+            _coordMapChar = boardPrinter.Print(_ships);
         }
 
-        private void PrintInfoAboutContainers(List<ShipContainer> shipContainers)
+        private void PrintInfoAboutShips(List<IShip> ships)
         {
-            foreach (var item in shipContainers)
+            foreach (var ship in ships)
             {
-                System.Console.WriteLine($"Shiptype: {item.ShipType}\t IsDestroyed: {item.IsDestroyed}");
-                foreach (var coord in item.Coordinates)
+                System.Console.WriteLine($"Shiptype: {ship.Name}\t IsDestroyed: {ship.IsDestroyed}");
+                foreach (var coord in ship.Coordinates)
                 {
                     System.Console.WriteLine($"\tCoord: {coord.Key}\t IsMarked: {coord.IsMarked} \t Has ship: {coord.HasShip}");
                 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Models;
+using Core.Models.Ships;
 using Core.Utilities;
 
 namespace Console
@@ -15,11 +16,11 @@ namespace Console
 
         public BoardPrinter() { }
 
-        public Dictionary<(int, int), string> Print(List<ShipContainer> shipContainers)
+        public Dictionary<(int, int), string> Print(List<IShip> ships)
         {
             var coordinateMapChar = new Dictionary<(int, int), string>();
 
-            var shipCoordinates = shipContainers
+            var shipCoordinates = ships
                             .SelectMany(s => s.Coordinates.Select(s => s))
                             .ToDictionary(d => d.Key);
 
