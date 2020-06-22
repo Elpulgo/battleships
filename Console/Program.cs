@@ -33,7 +33,7 @@ namespace Console
              [ ] Add writer, Extention ShipWriter in console proj. And writer to write the different marks (* / x etc..)
 
              [X] Interface for Ship/ShipContainer (rename?)
-             [ ] Utility to create coord key => pass column, row, get key entity. Use everywhere so
+             [X] Utility to create coord key => pass column, row, get key entity. Use everywhere so
                  built in the same way
              [X] Abstract Factory to create ships
                   [X] Color

@@ -43,7 +43,7 @@ namespace Core.Utilities
                 var startingRow = random.Next(1, GameConstants.MaxRowCount - shipType.NrOfBoxes());
                 var startingColumn = random.Next(1, GameConstants.MaxColumnCount - shipType.NrOfBoxes());
 
-                if (takenCoordinates.ContainsKey($"{(CoordinatesHelper.Column)startingColumn}{startingRow}"))
+                if (takenCoordinates.ContainsKey(CoordinateKey.Build(startingColumn, startingRow)))
                 {
                     continue;
                 }
@@ -64,7 +64,7 @@ namespace Core.Utilities
 
                     if (!TryAddCoordinateForBox(column, row, ref takenCoordinates))
                         continue;
-        
+
                     coordinates.Add(((CoordinatesHelper.Column)column, row));
                 }
             }
@@ -77,7 +77,7 @@ namespace Core.Utilities
             int row,
             ref Dictionary<string, string> takenCoordinates)
         {
-            var key = $"{(CoordinatesHelper.Column)column}{row}";
+            var key = CoordinateKey.Build(column, row);
 
             if (takenCoordinates.TryAdd(key, key))
                 return true;

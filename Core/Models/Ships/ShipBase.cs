@@ -26,7 +26,7 @@ namespace Core.Models.Ships
 
         public bool HasCoordinate(string key) => Coordinates.Any(coord => coord.Key == key);
 
-        public void MarkCoordinate(string key) => Coordinates.Single(coord => coord.Key == key).WasMarked();
+        public void MarkCoordinate(string key) => Coordinates.Single(coord => coord.Key == key).Mark();
 
         private void SetCoordinates(IEnumerable<(Column column, int row)> coordinates)
         {

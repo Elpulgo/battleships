@@ -40,7 +40,7 @@ namespace Core.Models
 
         public (bool shipFound, bool shipDestroyed) MarkCoordinate(string key)
         {
-            _matrix[key].WasMarked();
+            _matrix[key].Mark();
             var match = _ships.SingleOrDefault(ship => ship.HasCoordinate(key));
             if (match == null)
                 return (false, false);
@@ -55,7 +55,7 @@ namespace Core.Models
             {
                 foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
                 {
-                    var key = $"{column.ToString()}{row}";
+                    var key = CoordinateKey.Build(column, row);
                     _matrix.TryAdd(key, new CoordinateContainer(column, row));
                 }
             }

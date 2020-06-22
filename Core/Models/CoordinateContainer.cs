@@ -1,3 +1,4 @@
+using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
@@ -12,7 +13,7 @@ namespace Core.Models
 
         public bool IsMarked { get; private set; }
 
-        public string Key => $"{Column.ToString()}{Row}";
+        public string Key => CoordinateKey.Build(Column, Row);
 
         public CoordinateContainer(Column column, int row)
         {
@@ -26,7 +27,7 @@ namespace Core.Models
             return this;
         }
 
-        public void WasMarked()
+        public void Mark()
         {
             IsMarked = true;
         }

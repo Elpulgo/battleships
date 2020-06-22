@@ -45,7 +45,7 @@ namespace Console
                     //     continue;
                     // }
 
-                    if (shipCoordinates.TryGetValue($"{column.ToString()}{row}", out CoordinateContainer coord))
+                    if (shipCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
                     {
 
                         // TODO: Add shipcolors?
