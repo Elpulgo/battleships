@@ -8,6 +8,7 @@ namespace Core.Models.Ships
 {
     public enum Color
     {
+        None,
         Green,
         Magenta,
         Yellow,

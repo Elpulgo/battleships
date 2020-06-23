@@ -5,6 +5,7 @@ using System.Linq;
 using Core.Utilities;
 using Console.Models;
 using Core.Models.Ships;
+using Console.Print;
 
 namespace Console
 {
@@ -12,7 +13,7 @@ namespace Console
     {
         private string LastBoxChar { get; set; } = string.Empty;
         private List<IShip> _ships = new List<IShip>();
-        private static Dictionary<(int, int), string> _coordMapChar = new Dictionary<(int, int), string>();
+        private static Dictionary<(int, int), BoxContainer> _coordMapChar = new Dictionary<(int, int), BoxContainer>();
 
         public KeyInputHandler _keyInputHandler;
         static void Main(string[] args)
@@ -105,10 +106,10 @@ namespace Console
 
         private void OnKeyFired(object sender, KeyAction keyAction)
         {
-            if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out string oldChar))
+            if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out BoxContainer boxContainer))
             {
                 System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
-                System.Console.Write(oldChar);
+                boxContainer.BoxContent.Write(boxContainer.Color);
             }
             System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
 

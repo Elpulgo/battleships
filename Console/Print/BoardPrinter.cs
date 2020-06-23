@@ -5,25 +5,26 @@ using Core.Models;
 using Core.Models.Ships;
 using Core.Utilities;
 
-namespace Console
+namespace Console.Print
 {
     public class BoardPrinter
     {
         // private readonly List<ShipContainer> _shipContainers;
         private static string HorizontalDivier = "   ----------------------------------------";
-        private static string ShipIcon = " ✔ ";
+        private static string ShipIcon = "✔";
         // private static string MarkIcon = " ✘ ";
 
         public BoardPrinter() { }
 
-        public Dictionary<(int, int), string> Print(List<IShip> ships)
+        public Dictionary<(int, int), BoxContainer> Print(List<IShip> ships)
         {
-            var coordinateMapChar = new Dictionary<(int, int), string>();
+            var coordinateMapChar = new Dictionary<(int, int), BoxContainer>();
 
-            var shipCoordinates = ships
+            var shipCoordinatesMap = ships
                             .SelectMany(s => s.Coordinates.Select(s => s))
                             .ToDictionary(d => d.Key);
 
+            var coordinateColorMap = GroupCoordinatesByColor(ships);
             PrintColumns();
 
             foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
@@ -33,37 +34,22 @@ namespace Console
 
                 foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
                 {
-                    // // FOR TESTING
-                    // if (column == CoordinatesHelper.Column.C && shipCoordinates.ContainsKey($"{column.ToString()}{row}"))
-                    // {
-                    //     System.Console.ForegroundColor = ConsoleColor.Red;
-
-                    //     System.Console.Write(ShipIcon);
-                    //     System.Console.ResetColor();
-                    //     System.Console.Write("|");
-
-                    //     continue;
-                    // }
-
-                    if (shipCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
+                    if (shipCoordinatesMap.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
                     {
+                        var color = Color.None;
+                        coordinateColorMap.TryGetValue(coord, out color);
 
                         // TODO: Add shipcolors?
                         System.Console.ForegroundColor = coord.IsMarked && coord.HasShip ? ConsoleColor.Red : ConsoleColor.Green;
 
-                        System.Console.Write(ShipIcon);
-                        coordinateMapChar[(row, (int)column)] = "✔";
-                        System.Console.ResetColor();
+                        $" {ShipIcon} ".Write(color);
+
+                        coordinateMapChar[(row, (int)column)] = new BoxContainer("✔", color);
                         System.Console.Write("|");
                         continue;
                     }
-                    // // For testing!!
-                    // else if (row == 10)
-                    // {
-                    //     System.Console.Write(MarkIcon);
-                    // }
 
-                    coordinateMapChar[(row, (int)column)] = " ";
+                    coordinateMapChar[(row, (int)column)] = new BoxContainer().Empty();
 
                     System.Console.Write("   ");
                     System.Console.Write("|");
@@ -96,6 +82,21 @@ namespace Console
             }
 
             System.Console.Write("|");
+        }
+
+        private Dictionary<CoordinateContainer, Color> GroupCoordinatesByColor(List<IShip> ships)
+        {
+            var coordinateColorMap = new Dictionary<CoordinateContainer, Color>();
+
+            foreach (var ship in ships)
+            {
+                foreach (var coord in ship.Coordinates)
+                {
+                    coordinateColorMap.TryAdd(coord, ship.Color);
+                }
+            }
+
+            return coordinateColorMap;
         }
     }
 }
