@@ -31,29 +31,35 @@ namespace Core.Utilities
             where T : IShip
         {
             var isVertical = coordinates.Select(coord => coord.column).Distinct().Count() == 1;
-            var isSequential = IsSequential(coordinates.Select(coord => (int)coord.column).ToArray());
+            var isSequentialForVertical = IsSequential(coordinates.Select(coord => coord.row));
 
-            if (isVertical && isSequential)
-                return;
+            if (isVertical)
+            {
+                if (isSequentialForVertical)
+                    return;
 
-            if (!isSequential)
-                throw new ShipValidationException($"Ship {ship.Name} does not have coordinates marked in sequence. Check the coordinates again!");
+                throw new ShipValidationException($"Ship {ship.Name} does not have vertical coordinates marked in sequence. Check the coordinates again!");
+            }
 
             var isHorizontal = coordinates.Select(coord => coord.row).Distinct().Count() == 1;
-            isSequential = IsSequential(coordinates.Select(coord => coord.row).ToArray());
+            var isSequentialForHorizontal = IsSequential(coordinates.Select(coord => (int)coord.column));
 
-            if (isHorizontal && isHorizontal)
+            if (isHorizontal && isSequentialForHorizontal)
                 return;
 
-            if (!isSequential)
-                throw new ShipValidationException($"Ship {ship.Name} does not have coordinates marked in sequence. Check the coordinates again!");
+            if (!isSequentialForHorizontal)
+                throw new ShipValidationException($"Ship {ship.Name} does not have horizontal coordinates marked in sequence. Check the coordinates again!");
 
             throw new ShipValidationException($"Ship {ship.Name} is not vertical or horizontal. Check the coordinates again!");
         }
 
-        private static bool IsSequential(int[] coords)
-            => Enumerable.Range(1, coords.Length - 1).All(index => coords[index] - 1 == coords[index - 1]);
-
+        private static bool IsSequential(IEnumerable<int> coords)
+        {
+            var orderedCoords = coords.OrderBy(o => o).ToList();
+            return Enumerable
+                .Range(1, orderedCoords.Count - 1)
+                .All(index => orderedCoords[index] - 1 == orderedCoords[index - 1]);
+        }
     }
 
     public class ShipValidationException : Exception
