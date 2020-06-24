@@ -20,7 +20,7 @@ namespace Console
 
         private readonly ShipFactory _shipFactory = new ShipFactory();
 
-        private static Dictionary<(int, int), BoxContainer> _coordMapChar = new Dictionary<(int, int), BoxContainer>();
+        private static Dictionary<(int x, int y), BoxContainer> _coordMapChar = new Dictionary<(int x, int y), BoxContainer>();
 
         public KeyInputHandler _keyInputHandler;
         static void Main(string[] args)
@@ -37,7 +37,7 @@ namespace Console
                   [ ] S (Start game)? Only when all ships finished
              [X] Use PositionState interface instead of x properties in KeyInputHandler
              [ ] Change _coordMapChar to use (x,y) instead of (y,x) as key
-             [ ] ShipBuildException should check so all ships are in line too. Do in ShipBase
+             [X] ShipBuildException should check so all ships are in line too. Do in ShipBase
              [ ] GameMode -> Setup/Play
              [X] Add writer, Extention ShipWriter in console proj. And writer to write the different marks (* / x etc..)
 
@@ -134,7 +134,7 @@ namespace Console
 
                 case GameMode.GamePlay:
                     // TODO: Refactor to nice method.........
-                    if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out BoxContainer boxContainer))
+                    if (_coordMapChar.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
                     {
                         System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
                         boxContainer.BoxContent.Write(boxContainer.Color);
@@ -163,7 +163,7 @@ namespace Console
                 System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
                 "✔".Write(setup.ShipType.GetColor());
                 setup.SetCoord((Column)keyAction.OldStepX, keyAction.OldStepY);
-                _coordMapChar[(keyAction.OldStepY, keyAction.OldStepX)] = new BoxContainer("✔", setup.ShipType.GetColor());
+                _coordMapChar[(keyAction.OldStepX, keyAction.OldStepY)] = new BoxContainer("✔", setup.ShipType.GetColor());
 
                 if (setup.IsAllCoordsSet)
                 {
@@ -194,7 +194,7 @@ namespace Console
 
             PrintMessage($"Mark boxes for shiptype {setup.ShipType.ToString()}({setup.Coords.Count}/{setup.ShipType.NrOfBoxes()} boxes).");
 
-            if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out BoxContainer boxContainer))
+            if (_coordMapChar.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
             {
                 System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
                 boxContainer.BoxContent.Write(boxContainer.Color);

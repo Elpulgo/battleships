@@ -16,9 +16,9 @@ namespace Console.Print
 
         public BoardPrinter() { }
 
-        public Dictionary<(int, int), BoxContainer> Print(List<IShip> ships)
+        public Dictionary<(int x, int y), BoxContainer> Print(List<IShip> ships)
         {
-            var coordinateMapChar = new Dictionary<(int, int), BoxContainer>();
+            var coordinateMapChar = new Dictionary<(int x, int y), BoxContainer>();
 
             var shipCoordinatesMap = ships
                             .SelectMany(s => s.Coordinates.Select(s => s))
@@ -39,17 +39,14 @@ namespace Console.Print
                         var color = Color.None;
                         coordinateColorMap.TryGetValue(coord, out color);
 
-                        // TODO: Add shipcolors?
-                        System.Console.ForegroundColor = coord.IsMarked && coord.HasShip ? ConsoleColor.Red : ConsoleColor.Green;
-
                         $" {ShipIcon} ".Write(color);
 
-                        coordinateMapChar[(row, (int)column)] = new BoxContainer("✔", color);
+                        coordinateMapChar[((int)column, row)] = new BoxContainer(ShipIcon, color);
                         System.Console.Write("|");
                         continue;
                     }
 
-                    coordinateMapChar[(row, (int)column)] = new BoxContainer().Empty();
+                    coordinateMapChar[((int)column, row)] = new BoxContainer().Empty();
 
                     System.Console.Write("   ");
                     System.Console.Write("|");
