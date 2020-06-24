@@ -15,8 +15,6 @@ namespace Core.Models.Ships
 
         public override string Name => this.GetType().Name;
 
-        public override Color Color => Color.Yellow;
-
         public override ShipType ShipType => ShipType.Cruiser;
     }
 }

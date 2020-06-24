@@ -16,6 +16,7 @@ namespace Console
         #endregion
 
         public event EventHandler<bool> ExitEvent;
+
         public event EventHandler<KeyAction> KeyActionEvent;
 
         public GameMode Mode { get; set; }
@@ -43,14 +44,14 @@ namespace Console
             // TODO: Change and handle GamePlay mode here..
             while (Mode == GameMode.Setup)
             {
-                ListenForInput();
+                var key = ListenForInput();
                 _positionState.Validate();
-                FireKeyActionEvent();
+                FireKeyActionEvent(key);
                 Thread.Sleep(10);
             }
         }
 
-        private void ListenForInput()
+        private ConsoleKey? ListenForInput()
         {
             if (_initBufferHeight != System.Console.BufferHeight || _initBufferWidth != System.Console.BufferWidth)
             {
@@ -67,22 +68,26 @@ namespace Console
             {
                 case ConsoleKey.DownArrow:
                     _positionState.Increment_Y();
-                    break;
+                    return command;
                 case ConsoleKey.UpArrow:
                     _positionState.Decrement_Y();
-                    break;
+                    return command;
                 case ConsoleKey.LeftArrow:
                     _positionState.Decrement_X();
-                    break;
+                    return command;
                 case ConsoleKey.RightArrow:
                     _positionState.Increment_X();
-                    break;
+                    return command;
                 case ConsoleKey.Q:
                     ExitEvent.Invoke(this, true);
                     Mode = GameMode.Exit;
-                    break;
+                    return command;
+                case ConsoleKey.Enter:
+                    return command;
                 default: break;
             }
+
+            return null;
         }
 
         private void SetInitCursorPositions()
@@ -96,9 +101,12 @@ namespace Console
             System.Console.SetCursorPosition(_positionState.Position_X, _positionState.Position_Y);
         }
 
-        private void FireKeyActionEvent()
+        private void FireKeyActionEvent(ConsoleKey? key = null)
         {
-            var keyAction = new KeyAction()
+            if (key.HasValue && key.Value == ConsoleKey.Q)
+                return;
+
+            var keyAction = new KeyAction(key)
                 .WithOldStep(_positionState.OldStep_X, _positionState.OldStep_Y)
                 .WithOldPostion(_positionState.OldPosition_X, _positionState.OldPosition_Y)
                 .WithNewPosition(_positionState.Position_X, _positionState.Position_Y);

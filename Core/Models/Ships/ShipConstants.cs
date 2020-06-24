@@ -26,6 +26,17 @@ namespace Core.Models.Ships
                 ShipType.AirCraft => 5,
                 _ => throw new ShipValidationException($"Shiptype {type.ToString()} is not supported.")
             };
+
+        public static Color GetColor(this ShipType type) =>
+            type switch
+            {
+                ShipType.SubMarine => Color.Magenta,
+                ShipType.Destroyer => Color.Green,
+                ShipType.Cruiser => Color.Yellow,
+                ShipType.BattleShip => Color.Blue,
+                ShipType.AirCraft => Color.Cyan,
+                _ => throw new ShipValidationException($"Shiptype {type.ToString()} is not supported.")
+            };
     }
 
     public enum ShipType

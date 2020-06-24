@@ -13,11 +13,13 @@ namespace Console.Models
         public int OldPositionY { get; private set; }
         public int NewPositionX { get; private set; }
         public int NewPositionY { get; private set; }
+        public ConsoleKey? Key { get; }
 
         #endregion
 
-        public KeyAction()
+        public KeyAction(ConsoleKey? key)
         {
+            Key = key;
         }
 
         public KeyAction WithOldStep(int x, int y)

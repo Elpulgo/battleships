@@ -20,7 +20,7 @@ namespace Core.Models.Ships
 
         public abstract string Name { get; }
 
-        public abstract Color Color { get; }
+        public Color Color => ShipType.GetColor();
 
         public abstract ShipType ShipType { get; }
 

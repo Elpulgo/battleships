@@ -17,6 +17,7 @@ namespace Core.Factories
         /// <param name="shipType">What type of ship to build.</param>
         /// <returns>Return an IShip.</returns>
         /// <exception cref="Core.Factories.ShipBuildException">Thrown when ShipType is not supported</exception>
+        /// <exception cref="Core.Utilities.ShipValidationException">Thrown when coordinats are not valid</exception>
         public IShip Build(
             ShipType shipType,
             IEnumerable<(Column, int)> coords) =>

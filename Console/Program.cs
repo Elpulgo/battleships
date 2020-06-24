@@ -6,13 +6,20 @@ using Core.Utilities;
 using Console.Models;
 using Core.Models.Ships;
 using Console.Print;
+using static Core.Models.CoordinatesHelper;
+using Core.Factories;
 
 namespace Console
 {
     class Program
     {
         private string LastBoxChar { get; set; } = string.Empty;
+        private GameMode CurrentGameMode { get; set; }
+        private List<ShipSetup> ShipSetups { get; set; } = new List<ShipSetup>();
         private List<IShip> _ships = new List<IShip>();
+
+        private readonly ShipFactory _shipFactory = new ShipFactory();
+
         private static Dictionary<(int, int), BoxContainer> _coordMapChar = new Dictionary<(int, int), BoxContainer>();
 
         public KeyInputHandler _keyInputHandler;
@@ -29,9 +36,10 @@ namespace Console
                   [ ] F (Finish place ship)?
                   [ ] S (Start game)? Only when all ships finished
              [X] Use PositionState interface instead of x properties in KeyInputHandler
-
+             [ ] Change _coordMapChar to use (x,y) instead of (y,x) as key
+             [ ] ShipBuildException should check so all ships are in line too. Do in ShipBase
              [ ] GameMode -> Setup/Play
-             [ ] Add writer, Extention ShipWriter in console proj. And writer to write the different marks (* / x etc..)
+             [X] Add writer, Extention ShipWriter in console proj. And writer to write the different marks (* / x etc..)
 
              [X] Interface for Ship/ShipContainer (rename?)
              [X] Utility to create coord key => pass column, row, get key entity. Use everywhere so
@@ -56,13 +64,19 @@ namespace Console
 
         public void Run()
         {
+            CurrentGameMode = GameMode.Setup;
+
             // Need to be done before keyInputHandler is created.
             // Since handler calculate positions after board
             // which is created in this method.
-            CreateShipsForPlayer();
+            PrintBoard();
+
+            ShipSetups = ShipConstants.GetShipTypesPerPlayer()
+                .Select(s => new ShipSetup(s))
+                .ToList();
 
             _keyInputHandler = new KeyInputHandler()
-                .WithGameMode(GameMode.Setup);
+                .WithGameMode(CurrentGameMode);
 
             _keyInputHandler.ExitEvent += OnExit;
             _keyInputHandler.KeyActionEvent += OnKeyFired;
@@ -83,14 +97,14 @@ namespace Console
             }
         }
 
-        private void OverwritePrintedChar()
+        private void OverwritePrintedChar(string message, Color color = Color.None)
         {
             int currentLeft = System.Console.CursorLeft;
             int currentTop = System.Console.CursorTop;
 
             System.Console.SetCursorPosition(currentLeft - 1, currentTop);
 
-            System.Console.Write(" ");
+            message.Write(color);
             System.Console.SetCursorPosition(currentLeft, currentTop);
         }
 
@@ -98,35 +112,107 @@ namespace Console
         {
             if (shouldExit)
             {
-                OverwritePrintedChar();
+                OverwritePrintedChar(" ");
                 PrintMessage("Player decided to quit!", false);
                 Environment.Exit(0);
             }
         }
 
+        private (bool allDone, ShipSetup setup) GetShipSetup()
+            => (ShipSetups.All(a => a.IsAllCoordsSet), ShipSetups.FirstOrDefault(f => !f.IsAllCoordsSet));
+
         private void OnKeyFired(object sender, KeyAction keyAction)
         {
+            if (!keyAction.Key.HasValue)
+                return;
+
+            switch (CurrentGameMode)
+            {
+                case GameMode.Setup:
+                    KeyFiredInSetupMode(keyAction);
+                    break;
+
+                case GameMode.GamePlay:
+                    // TODO: Refactor to nice method.........
+                    if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out BoxContainer boxContainer))
+                    {
+                        System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
+                        boxContainer.BoxContent.Write(boxContainer.Color);
+                    }
+                    System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
+                    System.Console.Write("*");
+                    break;
+                case GameMode.Exit:
+                    break;
+                default: break;
+            }
+        }
+
+        private void KeyFiredInSetupMode(KeyAction keyAction)
+        {
+            var (allDone, setup) = GetShipSetup();
+
+            if (allDone)
+            {
+                PrintMessage("All ships are marked and validated. Press S to start the game!");
+                return;
+            }
+
+            if (keyAction.Key.Value == ConsoleKey.Enter)
+            {
+                System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
+                "✔".Write(setup.ShipType.GetColor());
+                setup.SetCoord((Column)keyAction.OldStepX, keyAction.OldStepY);
+                _coordMapChar[(keyAction.OldStepY, keyAction.OldStepX)] = new BoxContainer("✔", setup.ShipType.GetColor());
+
+                if (setup.IsAllCoordsSet)
+                {
+                    try
+                    {
+                        var ship = _shipFactory.Build(setup.ShipType, setup.Coords);
+                    }
+                    catch (ShipValidationException exception)
+                    {
+                        // ShipBase must check so all coords are in line too
+                        PrintMessage(exception.Message);
+                        return;
+                    }
+                    // TODO: Create ship if setup.AllCordsSet
+                    // and validate the ship before adding it to list.
+                    // Catch ShipValidationException otherwise and clear the coords for ship
+                    // and on the coordMapChar
+                }
+
+                (allDone, setup) = GetShipSetup();
+                if (!allDone)
+                {
+                    PrintMessage($"Mark boxes for shiptype {setup.ShipType.ToString()}({setup.Coords.Count}/{setup.ShipType.NrOfBoxes()} boxes).");
+                }
+
+                return;
+            }
+
+            PrintMessage($"Mark boxes for shiptype {setup.ShipType.ToString()}({setup.Coords.Count}/{setup.ShipType.NrOfBoxes()} boxes).");
+
             if (_coordMapChar.TryGetValue((keyAction.OldStepY, keyAction.OldStepX), out BoxContainer boxContainer))
             {
                 System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
                 boxContainer.BoxContent.Write(boxContainer.Color);
             }
             System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
-
-            // TODO: Should also indicate on game mode and so on what should be written..
             System.Console.Write("*");
         }
 
-        private void CreateShipsForPlayer()
+        private void PrintBoard()
         {
-            var shipGenerator = new ShipGenerator();
-            var ships = shipGenerator.Generate();
-            _ships = ships.ToList();
+            // var shipGenerator = new ShipGenerator();
+            // var ships = shipGenerator.Generate();
+            // _ships = ships.ToList();
 
             // PrintInfoAboutShips(_ships);
 
             var boardPrinter = new BoardPrinter();
-            _coordMapChar = boardPrinter.Print(_ships);
+            _coordMapChar = boardPrinter.Print(new List<IShip>());
         }
 
         private void PrintInfoAboutShips(List<IShip> ships)
