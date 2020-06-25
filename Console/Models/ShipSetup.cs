@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Console.Print;
 using Core.Models.Ships;
 using static Core.Models.CoordinatesHelper;
 
@@ -9,7 +10,9 @@ namespace Console.Models
     {
         public ShipType ShipType { get; }
 
-        public List<(Column, int)> Coords { get; private set; }
+        public List<(Column column, int row)> Coords { get; private set; }
+
+        private List<(int x, int y)> Positions { get; set; }
 
         public bool IsAllCoordsSet => Coords.Count == ShipType.NrOfBoxes();
 
@@ -18,13 +21,32 @@ namespace Console.Models
         public ShipSetup(ShipType shipType)
         {
             ShipType = shipType;
-            Coords = new List<(Column, int)>();
+            Positions = new List<(int x, int y)>();
+            Coords = new List<(Column column, int row)>();
         }
 
-        public void SetCoord(Column column, int row)
+        public void AddCoord(Column column, int row)
         {
             Coords.Add((column, row));
         }
 
+        public void AddPosition(int x, int y)
+        {
+            Positions.Add((x, y));
+        }
+
+        public void Clear(int currentPosition_X, int currentPosition_Y)
+        {
+            foreach (var position in Positions)
+            {
+                System.Console.SetCursorPosition(position.x, position.y);
+                " ".Write(Color.None);
+            }
+
+            Coords.Clear();
+            Positions.Clear();
+
+            System.Console.SetCursorPosition(currentPosition_X, currentPosition_Y);
+        }
     }
 }

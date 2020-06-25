@@ -23,6 +23,39 @@ namespace Console.Print
                 Color.None => ConsoleColor.White,
                 _ => ConsoleColor.White
             };
+
+        public static void OverwritePrintedChar(this string message, Color color = Color.None)
+        {
+            int currentLeft = System.Console.CursorLeft;
+            int currentTop = System.Console.CursorTop;
+
+            System.Console.SetCursorPosition(currentLeft - 1, currentTop);
+
+            message.Write(color);
+            System.Console.SetCursorPosition(currentLeft, currentTop);
+        }
+
+        public static void PrintGameMessage(this string message, bool bringBackCursor = true)
+        {
+            int currentLeft = System.Console.CursorLeft;
+            int currentTop = System.Console.CursorTop;
+
+            ClearLine();
+
+            System.Console.SetCursorPosition(0, System.Console.BufferHeight);
+            System.Console.Write(message);
+
+            if (bringBackCursor)
+            {
+                System.Console.SetCursorPosition(currentLeft, currentTop);
+            }
+
+            void ClearLine()
+            {
+                System.Console.SetCursorPosition(0, System.Console.BufferHeight);
+                System.Console.Write(new String(' ', System.Console.BufferWidth - 1));
+            }
+        }
     }
 }
 
