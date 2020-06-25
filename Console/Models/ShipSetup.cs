@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Console.Print;
 using Core.Models.Ships;

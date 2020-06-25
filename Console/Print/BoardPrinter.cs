@@ -9,11 +9,7 @@ namespace Console.Print
 {
     public class BoardPrinter
     {
-        // private readonly List<ShipContainer> _shipContainers;
         private static string HorizontalDivier = "   ----------------------------------------";
-        private static string ShipIcon = "✔";
-        // private static string MarkIcon = " ✘ ";
-
         public BoardPrinter() { }
 
         public Dictionary<(int x, int y), BoxContainer> Print(List<IShip> ships)
@@ -39,9 +35,9 @@ namespace Console.Print
                         var color = Color.None;
                         coordinateColorMap.TryGetValue(coord, out color);
 
-                        $" {ShipIcon} ".Write(color);
+                        $" {KeyConstants.Ship} ".Write(color);
 
-                        coordinateMapChar[((int)column, row)] = new BoxContainer(ShipIcon, color);
+                        coordinateMapChar[((int)column, row)] = new BoxContainer(KeyConstants.Ship, color);
                         System.Console.Write("|");
                         continue;
                     }

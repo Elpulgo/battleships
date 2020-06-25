@@ -41,7 +41,6 @@ namespace Console
         {
             FireKeyActionEvent();
 
-            // TODO: Change and handle GamePlay mode here..
             while (Mode == GameMode.Setup)
             {
                 var key = ListenForInput();

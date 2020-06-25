@@ -31,7 +31,7 @@ namespace Console.Models
             if (Position_X > System.Console.BufferWidth || Position_Y > System.Console.BufferHeight)
             {
                 System.Console.Clear();
-                System.Console.WriteLine("Coords are greater than buffer!");
+                System.Console.WriteLine("Coords are greater than buffer! Fatal error!");
             }
         }
         

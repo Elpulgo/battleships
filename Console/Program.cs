@@ -161,7 +161,7 @@ namespace Console
                 boxContainer.BoxContent.Write(boxContainer.Color);
             }
             System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
-            System.Console.Write("*");
+            KeyConstants.Move.Write(Color.None);
         }
 
         private bool HandleEnterKeyInSetupMode(KeyAction keyAction)
