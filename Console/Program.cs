@@ -13,6 +13,7 @@ namespace Console
 {
     class Program
     {
+        private List<GameBoard> _gameBoards = new List<GameBoard>();
         private GameMode CurrentGameMode { get; set; }
         private List<ShipSetup> ShipSetups { get; set; } = new List<ShipSetup>();
         private List<IShip> _ships = new List<IShip>();
@@ -48,6 +49,7 @@ namespace Console
                   [X] Boxes
                   [X] Name
 
+             [ ] Show info message on top always.. .eg 'Exit(Q) Mark(Enter) Move(Arrows)' and 'Player board' / 'Compouter board'
              [ ] GameEngine/Manager/GamePlay?
                   [ ] Fire Action (include playerid)-> Return ActionResult containing:
                       [ ] Coord (x,y)
@@ -130,6 +132,18 @@ namespace Console
 
         private void StartGame()
         {
+
+            _gameBoards.Add(new GameBoard(new Player("Player 1", PlayerType.Human)).WithShips(_ships));
+
+            var shipGenerator = new ShipGenerator();
+            var ships = shipGenerator.Generate();
+
+            _gameBoards.Add(new GameBoard(new Player("Computer", PlayerType.Computer)).WithShips(ships.ToList()));
+
+            // TODO: BoardPrinter should take GameBoards instead?
+            // And should be able to print both compter and human
+            var boardPrinter = new BoardPrinter();
+            _ = boardPrinter.Print(new List<IShip>());
 
             "GAMEPLAY IS ON!!".PrintGameMessage();
 

@@ -16,7 +16,6 @@ namespace Core.Models
         {
             _matrix = new Dictionary<string, CoordinateContainer>();
             Player = player;
-            FillMatrix();
         }
 
         public GameBoard WithShips(List<IShip> ships)
