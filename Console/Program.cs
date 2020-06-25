@@ -74,13 +74,28 @@ namespace Console
                 .Select(s => new ShipSetup(s))
                 .ToList();
 
+            SetupKeyHandlerFor(CurrentGameMode);
+            _keyInputHandler.Listen();
+
+            DisposeKeyHandlerEvents();
+        }
+
+        private void SetupKeyHandlerFor(GameMode gameMode)
+        {
             _keyInputHandler = new KeyInputHandler()
-                .WithGameMode(CurrentGameMode);
+                           .WithGameMode(gameMode);
 
             _keyInputHandler.ExitEvent += OnExit;
             _keyInputHandler.KeyActionEvent += OnKeyFired;
+        }
 
-            _keyInputHandler.Listen();
+        private void DisposeKeyHandlerEvents()
+        {
+            if (_keyInputHandler == null)
+                return;
+
+            _keyInputHandler.ExitEvent -= OnExit;
+            _keyInputHandler.KeyActionEvent -= OnKeyFired;
         }
 
         private void OnExit(object sender, bool shouldExit)
@@ -105,20 +120,54 @@ namespace Console
                     break;
 
                 case GameMode.GamePlay:
-                    // TODO: Refactor to nice method.........
-                    if (_coordMapChar.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
-                    {
-                        System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
-                        boxContainer.BoxContent.Write(boxContainer.Color);
-                    }
-                    System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
-                    System.Console.Write("*");
+                    KeyFiredInGamePlayMode(keyAction);
                     break;
                 case GameMode.Exit:
                     break;
                 default: break;
             }
         }
+
+        private void StartGame()
+        {
+
+            "GAMEPLAY IS ON!!".PrintGameMessage();
+
+            // TODO: Print board here.. for computer and human board..
+        }
+
+        #region Key Handling Game Play Mode
+        private void KeyFiredInGamePlayMode(KeyAction keyAction)
+        {
+            switch (keyAction.Key.Value)
+            {
+                // case ConsoleKey.Enter:
+                //     if (!HandleEnterKeyInSetupMode(keyAction))
+                //         return;
+                //     break;
+                case ConsoleKey.UpArrow:
+                case ConsoleKey.DownArrow:
+                case ConsoleKey.LeftArrow:
+                case ConsoleKey.RightArrow:
+                    // HandleArrowKeysInSetupMode(keyAction);
+                    break;
+                case ConsoleKey.S:
+                    StartGame();
+                    break;
+                default:
+                    return;
+            }
+
+            if (_coordMapChar.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
+            {
+                System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
+                boxContainer.BoxContent.Write(boxContainer.Color);
+            }
+            System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
+            KeyConstants.Move.Write(Color.None);
+        }
+
+        #endregion
 
         #region Key Handling Setup Mode
 
@@ -128,6 +177,8 @@ namespace Console
         {
             if (IsAllShipsSetup())
             {
+                CurrentGameMode = GameMode.GamePlay;
+                _keyInputHandler.Mode = CurrentGameMode;
                 "All ships are marked and validated. Press S to start the game!".PrintGameMessage();
                 return;
             }

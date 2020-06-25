@@ -41,7 +41,7 @@ namespace Console
         {
             FireKeyActionEvent();
 
-            while (Mode == GameMode.Setup)
+            while (Mode == GameMode.Setup || Mode == GameMode.GamePlay)
             {
                 var key = ListenForInput();
                 _positionState.Validate();
@@ -82,6 +82,7 @@ namespace Console
                     Mode = GameMode.Exit;
                     return command;
                 case ConsoleKey.Enter:
+                case ConsoleKey.S:
                     return command;
                 default: break;
             }
