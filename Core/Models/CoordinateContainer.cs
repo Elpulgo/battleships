@@ -1,3 +1,4 @@
+using Core.Models.Ships;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
@@ -13,6 +14,8 @@ namespace Core.Models
 
         public bool IsMarked { get; private set; }
 
+        public Color Color { get; private set; }
+
         public string Key => CoordinateKey.Build(Column, Row);
 
         public CoordinateContainer(Column column, int row)
@@ -24,6 +27,12 @@ namespace Core.Models
         public CoordinateContainer WithShip()
         {
             HasShip = true;
+            return this;
+        }
+
+        public CoordinateContainer WithColor(Color color)
+        {
+            Color = color;
             return this;
         }
 

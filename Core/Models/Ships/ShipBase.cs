@@ -32,7 +32,7 @@ namespace Core.Models.Ships
         {
             foreach (var coord in coordinates)
             {
-                Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip());
+                Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip().WithColor(Color));
             }
         }
     }

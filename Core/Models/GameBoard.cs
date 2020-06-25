@@ -41,12 +41,12 @@ namespace Core.Models
         public (bool shipFound, bool shipDestroyed) MarkCoordinate(string key)
         {
             _matrix[key].Mark();
-            var match = _ships.SingleOrDefault(ship => ship.HasCoordinate(key));
-            if (match == null)
+            var ship = _ships.SingleOrDefault(ship => ship.HasCoordinate(key));
+            if (ship == null)
                 return (false, false);
 
-            match.MarkCoordinate(key);
-            return (true, match.IsDestroyed);
+            ship.MarkCoordinate(key);
+            return (true, ship.IsDestroyed);
         }
 
         private void FillMatrix()

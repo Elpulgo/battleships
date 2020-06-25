@@ -179,6 +179,7 @@ namespace Console
                 try
                 {
                     var ship = _shipFactory.Build(setup.ShipType, setup.Coords);
+                    _ships.Add(ship);
                 }
                 catch (ShipValidationException exception)
                 {
