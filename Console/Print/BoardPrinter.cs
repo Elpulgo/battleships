@@ -16,8 +16,6 @@ namespace Console.Print
         public (Dictionary<(int x, int y), BoxContainer> coordMap_Human, Dictionary<(int x, int y), BoxContainer> coordMap_Computer) PrintMultipleBoards(
             List<IShip> humanShips, List<IShip> computerShips)
         {
-
-            // TODO: Computer board to LEFT where we navigate and human board to RIGHT where we display..
             var coordinateMapChar_Human = new Dictionary<(int x, int y), BoxContainer>();
             var coordinateMapChar_Computer = new Dictionary<(int x, int y), BoxContainer>();
 
@@ -36,64 +34,26 @@ namespace Console.Print
 
             foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
             {
-                // FOR COMPUTER SHIPS
-                System.Console.Write($"{row}");
-                PrintRowDigitDivider(row);
-
-                foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
-                {
-                    if (shipCoordinatesMap_Computer.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
-                    {
-                        var color = Color.None;
-                        coordinateColorMap_Computer.TryGetValue(coord, out color);
-
-                        $" {KeyConstants.Ship} ".Write(color);
-
-                        coordinateMapChar_Computer[((int)column, row)] = new BoxContainer(KeyConstants.Ship, color);
-                        System.Console.Write("|");
-                        continue;
-                    }
-
-                    coordinateMapChar_Computer[((int)column, row)] = new BoxContainer().Empty();
-
-                    System.Console.Write("   ");
-                    System.Console.Write("|");
-
-                }
-                // PrintDivider();
-
-
-                // FOR HUMAN SHIPS
+                PrintBoxesPerRow(
+                    row,
+                    shipCoordinatesMap_Computer,
+                    coordinateColorMap_Computer,
+                    ref coordinateMapChar_Computer);
 
                 System.Console.Write("\t\t");
-                System.Console.Write($"{row}");
-                PrintRowDigitDivider(row);
-                foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
-                {
-                    if (shipCoordinatesMap_Human.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
-                    {
-                        var color = Color.None;
-                        coordinateColorMap_Human.TryGetValue(coord, out color);
 
-                        $" {KeyConstants.Ship} ".Write(color);
+                PrintBoxesPerRow(
+                    row,
+                    shipCoordinatesMap_Human,
+                    coordinateColorMap_Human,
+                    ref coordinateMapChar_Human);
 
-                        coordinateMapChar_Human[((int)column, row)] = new BoxContainer(KeyConstants.Ship, color);
-                        System.Console.Write("|");
-                        continue;
-                    }
-
-                    coordinateMapChar_Human[((int)column, row)] = new BoxContainer().Empty();
-
-                    System.Console.Write("   ");
-                    System.Console.Write("|");
-
-                }
                 PrintDivider(true);
-
             }
 
             return (coordinateMapChar_Human, coordinateMapChar_Computer);
         }
+
         public Dictionary<(int x, int y), BoxContainer> Print(List<IShip> ships)
         {
             var coordinateMapChar = new Dictionary<(int x, int y), BoxContainer>();
@@ -103,37 +63,51 @@ namespace Console.Print
                             .ToDictionary(d => d.Key);
 
             var coordinateColorMap = GroupCoordinatesByColor(ships);
+
             PrintColumns();
 
             foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
             {
-                System.Console.Write($"{row}");
-                PrintRowDigitDivider(row);
+                PrintBoxesPerRow(
+                    row,
+                    shipCoordinatesMap,
+                    coordinateColorMap,
+                    ref coordinateMapChar);
 
-                foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
-                {
-                    if (shipCoordinatesMap.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
-                    {
-                        var color = Color.None;
-                        coordinateColorMap.TryGetValue(coord, out color);
-
-                        $" {KeyConstants.Ship} ".Write(color);
-
-                        coordinateMapChar[((int)column, row)] = new BoxContainer(KeyConstants.Ship, color);
-                        System.Console.Write("|");
-                        continue;
-                    }
-
-                    coordinateMapChar[((int)column, row)] = new BoxContainer().Empty();
-
-                    System.Console.Write("   ");
-                    System.Console.Write("|");
-
-                }
                 PrintDivider();
             }
 
             return coordinateMapChar;
+        }
+
+        private void PrintBoxesPerRow(
+            int row,
+            Dictionary<string, CoordinateContainer> shipCoordinates,
+            Dictionary<CoordinateContainer, Color> coordColorMap,
+            ref Dictionary<(int x, int y), BoxContainer> coordCharMap)
+        {
+            System.Console.Write($"{row}");
+            PrintRowDigitDivider(row);
+
+            foreach (CoordinatesHelper.Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
+            {
+                if (shipCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coord))
+                {
+                    var color = Color.None;
+                    coordColorMap.TryGetValue(coord, out color);
+
+                    $" {KeyConstants.Ship} ".Write(color);
+
+                    coordCharMap[((int)column, row)] = new BoxContainer(KeyConstants.Ship, color);
+                    System.Console.Write("|");
+                    continue;
+                }
+
+                coordCharMap[((int)column, row)] = new BoxContainer().Empty();
+
+                System.Console.Write("   ");
+                System.Console.Write("|");
+            }
         }
 
         private void PrintColumns(bool multiple = false)
