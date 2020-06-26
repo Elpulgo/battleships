@@ -19,7 +19,7 @@ namespace Console
 
         public event EventHandler<KeyAction> KeyActionEvent;
 
-        public GameMode Mode { get; set; }
+        public GameMode Mode { get; private set; }
 
         public KeyInputHandler()
         {
@@ -35,6 +35,24 @@ namespace Console
         {
             Mode = mode;
             return this;
+        }
+
+        public void SetGameMode(GameMode mode)
+        {
+            ClearScreen();
+            Mode = mode;
+        }
+
+        private void ClearScreen()
+        {
+            // System.Console.WriteLine("buffer is: " + _initPosition_Y);
+            // for (int i = 1; i < _initBufferHeight; i++)
+            // {
+            //     System.Console.SetCursorPosition(0, i);
+            //     System.Console.WriteLine();
+            // }
+
+            // System.Console.SetCursorPosition(0, _initPosition_Y);
         }
 
         public void Listen()

@@ -17,10 +17,10 @@ namespace Console
         private GameMode CurrentGameMode { get; set; }
         private List<ShipSetup> ShipSetups { get; set; } = new List<ShipSetup>();
         private List<IShip> _ships = new List<IShip>();
-
         private readonly ShipFactory _shipFactory = new ShipFactory();
-
-        private static Dictionary<(int x, int y), BoxContainer> _coordMapChar = new Dictionary<(int x, int y), BoxContainer>();
+        private int _initCursorTop_Y;
+        private static Dictionary<(int x, int y), BoxContainer> _coordMapChar_Human = new Dictionary<(int x, int y), BoxContainer>();
+        private static Dictionary<(int x, int y), BoxContainer> _coordMapChar_Computer = new Dictionary<(int x, int y), BoxContainer>();
 
         public KeyInputHandler _keyInputHandler;
         static void Main(string[] args)
@@ -65,21 +65,32 @@ namespace Console
 
         public void Run()
         {
+            _initCursorTop_Y = System.Console.CursorTop;
             CurrentGameMode = GameMode.Setup;
-
             // Need to be done before keyInputHandler is created.
             // Since handler calculate positions after board
             // which is created in this method.
+
             PrintBoard();
 
-            ShipSetups = ShipConstants.GetShipTypesPerPlayer()
-                .Select(s => new ShipSetup(s))
-                .ToList();
-
+            // FOR TEST
             SetupKeyHandlerFor(CurrentGameMode);
-            _keyInputHandler.Listen();
 
-            DisposeKeyHandlerEvents();
+            var shipGenerator = new ShipGenerator();
+            _ships = shipGenerator.Generate().ToList();
+            StartGame();
+            // END TEST
+
+            // TODO: This hsould be here, only for test when generating boards ranomdly for player..
+
+            // ShipSetups = ShipConstants.GetShipTypesPerPlayer()
+            //     .Select(s => new ShipSetup(s))
+            //     .ToList();
+            // SetupKeyHandlerFor(CurrentGameMode);
+
+            // _keyInputHandler.Listen();
+
+            // DisposeKeyHandlerEvents();
         }
 
         private void SetupKeyHandlerFor(GameMode gameMode)
@@ -132,7 +143,9 @@ namespace Console
 
         private void StartGame()
         {
+            System.Console.Clear();
 
+            _keyInputHandler.SetGameMode(GameMode.GamePlay);
             _gameBoards.Add(new GameBoard(new Player("Player 1", PlayerType.Human)).WithShips(_ships));
 
             var shipGenerator = new ShipGenerator();
@@ -143,14 +156,35 @@ namespace Console
             // TODO: BoardPrinter should take GameBoards instead?
             // And should be able to print both compter and human
             var boardPrinter = new BoardPrinter();
-            _ = boardPrinter.Print(new List<IShip>());
 
-            "GAMEPLAY IS ON!!".PrintGameMessage();
+            System.Console.SetCursorPosition(0, _initCursorTop_Y);
+
+            (_coordMapChar_Human, _coordMapChar_Computer) = boardPrinter.PrintMultipleBoards(_ships, ships.ToList());
+
+
+            _keyInputHandler.Listen();
+
+
+            // _ = boardPrinter.Print(new List<IShip>());
+
+            // "GAMEPLAY IS ON!!".PrintGameMessage();
 
             // TODO: Print board here.. for computer and human board..
         }
 
         #region Key Handling Game Play Mode
+
+        private void HandleArrowKeysInGamePlayMode(KeyAction keyAction)
+        {
+            if (_coordMapChar_Computer.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
+            {
+                System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
+                boxContainer.BoxContent.Write(boxContainer.Color);
+            }
+            System.Console.SetCursorPosition(keyAction.NewPositionX, keyAction.NewPositionY);
+            KeyConstants.Move.Write(Color.None);
+        }
+
         private void KeyFiredInGamePlayMode(KeyAction keyAction)
         {
             switch (keyAction.Key.Value)
@@ -163,7 +197,7 @@ namespace Console
                 case ConsoleKey.DownArrow:
                 case ConsoleKey.LeftArrow:
                 case ConsoleKey.RightArrow:
-                    // HandleArrowKeysInSetupMode(keyAction);
+                    HandleArrowKeysInGamePlayMode(keyAction);
                     break;
                 case ConsoleKey.S:
                     StartGame();
@@ -172,7 +206,7 @@ namespace Console
                     return;
             }
 
-            if (_coordMapChar.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
+            if (_coordMapChar_Computer.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
             {
                 System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
                 boxContainer.BoxContent.Write(boxContainer.Color);
@@ -192,7 +226,7 @@ namespace Console
             if (IsAllShipsSetup())
             {
                 CurrentGameMode = GameMode.GamePlay;
-                _keyInputHandler.Mode = CurrentGameMode;
+                _keyInputHandler.SetGameMode(CurrentGameMode);
                 "All ships are marked and validated. Press S to start the game!".PrintGameMessage();
                 return;
             }
@@ -220,7 +254,7 @@ namespace Console
 
         private void HandleArrowKeysInSetupMode(KeyAction keyAction)
         {
-            if (_coordMapChar.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
+            if (_coordMapChar_Human.TryGetValue((keyAction.OldStepX, keyAction.OldStepY), out BoxContainer boxContainer))
             {
                 System.Console.SetCursorPosition(keyAction.OldPostionX, keyAction.OldPositionY);
                 boxContainer.BoxContent.Write(boxContainer.Color);
@@ -269,14 +303,14 @@ namespace Console
             "✔".Write(setup.ShipType.GetColor());
             setup.AddCoord((Column)keyAction.OldStepX, keyAction.OldStepY);
             setup.AddPosition(keyAction.NewPositionX, keyAction.NewPositionY);
-            _coordMapChar[(keyAction.OldStepX, keyAction.OldStepY)] = new BoxContainer("✔", setup.ShipType.GetColor());
+            _coordMapChar_Human[(keyAction.OldStepX, keyAction.OldStepY)] = new BoxContainer("✔", setup.ShipType.GetColor());
         }
 
         private void HandleShipSetupNotValidated(ShipSetup setup, KeyAction keyAction, string exceptionMessage)
         {
             foreach (var coord in setup.Coords)
             {
-                _coordMapChar[((int)coord.column, coord.row)] = new BoxContainer().Empty();
+                _coordMapChar_Human[((int)coord.column, coord.row)] = new BoxContainer().Empty();
             }
             setup.Clear(keyAction.NewPositionX, keyAction.NewPositionY);
             exceptionMessage.PrintGameMessage();
@@ -293,7 +327,7 @@ namespace Console
             // PrintInfoAboutShips(_ships);
 
             var boardPrinter = new BoardPrinter();
-            _coordMapChar = boardPrinter.Print(new List<IShip>());
+            _coordMapChar_Human = boardPrinter.Print(new List<IShip>());
         }
 
         private void PrintInfoAboutShips(List<IShip> ships)
