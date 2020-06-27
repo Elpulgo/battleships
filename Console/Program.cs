@@ -8,6 +8,7 @@ using Core.Models.Ships;
 using Console.Print;
 using static Core.Models.CoordinatesHelper;
 using Core.Factories;
+using System.Threading.Tasks;
 
 namespace Console
 {
@@ -162,17 +163,26 @@ namespace Console
             (_coordMapChar_Human, _coordMapChar_Computer) = boardPrinter.PrintMultipleBoards(_ships, ships.ToList());
 
 
+            // Probably not needed later on, since we already wait in Run()
+            // But keepin for test for now
             _keyInputHandler.Listen();
-
-
-            // _ = boardPrinter.Print(new List<IShip>());
-
-            // "GAMEPLAY IS ON!!".PrintGameMessage();
-
-            // TODO: Print board here.. for computer and human board..
         }
 
         #region Key Handling Game Play Mode
+
+
+        private void HandleEnterKeyInGamePlayMode(KeyAction keyAction)
+        {
+            var key = CoordinateKey.Build((Column)keyAction.OldStepX, keyAction.OldStepY);
+
+            var (shipFound, shipDestroyed) = _gameBoards
+                .Single(f => f.Player.Type == PlayerType.Computer)
+                .MarkCoordinate(key);
+
+            $"Ship was found: {shipFound}, ship destroyed: {shipDestroyed}".PrintGameMessage();
+
+            // TODO: Here we need manager to check if ship is hit..
+        }
 
         private void HandleArrowKeysInGamePlayMode(KeyAction keyAction)
         {
@@ -189,10 +199,9 @@ namespace Console
         {
             switch (keyAction.Key.Value)
             {
-                // case ConsoleKey.Enter:
-                //     if (!HandleEnterKeyInSetupMode(keyAction))
-                //         return;
-                //     break;
+                case ConsoleKey.Enter:
+                    HandleEnterKeyInGamePlayMode(keyAction);
+                    return;
                 case ConsoleKey.UpArrow:
                 case ConsoleKey.DownArrow:
                 case ConsoleKey.LeftArrow:
