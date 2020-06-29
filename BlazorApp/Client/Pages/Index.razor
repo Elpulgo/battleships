@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
+@using Core.Utilities
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
@@ -26,14 +27,27 @@
     }
 </ul>
 
+<ul>
+    @foreach (var item in items)
+    {
+        <li>@item</li>
+    }
+</ul>
+
 @code {
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
     private string userInput;
     private string messageInput;
+    private List<string> items = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
+        var generator = new ShipGenerator();
+        var ships = generator.Generate();
+
+        items = ships.Select(ship => ship.Name).ToList();
+
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .Build();
@@ -53,7 +67,7 @@
 
     public bool IsConnected =>
         hubConnection.State == HubConnectionState.Connected;
-        
+
     public void Dispose()
     {
         _ = hubConnection.DisposeAsync();
