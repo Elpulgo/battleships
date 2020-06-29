@@ -1,0 +1,32 @@
+@using Core.Utilities
+
+<div class="container-fluid p-0">
+    <div class="row no-gutters">
+        <div class="col table-cell-column"></div>
+        @foreach(var column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
+            <div class="col table-cell-column">@column.ToString()</div>
+        }
+    </div>
+    @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
+    {   
+        <div class="row no-gutters">
+            <div class="col table-cell-row">
+                @row
+            </div>
+            @foreach(Core.Models.CoordinatesHelper.Column column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
+                @if((row == 6 || row == 7 || row == 2) && (column == Core.Models.CoordinatesHelper.Column.C)){
+                    <div class="col table-cell">*</div>
+                }else{
+
+                <div class="col table-cell"></div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+
+    // TODO: Show board.. pass down from parent.
+  
+}
