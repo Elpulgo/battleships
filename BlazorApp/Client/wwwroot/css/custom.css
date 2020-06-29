@@ -1,17 +1,24 @@
 .table-cell {
   /*For mobile view... add responsive breakpoints here..*/
-
-  max-width: 25px !important;
+  max-width: 32px !important;
+  min-height: 32px;
   border: 1px solid grey;
   padding: 0px;
-  vertical-align: middle;
   text-align: center;
 }
 
-.table-cell-header {
+.table-cell-column {
   /*For mobile view... add responsive breakpoints here..*/
 
-  max-width: 25px !important;
+  max-width: 32px !important;
   padding: 0;
   text-align: center;
+}
+
+.table-cell-row {
+  /*For mobile view... add responsive breakpoints here..*/
+
+  max-width: 32px !important;
+  padding: 0;
+  text-align: left;
 }
