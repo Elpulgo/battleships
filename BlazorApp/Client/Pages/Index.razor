@@ -4,35 +4,32 @@
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
-<div class="form-group">
-    <label>
-        User:
-        <input @bind="userInput" />
-    </label>
-</div>
-<div class="form-group">
-    <label>
-        Message:
-        <input @bind="messageInput" size="50" />
-    </label>
-</div>
-<button @onclick="Send" disabled="@(!IsConnected)">Send</button>
-
 <hr>
 
-<ul id="messagesList">
-    @foreach (var message in messages)
-    {
-        <li>@message</li>
-    }
-</ul>
+<div class="container-fluid p-0">
+    <div class="row no-gutters">
+        <div class="col table-cell-header"></div>
+        @foreach(var column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
+            <div class="col table-cell-header">@column.ToString()</div>
+        }
+    </div>
+    @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
+    {   
+        <div class="row no-gutters">
+            <div class="col table-cell-header">
+                @row
+            </div>
+            @foreach(Core.Models.CoordinatesHelper.Column column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
+                @if((row == 6 || row == 7 || row == 2) && (column == Core.Models.CoordinatesHelper.Column.C)){
+                    <div class="col table-cell">*</div>
+                }else{
 
-<ul>
-    @foreach (var item in items)
-    {
-        <li>@item</li>
+                <div class="col table-cell"></div>
+                }
+            }
+        </div>
     }
-</ul>
+</div>
 
 @code {
     private HubConnection hubConnection;
@@ -52,7 +49,21 @@
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .Build();
 
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        hubConnection.On<string, string>("CoordinateMarked", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, string>("GameFinished", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, string>("OpponentReady", (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
             messages.Add(encodedMsg);
