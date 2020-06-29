@@ -1,0 +1,17 @@
+.table-cell {
+  /*For mobile view... add responsive breakpoints here..*/
+
+  max-width: 25px !important;
+  border: 1px solid grey;
+  padding: 0px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table-cell-header {
+  /*For mobile view... add responsive breakpoints here..*/
+
+  max-width: 25px !important;
+  padding: 0;
+  text-align: center;
+}
