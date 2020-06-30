@@ -1,0 +1,30 @@
+@using Client.Models
+@using static Core.Models.CoordinatesHelper
+
+<div class="col table-cell" @onclick=@OnMarked>
+    <span class="@IconName" style="vertical-align:middle;" aria-hidden="true"></span>
+</div>
+
+@code {
+    [Parameter]
+    public CellType Type { get; set; }
+    [Parameter]
+    public Column Column { get; set; }
+    [Parameter]
+    public int Row { get; set; }
+    [Parameter]
+    public EventCallback<CoordEventArgs> OnClicked { get; set; }
+
+    private string IconName;
+
+    public void OnMarked() => OnClicked.InvokeAsync(new CoordEventArgs(Column, Row));
+
+    protected override void OnInitialized() =>
+        IconName = Type switch
+        {
+            CellType.None => String.Empty,
+            CellType.Flag => "oi oi-flag",
+            CellType.X => "oi oi-x",
+            _ => String.Empty
+        };
+}

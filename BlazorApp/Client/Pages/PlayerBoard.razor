@@ -1,0 +1,78 @@
+@using Core.Utilities 
+@using Core.Models.Ships 
+@using Core.Models 
+@using Client.Models 
+@using static Core.Models.CoordinatesHelper
+
+<div class="container-fluid p-0">
+    <div class="row no-gutters">
+        <div class="col table-cell-column"></div>
+        @foreach(var column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
+            <div class="col table-cell-column">@column.ToString()</div>
+        }
+    </div>
+    @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
+    {   
+        <div class="row no-gutters">
+            <div class="col table-cell-row">
+                @row
+            </div>
+            @foreach(Column column in Enum.GetValues(typeof(Column))){
+                @if(_shipCoordinates.ContainsKey(CoordinateKey.Build(column, row))){
+                    <BlazorApp.Client.Components.Cell 
+                        Type=CellType.Flag
+                        Column=column
+                        Row=row
+                        />
+                } else {
+                    <BlazorApp.Client.Components.Cell 
+                        Type=CellType.X
+                        Column=column
+                        Row=row
+                        OnClicked=@OnCoordinateClicked />
+                }
+            }
+        </div>
+    }
+</div>
+@if(GameMode == GameMode.Setup && AllShipsSetup){
+    <button class="btn btn-primary" @onclick=@OnReady>Ready</button>
+}
+
+@code {
+    [Parameter]
+    public GameMode GameMode { get; set; }
+    [Parameter]
+    public EventCallback<AllShipsMarkedEventArgs> OnAllShipsMarked { get; set; }
+
+    public IEnumerable<IShip> Ships { get; set; }
+    public Dictionary<string, string> _shipCoordinates;
+    private bool AllShipsSetup { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        Ships = new List<IShip>();
+        _shipCoordinates = new Dictionary<string, string>();
+        _shipCoordinates.Add("A3", "A3");
+        _shipCoordinates.Add("B6", "B6");
+        _shipCoordinates.Add("E7", "E7");
+        _shipCoordinates.Add("E9", "E9");
+        _shipCoordinates.Add("E8", "E8");
+
+
+        return Task.CompletedTask;
+    }
+
+    public void OnCoordinateClicked(CoordEventArgs eventArgs)
+    {
+        AllShipsSetup = true;
+    }
+
+    public async Task OnReady()
+    {
+        await OnAllShipsMarked.InvokeAsync(new AllShipsMarkedEventArgs(Ships.ToList()));
+    }
+
+    // TODO: Show board.. pass down from parent.
+
+}

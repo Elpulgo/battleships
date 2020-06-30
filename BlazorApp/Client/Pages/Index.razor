@@ -1,26 +1,38 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Core.Utilities
+@using Core.Models.Ships
+@using Core.Models
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
 <hr>
 <h1>Opponent board</h1>
 
-<Board />
+@* <OpponentBoard /> *@
 
 <hr>
 <h1>Your board</h1>
-<Board />
+<PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked />
+
+@if(@IsAllShipsMarked)
+{
+    <div><span>
+        All ships are now marked
+    </span></div>
+}
 
 @code {
+    private bool IsAllShipsMarked;
     private HubConnection hubConnection;
     private List<string> items = new List<string>();
+
+    public List<IShip> ships = new List<IShip>();
 
     protected override async Task OnInitializedAsync()
     {
         var generator = new ShipGenerator();
-        var ships = generator.Generate();
+        ships = generator.Generate().ToList();
 
         items = ships.Select(ship => ship.Name).ToList();
 
@@ -57,6 +69,13 @@
 
     public bool IsConnected =>
         hubConnection.State == HubConnectionState.Connected;
+
+    public void OnAllShipsMarked(Models.AllShipsMarkedEventArgs eventArgs)
+    {
+        IsAllShipsMarked = true;
+        StateHasChanged();
+        // TODO: Sen api call, all ships are marked    
+    }
 
     public void Dispose()
     {
