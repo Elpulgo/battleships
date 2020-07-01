@@ -60,7 +60,7 @@ namespace BlazorApp.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chathub");
+                endpoints.MapHub<BattleshipHub>("/BattleshipHub");
                 endpoints.MapFallbackToFile("index.html");
             });
         }
