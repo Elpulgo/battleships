@@ -1,0 +1,127 @@
+@using Core.Utilities 
+@using Core.Models.Ships 
+@using static Core.Models.Ships.ShipConstants
+@using Core.Factories;
+@using Client.Models 
+@using static Core.Models.CoordinatesHelper
+
+<BoardWrapper>
+    @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
+    {   
+        <div class="row no-gutters">
+            <div class="col table-cell-row">
+                @row
+            </div>
+            @foreach(Column column in Enum.GetValues(typeof(Column))){
+                @if(MarkedCoordinates.ContainsKey(CoordinateKey.Build(column, row))){
+                    <BlazorApp.Client.Components.Cell 
+                        Type=CellType.Flag
+                        Column=column
+                        Row=row
+                        />
+                } else {
+                    <BlazorApp.Client.Components.Cell 
+                        Type=CellType.None
+                        Column=column
+                        Row=row
+                        OnClicked=@OnCoordinateClicked />
+                }
+            }
+        </div>
+    }
+</BoardWrapper>
+
+@{
+    if(!ShipsTypesToCreate.Any()){
+        <span>All ships are marked!</span>
+    }else{
+        var currentShipType = ShipsTypesToCreate.FirstOrDefault();
+        <span>Mark coordinates for @currentShipType.ToString() 
+            (@CoordinatesForCurrentShip.Count / @currentShipType.NrOfBoxes())
+        </span>
+    }
+}
+
+@{
+    if(!String.IsNullOrEmpty(ErrorMessage)){
+        <span>@ErrorMessage</span>
+    }
+}
+
+@code {
+   
+    private List<ShipType> ShipsTypesToCreate;
+    private List<(Column column, int row)> CoordinatesForCurrentShip;
+    private List<IShip> Ships { get; set; }
+    private ShipFactory _factory;
+    private Dictionary<string, string> MarkedCoordinates;
+
+    private string ErrorMessage;
+
+    protected override Task OnInitializedAsync()
+    {
+        _factory = new ShipFactory();
+        Ships = new List<IShip>();
+        CoordinatesForCurrentShip = new List<(Column, int)>();
+        MarkedCoordinates = new Dictionary<string, string>();
+
+        ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
+
+        return Task.CompletedTask;
+    }
+
+    public void OnCoordinateClicked(CoordEventArgs eventArgs)
+    {
+        ClearErrorMessage();
+
+        if (!ShipsTypesToCreate.Any())
+            return;
+
+        var currentShipType = ShipsTypesToCreate.FirstOrDefault();
+
+        CoordinatesForCurrentShip.Add((eventArgs.Column, eventArgs.Row));
+        MarkedCoordinates.Add(CoordinateKey.Build(eventArgs.Column, eventArgs.Row), string.Empty);
+
+        if (CoordinatesForCurrentShip.Count < currentShipType.NrOfBoxes())
+            return;
+
+        TryCreateShip(currentShipType);
+    }
+
+    private void TryCreateShip(ShipType currentShipType)
+    {
+        try
+        {
+            var ship = _factory.Build(currentShipType, CoordinatesForCurrentShip);
+            Ships.Add(ship);
+            ShipsTypesToCreate.RemoveAt(0);
+        }
+        catch (ShipBuildException shipBuildException)
+        {
+            ErrorMessage = shipBuildException.Message;
+            ResetCurrentCoordinates();
+        }
+        catch (ShipValidationException shipValidationException)
+        {
+            ErrorMessage = shipValidationException.Message;
+            ResetCurrentCoordinates();
+        }
+        finally
+        {
+            ClearCurrentShipCoordinates();
+        }
+    }
+
+    private void ResetCurrentCoordinates()
+    {
+        foreach (var coord in CoordinatesForCurrentShip)
+        {
+            var key = CoordinateKey.Build(coord.column, coord.row);
+            MarkedCoordinates.Remove(key);
+        }
+    }
+
+    private void ClearCurrentShipCoordinates() => CoordinatesForCurrentShip.Clear();
+
+    private void ClearErrorMessage() => ErrorMessage = String.Empty;
+}

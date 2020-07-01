@@ -10,8 +10,11 @@
 @* <OpponentBoard /> *@
 
 <hr>
-<h1>Your board</h1>
-<PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked />
+
+<hr>
+<Setup />
+@* <h1>Your board</h1> *@
+@* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
 
 @if(@IsAllShipsMarked)
 {
