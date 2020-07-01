@@ -5,6 +5,7 @@
   border: 1px solid grey;
   padding: 0px;
   text-align: center;
+  cursor: pointer;
 }
 
 .table-cell-column {

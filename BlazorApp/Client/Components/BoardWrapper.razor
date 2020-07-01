@@ -1,0 +1,14 @@
+<div class="container-fluid p-0">
+    <div class="row no-gutters">
+        <div class="col table-cell-column"></div>
+        @foreach(var column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
+            <div class="col table-cell-column">@column.ToString()</div>
+        }
+    </div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

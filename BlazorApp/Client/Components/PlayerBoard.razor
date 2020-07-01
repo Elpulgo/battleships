@@ -4,13 +4,7 @@
 @using Client.Models 
 @using static Core.Models.CoordinatesHelper
 
-<div class="container-fluid p-0">
-    <div class="row no-gutters">
-        <div class="col table-cell-column"></div>
-        @foreach(var column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
-            <div class="col table-cell-column">@column.ToString()</div>
-        }
-    </div>
+<BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
         <div class="row no-gutters">
@@ -26,7 +20,7 @@
                         />
                 } else {
                     <BlazorApp.Client.Components.Cell 
-                        Type=CellType.X
+                        Type=CellType.None
                         Column=column
                         Row=row
                         OnClicked=@OnCoordinateClicked />
@@ -34,7 +28,8 @@
             }
         </div>
     }
-</div>
+</BoardWrapper>
+
 @if(GameMode == GameMode.Setup && AllShipsSetup){
     <button class="btn btn-primary" @onclick=@OnReady>Ready</button>
 }
