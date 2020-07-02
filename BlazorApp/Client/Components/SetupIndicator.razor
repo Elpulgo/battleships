@@ -1,0 +1,25 @@
+@using Core.Models.Ships
+
+@{
+    if(!ShipsTypesToCreate.Any()){
+        <div>All ships are marked!</div>
+    } else {
+        var currentShipType = ShipsTypesToCreate.FirstOrDefault();
+        <div>
+            Mark coordinates for: @currentShipType.ToString()
+        </div>
+        <div>
+            @for(var i = 0; i < @currentShipType.NrOfBoxes(); i++){
+                var color = i < CoordinateCount ? currentShipType.GetColor() : Color.LightGrey;
+                <span class="oi oi-flag p-1" style="vertical-align:middle; color:@color;" aria-hidden="true"></span>
+            }
+        </div>
+    }
+}
+
+@code{
+    [Parameter]
+    public List<ShipType> ShipsTypesToCreate { get; set; }
+    [Parameter]
+    public int CoordinateCount { get; set; }
+}

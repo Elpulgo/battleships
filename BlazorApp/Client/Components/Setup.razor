@@ -6,6 +6,8 @@
 @using Client.Models 
 @using static Core.Models.CoordinatesHelper
 
+<h4>Setup</h4>
+<hr>
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
@@ -16,39 +18,28 @@
             @foreach(Column column in Enum.GetValues(typeof(Column))){
                 @if(MarkedCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coordContainer)){
                     <BlazorApp.Client.Components.Cell 
-                        Type=CellType.Flag
-                        Column=column
-                        Row=row
-                        Color=coordContainer.Color
+                        Type="@CellType.Flag"
+                        Column="@column"
+                        Row="@row"
+                        Color="@coordContainer.Color"
                         />
                 } else {
                     <BlazorApp.Client.Components.Cell 
-                        Type=CellType.None
-                        Column=column
-                        Row=row
-                        OnClicked=@OnCoordinateClicked />
+                        Type="@CellType.None"
+                        Column="@column"
+                        Row="@row"
+                        OnClicked="@OnCoordinateClicked" />
                 }
             }
         </div>
     }
 </BoardWrapper>
-
-@{
-    if(!ShipsTypesToCreate.Any()){
-        <div>All ships are marked!</div>
-    } else {
-        var currentShipType = ShipsTypesToCreate.FirstOrDefault();
-        <div>Mark coordinates for @currentShipType.ToString() 
-            (@CoordinatesForCurrentShip.Count / @currentShipType.NrOfBoxes())
-        </div>
-    }
-}
-
 @if(!String.IsNullOrEmpty(ErrorMessage)){
+    <hr>
     <div style="color: red; font-weight:bold;">@ErrorMessage</div>
 }
-
-@* Flagicons, number of set for current? Use component for this. SetupIndicator?? *@
+<hr>
+<SetupIndicator ShipsTypesToCreate="@ShipsTypesToCreate" CoordinateCount="@CoordinatesForCurrentShip.Count" />
 
 @code {
    

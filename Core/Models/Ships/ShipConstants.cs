@@ -31,10 +31,10 @@ namespace Core.Models.Ships
             type switch
             {
                 ShipType.SubMarine => Color.Magenta,
-                ShipType.Destroyer => Color.Green,
-                ShipType.Cruiser => Color.Yellow,
+                ShipType.Destroyer => Color.Cyan,
+                ShipType.Cruiser => Color.Grey,
                 ShipType.BattleShip => Color.Blue,
-                ShipType.AirCraft => Color.Cyan,
+                ShipType.AirCraft => Color.Green,
                 _ => throw new ShipValidationException($"Shiptype {type.ToString()} is not supported.")
             };
     }

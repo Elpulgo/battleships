@@ -4,8 +4,8 @@
 @using Core.Models
 @using BlazorApp.Client.Components
 
-<hr>
-<h1>Opponent board</h1>
+@* <hr>
+<h1>Opponent board</h1> *@
 
 @* <OpponentBoard /> *@
 
@@ -15,13 +15,6 @@
 <Setup />
 @* <h1>Your board</h1> *@
 @* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
-
-@if(@IsAllShipsMarked)
-{
-    <div><span>
-        All ships are now marked
-    </span></div>
-}
 
 @code {
     private bool IsAllShipsMarked;
