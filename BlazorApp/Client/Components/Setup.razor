@@ -2,6 +2,7 @@
 @using Core.Models.Ships 
 @using static Core.Models.Ships.ShipConstants
 @using Core.Factories;
+@using Core.Models
 @using Client.Models 
 @using static Core.Models.CoordinatesHelper
 
@@ -13,11 +14,12 @@
                 @row
             </div>
             @foreach(Column column in Enum.GetValues(typeof(Column))){
-                @if(MarkedCoordinates.ContainsKey(CoordinateKey.Build(column, row))){
+                @if(MarkedCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coordContainer)){
                     <BlazorApp.Client.Components.Cell 
                         Type=CellType.Flag
                         Column=column
                         Row=row
+                        Color=coordContainer.Color
                         />
                 } else {
                     <BlazorApp.Client.Components.Cell 
@@ -33,28 +35,28 @@
 
 @{
     if(!ShipsTypesToCreate.Any()){
-        <span>All ships are marked!</span>
-    }else{
+        <div>All ships are marked!</div>
+    } else {
         var currentShipType = ShipsTypesToCreate.FirstOrDefault();
-        <span>Mark coordinates for @currentShipType.ToString() 
+        <div>Mark coordinates for @currentShipType.ToString() 
             (@CoordinatesForCurrentShip.Count / @currentShipType.NrOfBoxes())
-        </span>
+        </div>
     }
 }
 
-@{
-    if(!String.IsNullOrEmpty(ErrorMessage)){
-        <span>@ErrorMessage</span>
-    }
+@if(!String.IsNullOrEmpty(ErrorMessage)){
+    <div style="color: red; font-weight:bold;">@ErrorMessage</div>
 }
+
+@* Flagicons, number of set for current? Use component for this. SetupIndicator?? *@
 
 @code {
    
     private List<ShipType> ShipsTypesToCreate;
-    private List<(Column column, int row)> CoordinatesForCurrentShip;
+    private List<CoordinateContainer> CoordinatesForCurrentShip;
     private List<IShip> Ships { get; set; }
     private ShipFactory _factory;
-    private Dictionary<string, string> MarkedCoordinates;
+    private Dictionary<string, CoordinateContainer> MarkedCoordinates;
 
     private string ErrorMessage;
 
@@ -62,8 +64,8 @@
     {
         _factory = new ShipFactory();
         Ships = new List<IShip>();
-        CoordinatesForCurrentShip = new List<(Column, int)>();
-        MarkedCoordinates = new Dictionary<string, string>();
+        CoordinatesForCurrentShip = new List<CoordinateContainer>();
+        MarkedCoordinates = new Dictionary<string, CoordinateContainer>();
 
         ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
 
@@ -79,8 +81,11 @@
 
         var currentShipType = ShipsTypesToCreate.FirstOrDefault();
 
-        CoordinatesForCurrentShip.Add((eventArgs.Column, eventArgs.Row));
-        MarkedCoordinates.Add(CoordinateKey.Build(eventArgs.Column, eventArgs.Row), string.Empty);
+        var coordContainer = new CoordinateContainer(eventArgs.Column, eventArgs.Row)
+            .WithColor(ShipConstants.GetColor(currentShipType));
+
+        CoordinatesForCurrentShip.Add(coordContainer);
+        MarkedCoordinates.Add(coordContainer.Key, coordContainer);
 
         if (CoordinatesForCurrentShip.Count < currentShipType.NrOfBoxes())
             return;
@@ -92,7 +97,7 @@
     {
         try
         {
-            var ship = _factory.Build(currentShipType, CoordinatesForCurrentShip);
+            var ship = _factory.Build(currentShipType, CoordinatesForCurrentShip.Select(s => (s.Column, s.Row)));
             Ships.Add(ship);
             ShipsTypesToCreate.RemoveAt(0);
         }
@@ -116,8 +121,7 @@
     {
         foreach (var coord in CoordinatesForCurrentShip)
         {
-            var key = CoordinateKey.Build(coord.column, coord.row);
-            MarkedCoordinates.Remove(key);
+            MarkedCoordinates.Remove(coord.Key);
         }
     }
 
