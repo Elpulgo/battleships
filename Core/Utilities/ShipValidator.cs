@@ -33,13 +33,11 @@ namespace Core.Utilities
             var isVertical = coordinates.Select(coord => coord.column).Distinct().Count() == 1;
             var isSequentialForVertical = IsSequential(coordinates.Select(coord => coord.row));
 
-            if (isVertical)
-            {
-                if (isSequentialForVertical)
-                    return;
+            if (isVertical && isSequentialForVertical)
+                return;
 
+            if (isVertical && !isSequentialForVertical)
                 throw new ShipValidationException($"Ship {ship.Name} does not have vertical coordinates marked in sequence. Check the coordinates again!");
-            }
 
             var isHorizontal = coordinates.Select(coord => coord.row).Distinct().Count() == 1;
             var isSequentialForHorizontal = IsSequential(coordinates.Select(coord => (int)coord.column));
@@ -47,7 +45,7 @@ namespace Core.Utilities
             if (isHorizontal && isSequentialForHorizontal)
                 return;
 
-            if (!isSequentialForHorizontal)
+            if (isHorizontal && !isSequentialForHorizontal)
                 throw new ShipValidationException($"Ship {ship.Name} does not have horizontal coordinates marked in sequence. Check the coordinates again!");
 
             throw new ShipValidationException($"Ship {ship.Name} is not vertical or horizontal. Check the coordinates again!");
