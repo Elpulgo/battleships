@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Core.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -15,10 +16,14 @@ namespace BlazorApp.Client.Services
     // Should handle messages and SignalR related stuff
     public class MessageService : IMessageService, IDisposable
     {
-        private HubConnection _hubConnection;
+        private readonly HubConnection _hubConnection;
+        private readonly EventService _eventService;
 
-        public MessageService(NavigationManager navigationManager)
+        public MessageService(
+            NavigationManager navigationManager,
+            EventService eventService)
         {
+            _eventService = eventService;
             _hubConnection = new HubConnectionBuilder()
                        .WithUrl(navigationManager.ToAbsoluteUri("/battleshiphub"))
                        .Build();
@@ -46,10 +51,7 @@ namespace BlazorApp.Client.Services
                 var encodedMsg = $"{user}: {message}";
             });
 
-            _hubConnection.On<string, string>("OpponentReady", (user, message) =>
-            {
-                var encodedMsg = $"{user}: {message}";
-            });
+            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventService.GameModeChanged(gameMode));
 
             await _hubConnection.StartAsync();
         }
