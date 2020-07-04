@@ -10,7 +10,7 @@ namespace Core.Utilities
     public static class ShipValidator
     {
         public static void ValidateCoordinates<T>(this T ship, List<(Column column, int row)> coordinates)
-            where T : IShip
+            where T : Ship
         {
             var length = coordinates.Count;
             if (coordinates.Any(coord => coord.row > GameConstants.MaxRowCount))
@@ -28,7 +28,7 @@ namespace Core.Utilities
         }
 
         private static void ValidateCoordinatesAreInLine<T>(this T ship, List<(Column column, int row)> coordinates)
-            where T : IShip
+            where T : Ship
         {
             var isVertical = coordinates.Select(coord => coord.column).Distinct().Count() == 1;
             var isSequentialForVertical = IsSequential(coordinates.Select(coord => coord.row));

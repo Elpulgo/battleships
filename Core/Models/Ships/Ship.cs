@@ -5,11 +5,12 @@ using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models.Ships
 {
-    public abstract class ShipBase : IShip
+    public class Ship
     {
-        public ShipBase(IEnumerable<(Column column, int row)> coordinates)
+        public Ship(ShipType shipType, IEnumerable<(Column column, int row)> coordinates)
         {
-            Coordinates = new List<CoordinateContainer>();
+            ShipType = shipType;
+            ShipValidator.ValidateCoordinates<Ship>(this, coordinates.ToList());
             SetCoordinates(coordinates);
         }
 
@@ -18,11 +19,11 @@ namespace Core.Models.Ships
 
         public int Boxes => ShipType.NrOfBoxes();
 
-        public abstract string Name { get; }
+        public string Name => ShipType.ToString();
 
         public Color Color => ShipType.GetColor();
 
-        public abstract ShipType ShipType { get; }
+        public ShipType ShipType { get; }
 
         public bool HasCoordinate(string key) => Coordinates.Any(coord => coord.Key == key);
 
@@ -30,6 +31,8 @@ namespace Core.Models.Ships
 
         private void SetCoordinates(IEnumerable<(Column column, int row)> coordinates)
         {
+            Coordinates = new List<CoordinateContainer>();
+
             foreach (var coord in coordinates)
             {
                 Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip().WithColor(Color));

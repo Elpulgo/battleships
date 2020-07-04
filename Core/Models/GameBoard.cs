@@ -10,7 +10,7 @@ namespace Core.Models
     public class GameBoard
     {
         private Dictionary<string, CoordinateContainer> _matrix;
-        private List<IShip> _ships;
+        private List<Ship> _ships;
         public Player Player { get; }
         public GameBoard(Player player)
         {
@@ -18,7 +18,7 @@ namespace Core.Models
             Player = player;
         }
 
-        public GameBoard WithShips(List<IShip> ships)
+        public GameBoard WithShips(List<Ship> ships)
         {
 
             _ships = ships;

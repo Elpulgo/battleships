@@ -1,24 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Models;
 using Core.Models.Ships;
-using Core.Factories;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Utilities
 {
     public class ShipGenerator
     {
-        private readonly ShipFactory _shipFactory;
         public ShipGenerator()
         {
-            _shipFactory = new ShipFactory();
         }
 
-        public IEnumerable<IShip> Generate() => GenerateShips();
+        public IEnumerable<Ship> Generate() => GenerateShips();
 
-        private IEnumerable<IShip> GenerateShips()
+        private IEnumerable<Ship> GenerateShips()
         {
             var takenCoodinateKeys = new Dictionary<string, string>();
 
@@ -28,7 +24,7 @@ namespace Core.Utilities
             }
         }
 
-        private IShip GenerateShipFor(
+        private Ship GenerateShipFor(
             ShipType shipType,
             ref Dictionary<string, string> takenCoordinates)
         {
@@ -69,7 +65,7 @@ namespace Core.Utilities
                 }
             }
 
-            return _shipFactory.Build(shipType, coordinates);
+            return new Ship(shipType, coordinates);
         }
 
         private bool TryAddCoordinateForBox(
