@@ -2,7 +2,7 @@
   /*For mobile view... add responsive breakpoints here..*/
   max-width: 32px !important;
   min-height: 32px;
-  border: 1px solid lightskyblue;
+  border: 1px solid lightgrey;
   padding: 0px;
   text-align: center;
   cursor: pointer;
