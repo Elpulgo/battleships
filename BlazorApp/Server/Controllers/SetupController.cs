@@ -1,4 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using BlazorApp.Server.Hubs;
+using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Core.Models;
+using Core.Models.Ships;
+using Shared;
 
 namespace BlazorApp.Server.Controllers
 {
@@ -6,9 +14,11 @@ namespace BlazorApp.Server.Controllers
     [Route("[controller]")]
     public class SetupController : ControllerBase
     {
-        public SetupController()
-        {
+        private readonly BattleshipHub _battleShipHub;
 
+        public SetupController(BattleshipHub battleShipHub)
+        {
+            _battleShipHub = battleShipHub;
         }
 
         [HttpPost]
@@ -21,13 +31,14 @@ namespace BlazorApp.Server.Controllers
 
         }
 
-        [HttpPost]
-        public IActionResult MarkShips()
+        [HttpPost("Ready/{playerId}")]
+        public async Task<IActionResult> PlayerReady([FromBody] List<ShipBase> request, Guid playerId)
         {
+            await _battleShipHub.GameModeChanged(Core.Models.GameMode.WaitingForPlayer);
+            System.Console.WriteLine(request.FirstOrDefault().Name);
             // Body with list of ships? and player
             // Return succes or false, depending on validation?
-            return null;
-
+            return Ok();
         }
     }
 }
