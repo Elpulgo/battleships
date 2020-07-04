@@ -3,8 +3,12 @@
 @using static Core.Models.Ships.ShipConstants
 @using Core.Factories;
 @using Core.Models
-@using Client.Models 
 @using static Core.Models.CoordinatesHelper
+
+@using Client.Models
+@using Client.Services
+
+@inject IGamePlayService GamePlayService
 
 <h4>Setup</h4>
 <hr>
@@ -21,14 +25,16 @@
                         Type="@CellType.Flag"
                         Column="@column"
                         Row="@row"
-                        Color="@coordContainer.Color"
-                        />
+                        Color="@coordContainer.Color">
+                    </BlazorApp.Client.Components.Cell>
                 } else {
                     <BlazorApp.Client.Components.Cell 
                         Type="@CellType.None"
                         Column="@column"
                         Row="@row"
-                        OnClicked="@OnCoordinateClicked" />
+                        OnClicked="@OnCoordinateClicked">
+                    </BlazorApp.Client.Components.Cell>
+
                 }
             }
         </div>
@@ -39,7 +45,12 @@
     <div style="color: red; font-weight:bold;">@ErrorMessage</div>
 }
 <hr>
-<SetupIndicator ShipsTypesToCreate="@ShipsTypesToCreate" CoordinateCount="@CoordinatesForCurrentShip.Count" />
+<SetupIndicator ShipsTypesToCreate="@ShipsTypesToCreate" CoordinateCount="@CoordinatesForCurrentShip.Count">
+</SetupIndicator>
+
+@if(!ShipsTypesToCreate.Any()){
+    <button class="btn btn-success" @onclick=@OnReady>Start game!</button>
+}
 
 @code {
    
@@ -82,6 +93,11 @@
             return;
 
         TryCreateShip(currentShipType);
+    }
+    public async Task OnReady()
+    {
+        await GamePlayService.PlayerReadyAsync(Ships);
+        // await OnAllShipsMarked.InvokeAsync(new AllShipsMarkedEventArgs(Ships.ToList())); 
     }
 
     private void TryCreateShip(ShipType currentShipType)
