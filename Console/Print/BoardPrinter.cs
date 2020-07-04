@@ -14,7 +14,7 @@ namespace Console.Print
 
 
         public (Dictionary<(int x, int y), BoxContainer> coordMap_Human, Dictionary<(int x, int y), BoxContainer> coordMap_Computer) PrintMultipleBoards(
-            List<IShip> humanShips, List<IShip> computerShips)
+            List<Ship> humanShips, List<Ship> computerShips)
         {
             var coordinateMapChar_Human = new Dictionary<(int x, int y), BoxContainer>();
             var coordinateMapChar_Computer = new Dictionary<(int x, int y), BoxContainer>();
@@ -54,7 +54,7 @@ namespace Console.Print
             return (coordinateMapChar_Human, coordinateMapChar_Computer);
         }
 
-        public Dictionary<(int x, int y), BoxContainer> Print(List<IShip> ships)
+        public Dictionary<(int x, int y), BoxContainer> Print(List<Ship> ships)
         {
             var coordinateMapChar = new Dictionary<(int x, int y), BoxContainer>();
 
@@ -152,7 +152,7 @@ namespace Console.Print
             System.Console.Write("|");
         }
 
-        private Dictionary<CoordinateContainer, Color> GroupCoordinatesByColor(List<IShip> ships)
+        private Dictionary<CoordinateContainer, Color> GroupCoordinatesByColor(List<Ship> ships)
         {
             var coordinateColorMap = new Dictionary<CoordinateContainer, Color>();
 

@@ -7,8 +7,6 @@ using Console.Models;
 using Core.Models.Ships;
 using Console.Print;
 using static Core.Models.CoordinatesHelper;
-using Core.Factories;
-using System.Threading.Tasks;
 
 namespace Console
 {
@@ -17,8 +15,7 @@ namespace Console
         private List<GameBoard> _gameBoards = new List<GameBoard>();
         private GameMode CurrentGameMode { get; set; }
         private List<ShipSetup> ShipSetups { get; set; } = new List<ShipSetup>();
-        private List<IShip> _ships = new List<IShip>();
-        private readonly ShipFactory _shipFactory = new ShipFactory();
+        private List<Ship> _ships = new List<Ship>();
         private int _initCursorTop_Y;
         private static Dictionary<(int x, int y), BoxContainer> _coordMapChar_Human = new Dictionary<(int x, int y), BoxContainer>();
         private static Dictionary<(int x, int y), BoxContainer> _coordMapChar_Computer = new Dictionary<(int x, int y), BoxContainer>();
@@ -286,8 +283,7 @@ namespace Console
             {
                 try
                 {
-                    var ship = _shipFactory.Build(setup.ShipType, setup.Coords);
-                    _ships.Add(ship);
+                    _ships.Add(new Ship(setup.ShipType, setup.Coords));
                 }
                 catch (ShipValidationException exception)
                 {
@@ -336,10 +332,10 @@ namespace Console
             // PrintInfoAboutShips(_ships);
 
             var boardPrinter = new BoardPrinter();
-            _coordMapChar_Human = boardPrinter.Print(new List<IShip>());
+            _coordMapChar_Human = boardPrinter.Print(new List<Ship>());
         }
 
-        private void PrintInfoAboutShips(List<IShip> ships)
+        private void PrintInfoAboutShips(List<Ship> ships)
         {
             foreach (var ship in ships)
             {
