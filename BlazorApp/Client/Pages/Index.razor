@@ -11,6 +11,8 @@
 @implements IDisposable
 
 <CascadingValue Value="@GameMode">
+<CascadingValue Value="@Player">
+
     @* <hr>
     <h1>Opponent board</h1> *@
 
@@ -18,41 +20,58 @@
 
     <hr>
     <span>@GameMode.ToString()</span>
+    <span>@Player?.Name.ToString()</span>
 
     <hr>
-    @if(GameMode == GameMode.Setup){
-        <Setup></Setup>
+    @switch (GameMode)
+    {
+        case GameMode.CreatingPlayer:
+            <CreatePlayer></CreatePlayer>
+            break;
+        case GameMode.Setup:
+            <Setup></Setup>
+            break;
+        default:
+            break;
     }
     @* <h1>Your board</h1> *@
     @* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
 </CascadingValue>
+</CascadingValue>
+
 
 @code {
-    public GameMode GameMode;
+    public GameMode GameMode = GameMode.CreatingPlayer;
+    public Player Player;
     protected override async Task OnInitializedAsync()
     {
 
-        // FOR TEST
-        GameMode = GameMode.Setup;
         SubscribeToEvents();
         var generator = new ShipGenerator();
         var ships = generator.Generate().ToList();
-
-        // items = ships.Select(ship => ship.Name).ToList();
     }
 
     public void SubscribeToEvents()
     {
-        EventService.GameModeEventChanged += HandleGameModeChaged;
+        EventService.GameModeEventChanged += HandleGameModeChanged;
+        EventService.PlayerCreatedEventChanged += HandlePlayerCreatedChanged;
     }
 
-    private void HandleGameModeChaged(object sender, GameMode gameMode) {
+    private void HandleGameModeChanged(object sender, GameMode gameMode)
+    {
         GameMode = gameMode;
         StateHasChanged();
-    } 
+    }
+
+    private void HandlePlayerCreatedChanged(object sender, Player player)
+    {
+        Player = player;
+        StateHasChanged();
+    }
 
     public void Dispose()
     {
-        EventService.GameModeEventChanged -= HandleGameModeChaged;
+        EventService.GameModeEventChanged -= HandleGameModeChanged;
+        EventService.PlayerCreatedEventChanged -= HandlePlayerCreatedChanged;
     }
 }

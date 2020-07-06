@@ -1,0 +1,9 @@
+@if(!String.IsNullOrEmpty(Error)){
+    <hr>
+    <div style="color: red; font-weight:bold;">@Error</div>
+}
+
+@code{
+    [Parameter]
+    public string Error { get; set; }
+}

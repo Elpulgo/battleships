@@ -12,7 +12,7 @@ namespace BlazorApp.Client.Services
 {
     public interface IGamePlayService
     {
-        Task<Player> CreatePlayerAsync(string name, PlayerType type);
+        Task CreatePlayerAsync(string name, PlayerType type);
         Task<ICollection<Ship>> GetShipsAsync();
         Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
@@ -24,11 +24,16 @@ namespace BlazorApp.Client.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IMessageService _messageService;
+        private readonly IEventService _eventService;
 
-        public GamePlayService(HttpClient httpClient, IMessageService messageService)
+        public GamePlayService(
+            HttpClient httpClient,
+            IMessageService messageService,
+            IEventService eventService)
         {
             _httpClient = httpClient;
             _messageService = messageService;
+            _eventService = eventService;
         }
 
         public async Task<ICollection<Ship>> GetShipsAsync()
@@ -57,11 +62,8 @@ namespace BlazorApp.Client.Services
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task<Player> CreatePlayerAsync(string name, PlayerType type)
+        public async Task CreatePlayerAsync(string name, PlayerType type)
         {
-            // if(!_messageService.IsConnected)
-            //     return null;
-
             try
             {
                 var response = await _httpClient.PostAsJsonAsync(
@@ -70,14 +72,13 @@ namespace BlazorApp.Client.Services
 
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<Player>();
+                var player = await response.Content.ReadFromJsonAsync<Player>();
+                _eventService.PlayerCreated(player);
             }
             catch (Exception exception)
             {
                 Console.WriteLine("Failed to create player: " + exception.Message);
             }
-
-            return null;
         }
     }
 }

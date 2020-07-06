@@ -1,0 +1,37 @@
+@using Core.Models
+@using Client.Services
+
+@inject IGamePlayService GamePlayService
+
+
+<h4>Create Player</h4>
+<input class="form-control" id="name" @bind="Name" />
+<input type="checkbox" id="opponentType" @bind="IsOpponentComputer" />
+
+<button class="btn btn-success" @onclick=@OnReady>Create</button>
+@if(ShowError){
+    <ErrorMessage Error="Name can't be empty!"></ErrorMessage>
+}
+
+@code {
+    public string Name { get; set; }
+    public bool IsOpponentComputer { get; set; }
+    public bool ShowError { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    public async Task OnReady()
+    {
+        ShowError = false;
+
+        if (string.IsNullOrEmpty(Name))
+        {
+            ShowError = true;
+            return;
+        }
+
+        await GamePlayService.CreatePlayerAsync(Name, PlayerType.Human);
+    }
+}

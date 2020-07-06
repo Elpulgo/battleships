@@ -8,7 +8,6 @@
 @using Client.Services
 
 @inject IGamePlayService GamePlayService
-@inject IMessageService MessageService
 
 
 <h4>Setup</h4>
@@ -42,8 +41,7 @@
     }
 </BoardWrapper>
 @if(!String.IsNullOrEmpty(ErrorMessage)){
-    <hr>
-    <div style="color: red; font-weight:bold;">@ErrorMessage</div>
+    <ErrorMessage Error="@ErrorMessage"></ErrorMessage>
 }
 <hr>
 <SetupIndicator ShipsTypesToCreate="@ShipsTypesToCreate" CoordinateCount="@CoordinatesForCurrentShip.Count">
@@ -69,8 +67,6 @@
         MarkedCoordinates = new Dictionary<string, CoordinateContainer>();
 
         ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
-
-        var player = await GamePlayService.CreatePlayerAsync("lars", PlayerType.Human);
     }
 
     public void OnCoordinateClicked(CoordEventArgs eventArgs)
