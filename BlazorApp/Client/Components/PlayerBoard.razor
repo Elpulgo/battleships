@@ -40,13 +40,13 @@
     [Parameter]
     public EventCallback<AllShipsMarkedEventArgs> OnAllShipsMarked { get; set; }
 
-    public IEnumerable<IShip> Ships { get; set; }
+    public IEnumerable<Ship> Ships { get; set; }
     public Dictionary<string, string> _shipCoordinates;
     private bool AllShipsSetup { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        Ships = new List<IShip>();
+        Ships = new List<Ship>();
         _shipCoordinates = new Dictionary<string, string>();
         _shipCoordinates.Add("A3", "A3");
         _shipCoordinates.Add("B6", "B6");

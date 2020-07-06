@@ -7,9 +7,9 @@ namespace BlazorApp.Client.Models
 {
     public class AllShipsMarkedEventArgs : EventArgs
     {
-        public List<IShip> Ships { get; }
+        public List<Ship> Ships { get; }
         
-        public AllShipsMarkedEventArgs(List<IShip> ships)
+        public AllShipsMarkedEventArgs(List<Ship> ships)
         {
             Ships = ships;
         }

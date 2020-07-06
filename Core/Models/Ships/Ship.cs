@@ -7,6 +7,10 @@ namespace Core.Models.Ships
 {
     public class Ship
     {
+        public Ship()
+        {            
+        }
+        
         public Ship(ShipType shipType, IEnumerable<(Column column, int row)> coordinates)
         {
             ShipType = shipType;
