@@ -34,15 +34,6 @@ namespace BlazorApp.Server.Controllers
             var player = new Player(dto.Name, dto.Type);
             _connectionManager.Add(player, connectionId);
 
-            Console.WriteLine("Connectionid is: " + connectionId);
-            Console.WriteLine("Connections is: " + _connectionManager.Count);
-            Console.WriteLine("Will activate 'GameModeChanged' now!");
-
-
-            await _hubContext.Clients.All.SendAsync("GameModeChanged", GameMode.WaitingForPlayer);
-            // Body with name and gamemode(human or computer)
-            // Return Core.Model.Player with id as Guid, connected to signalR guid id?
-            // Exception/Error model if 2 players already exist
             return Ok(player);
         }
 
