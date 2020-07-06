@@ -12,11 +12,15 @@ namespace BlazorApp.Client.Services
 {
     public interface IGamePlayService
     {
-        Task CreatePlayerAsync(string name, PlayerType type);
+        Task CreatePlayerAsync(string name, PlayerType type, bool playVsComputer);
+        Task<bool> IsPlayerSlotAvailableAsync();
+        Task<bool> IsOtherPlayerCreated();
+        Task PreLoadPlayerSlotAvailable();
         Task<ICollection<Ship>> GetShipsAsync();
         Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
         Task PlayerReadyAsync(List<Ship> ships);
+        bool IsPlayerSlotAvailable { get; }
     }
 
     // Should handle gameplay related stuff, such as mark coordinate, get ships, get coordinates
@@ -25,6 +29,8 @@ namespace BlazorApp.Client.Services
         private readonly HttpClient _httpClient;
         private readonly IMessageService _messageService;
         private readonly IEventService _eventService;
+
+        public bool IsPlayerSlotAvailable { get; private set; } = true;
 
         public GamePlayService(
             HttpClient httpClient,
@@ -35,6 +41,8 @@ namespace BlazorApp.Client.Services
             _messageService = messageService;
             _eventService = eventService;
         }
+
+        public async Task PreLoadPlayerSlotAvailable() => IsPlayerSlotAvailable = await IsPlayerSlotAvailableAsync();
 
         public async Task<ICollection<Ship>> GetShipsAsync()
         {
@@ -62,13 +70,17 @@ namespace BlazorApp.Client.Services
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task CreatePlayerAsync(string name, PlayerType type)
+        public Task<bool> IsPlayerSlotAvailableAsync() => GetRequest<bool>("setup/IsPlayerSlotAvailable");
+
+        public Task<bool> IsOtherPlayerCreated() => GetRequest<bool>("setup/IsOtherPlayerCreated");
+
+        public async Task CreatePlayerAsync(string name, PlayerType type, bool playVsComputer)
         {
             try
             {
                 var response = await _httpClient.PostAsJsonAsync(
                     $"setup/createplayer/{_messageService.HubConnectionId}",
-                    new CreatePlayerDto(type, name));
+                    new CreatePlayerDto(type, name, playVsComputer));
 
                 response.EnsureSuccessStatusCode();
 
@@ -79,6 +91,15 @@ namespace BlazorApp.Client.Services
             {
                 Console.WriteLine("Failed to create player: " + exception.Message);
             }
+        }
+
+        private async Task<T> GetRequest<T>(string url)
+        {
+            var response = await _httpClient.GetAsync(url);
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<T>();
         }
     }
 }

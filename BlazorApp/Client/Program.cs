@@ -25,11 +25,20 @@ namespace BlazorApp.Client
             builder.Services.AddSingleton<IEventService, EventService>();
 
             var host = builder.Build();
+            await host.PreLoad();
+            await host.RunAsync();
+        }
+    }
 
+    public static class WebAssemblyHostExtensions
+    {
+        public static async Task PreLoad(this WebAssemblyHost host)
+        {
             var messageService = host.Services.GetRequiredService<IMessageService>();
             await messageService.InitializeAsync();
 
-            await host.RunAsync();
+            var gamePlayService = host.Services.GetRequiredService<IGamePlayService>();
+            await gamePlayService.PreLoadPlayerSlotAvailable();
         }
     }
 }

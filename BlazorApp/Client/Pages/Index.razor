@@ -8,44 +8,46 @@
 
 @inject IEventService EventService
 @inject IMessageService MessageService
+@inject IGamePlayService GamePlayService
 @implements IDisposable
 
-<CascadingValue Value="@GameMode">
-<CascadingValue Value="@Player">
-
-    @* <hr>
-    <h1>Opponent board</h1> *@
-
-    @* <OpponentBoard /> *@
-
+@if(GameIsAvailable){
+    <CascadingValue Value="@GameMode">
+    <CascadingValue Value="@Player">
     <hr>
-    <span>@GameMode.ToString()</span>
-    <span>@Player?.Name.ToString()</span>
+        <span>@GameMode.ToString()</span>
+        <span>@Player?.Name.ToString()</span>
 
-    <hr>
-    @switch (GameMode)
-    {
-        case GameMode.CreatingPlayer:
-            <CreatePlayer></CreatePlayer>
-            break;
-        case GameMode.Setup:
-            <Setup></Setup>
-            break;
-        default:
-            break;
-    }
-    @* <h1>Your board</h1> *@
-    @* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
-</CascadingValue>
-</CascadingValue>
-
+        <hr>
+        @switch (GameMode)
+        {
+            case GameMode.CreatingPlayer:
+                <CreatePlayer></CreatePlayer>
+                break;
+            case GameMode.Setup:
+                <Setup></Setup>
+                break;
+            case GameMode.WaitingForPlayer:
+                break;
+            default:
+                break;
+        }
+        @* <h1>Your board</h1> *@
+        @* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
+    </CascadingValue>
+    </CascadingValue>
+} else {
+    <div>Game is not available. Has already reached max number of players!</div>
+}
 
 @code {
     public GameMode GameMode = GameMode.CreatingPlayer;
     public Player Player;
+    public bool GameIsAvailable = false;
+
     protected override async Task OnInitializedAsync()
     {
-
+        GameIsAvailable = GamePlayService.IsPlayerSlotAvailable;
         SubscribeToEvents();
         var generator = new ShipGenerator();
         var ships = generator.Generate().ToList();

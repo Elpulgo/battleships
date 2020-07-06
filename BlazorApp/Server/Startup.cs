@@ -34,6 +34,7 @@ namespace BlazorApp.Server
             });
             services.AddRazorPages();
             services.AddSingleton<ConnectionManager<Player>>();
+            services.AddSingleton<PlayerManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

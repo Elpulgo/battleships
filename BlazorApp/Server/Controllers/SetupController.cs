@@ -18,12 +18,23 @@ namespace BlazorApp.Server.Controllers
     {
         private readonly IHubContext<BattleshipHub> _hubContext;
         private readonly ConnectionManager<Player> _connectionManager;
+        private readonly PlayerManager _playerManager;
 
-        public SetupController(IHubContext<BattleshipHub> hubContext, ConnectionManager<Player> connectionManager)
+        public SetupController(
+            IHubContext<BattleshipHub> hubContext,
+            ConnectionManager<Player> connectionManager,
+            PlayerManager playerManager)
         {
             _hubContext = hubContext;
             _connectionManager = connectionManager;
+            _playerManager = playerManager;
         }
+
+        [HttpGet("isplayerslotavailable")]
+        public bool IsPlayerSlotAvailable() => (!_playerManager.IsPlayingVsComputer && _connectionManager.Count < 2);
+
+        [HttpGet("isotherplayercreated")]
+        public bool IsOtherPlayerCreated() => _playerManager.PlayerCount > 0 && !_playerManager.IsPlayingVsComputer;
 
         [HttpPost("createplayer/{connectionId}")]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto dto, string connectionId)
@@ -33,6 +44,12 @@ namespace BlazorApp.Server.Controllers
 
             var player = new Player(dto.Name, dto.Type);
             _connectionManager.Add(player, connectionId);
+            _playerManager.AddPlayerToGame(player);
+
+            if (dto.PlayVsComputer)
+            {
+                _playerManager.PlayVsComputer();
+            }
 
             return Ok(player);
         }
