@@ -6,29 +6,31 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BlazorApp.Client.Services
 {
-
-
     public interface IMessageService
     {
+        Task InitializeAsync();
 
+        string HubConnectionId { get; }
+
+        bool IsConnected { get; }
     }
 
-    // Should handle messages and SignalR related stuff
     public class MessageService : IMessageService, IDisposable
     {
+        private const string HUBNAME = "/battleshiphub";
         private readonly HubConnection _hubConnection;
-        private readonly EventService _eventService;
+        private readonly IEventService _eventService;
+
+        public string HubConnectionId => _hubConnection.ConnectionId;
 
         public MessageService(
             NavigationManager navigationManager,
-            EventService eventService)
+            IEventService eventService)
         {
             _eventService = eventService;
             _hubConnection = new HubConnectionBuilder()
-                       .WithUrl(navigationManager.ToAbsoluteUri("/battleshiphub"))
+                       .WithUrl(navigationManager.ToAbsoluteUri(HUBNAME))
                        .Build();
-
-            new Action(async () => await Initialize()).Invoke();
         }
 
 
@@ -36,10 +38,9 @@ namespace BlazorApp.Client.Services
         // Task Send() =>
         //         hubConnection.SendAsync("SendMessage", userInput, messageInput); *@
 
-        //     public bool IsConnected =>
-        //         hubConnection.State == HubConnectionState.Connected;
+        public bool IsConnected => _hubConnection.State == HubConnectionState.Connected;
 
-        private async Task Initialize()
+        public async Task InitializeAsync()
         {
             _hubConnection.On<string, string>("CoordinateMarked", (user, message) =>
             {
@@ -51,14 +52,12 @@ namespace BlazorApp.Client.Services
                 var encodedMsg = $"{user}: {message}";
             });
 
-            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventService.GameModeChanged(gameMode));
 
+            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventService.GameModeChanged(gameMode));
+            Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();
         }
 
-        public void Dispose()
-        {
-            _ = _hubConnection.DisposeAsync();
-        }
+        public void Dispose() => _ = _hubConnection.DisposeAsync();
     }
 }
