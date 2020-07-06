@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 using BlazorApp.Server.Hubs;
+using BlazorApp.Server.Managers;
+using Core.Models;
 
 namespace BlazorApp.Server
 {
@@ -31,7 +33,7 @@ namespace BlazorApp.Server
                     new[] { "application/octet-stream" });
             });
             services.AddRazorPages();
-            services.AddSingleton<BattleshipHub>();
+            services.AddSingleton<ConnectionManager<Player>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
