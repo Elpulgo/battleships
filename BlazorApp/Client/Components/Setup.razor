@@ -1,7 +1,6 @@
 @using Core.Utilities 
 @using Core.Models.Ships 
 @using static Core.Models.Ships.ShipConstants
-@using Core.Factories;
 @using Core.Models
 @using static Core.Models.CoordinatesHelper
 
@@ -9,6 +8,8 @@
 @using Client.Services
 
 @inject IGamePlayService GamePlayService
+@inject IMessageService MessageService
+
 
 <h4>Setup</h4>
 <hr>
@@ -56,22 +57,20 @@
    
     private List<ShipType> ShipsTypesToCreate;
     private List<CoordinateContainer> CoordinatesForCurrentShip;
-    private List<IShip> Ships { get; set; }
-    private ShipFactory _factory;
+    private List<Ship> Ships { get; set; }
     private Dictionary<string, CoordinateContainer> MarkedCoordinates;
 
-    private string ErrorMessage;
+    private string ErrorMessage = String.Empty;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _factory = new ShipFactory();
-        Ships = new List<IShip>();
+        Ships = new List<Ship>();
         CoordinatesForCurrentShip = new List<CoordinateContainer>();
         MarkedCoordinates = new Dictionary<string, CoordinateContainer>();
 
         ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
 
-        return Task.CompletedTask;
+        var player = await GamePlayService.CreatePlayerAsync("lars", PlayerType.Human);
     }
 
     public void OnCoordinateClicked(CoordEventArgs eventArgs)
@@ -96,7 +95,7 @@
     }
     public async Task OnReady()
     {
-        await GamePlayService.PlayerReadyAsync(Ships);
+        @* await GamePlayService.PlayerReadyAsync(Ships); *@
         // await OnAllShipsMarked.InvokeAsync(new AllShipsMarkedEventArgs(Ships.ToList())); 
     }
 
@@ -104,14 +103,9 @@
     {
         try
         {
-            var ship = _factory.Build(currentShipType, CoordinatesForCurrentShip.Select(s => (s.Column, s.Row)));
+            var ship = new Ship(currentShipType, CoordinatesForCurrentShip.Select(s => (s.Column, s.Row)));
             Ships.Add(ship);
             ShipsTypesToCreate.RemoveAt(0);
-        }
-        catch (ShipBuildException shipBuildException)
-        {
-            ErrorMessage = shipBuildException.Message;
-            ResetCurrentCoordinates();
         }
         catch (ShipValidationException shipValidationException)
         {

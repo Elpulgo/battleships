@@ -3,7 +3,6 @@ using Core.Models;
 
 namespace BlazorApp.Client.Services
 {
-
     public interface IEventService
     {
         event EventHandler<GameMode> GameModeEventChanged;
@@ -21,6 +20,10 @@ namespace BlazorApp.Client.Services
 
         }
 
-        public void GameModeChanged(GameMode gameMode) => GameModeEventChanged.Invoke(this, gameMode);
+        public void GameModeChanged(GameMode gameMode)
+        {
+            Console.WriteLine("Gamemode changed..");
+            GameModeEventChanged.Invoke(this, gameMode);
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -11,23 +12,26 @@ namespace BlazorApp.Client.Services
 {
     public interface IGamePlayService
     {
-        Task<ICollection<IShip>> GetShipsAsync();
+        Task<Player> CreatePlayerAsync(string name, PlayerType type);
+        Task<ICollection<Ship>> GetShipsAsync();
         Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
-        Task PlayerReadyAsync(List<IShip> ships);
+        Task PlayerReadyAsync(List<Ship> ships);
     }
 
     // Should handle gameplay related stuff, such as mark coordinate, get ships, get coordinates
     public class GamePlayService : IGamePlayService
     {
         private readonly HttpClient _httpClient;
+        private readonly IMessageService _messageService;
 
-        public GamePlayService(HttpClient httpClient)
+        public GamePlayService(HttpClient httpClient, IMessageService messageService)
         {
             _httpClient = httpClient;
+            _messageService = messageService;
         }
 
-        public async Task<ICollection<IShip>> GetShipsAsync()
+        public async Task<ICollection<Ship>> GetShipsAsync()
         {
             return null;
         }
@@ -42,7 +46,7 @@ namespace BlazorApp.Client.Services
 
         }
 
-        public async Task PlayerReadyAsync(List<IShip> ships)
+        public async Task PlayerReadyAsync(List<Ship> ships)
         {
             // Do http call to 'setup/ready/{playerId}' which is a Guid..
 
@@ -51,7 +55,29 @@ namespace BlazorApp.Client.Services
                ships);
 
             response.EnsureSuccessStatusCode();
-            System.Console.WriteLine("In PlayerReadyAsync..");
+        }
+
+        public async Task<Player> CreatePlayerAsync(string name, PlayerType type)
+        {
+            // if(!_messageService.IsConnected)
+            //     return null;
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync(
+                    $"setup/createplayer/{_messageService.HubConnectionId}",
+                    new CreatePlayerDto(type, name));
+
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadFromJsonAsync<Player>();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine("Failed to create player: " + exception.Message);
+            }
+
+            return null;
         }
     }
 }

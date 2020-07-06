@@ -2,38 +2,57 @@
 @using Core.Utilities
 @using Core.Models.Ships
 @using Core.Models
+
 @using BlazorApp.Client.Components
+@using Client.Services
 
-@* <hr>
-<h1>Opponent board</h1> *@
+@inject IEventService EventService
+@inject IMessageService MessageService
+@implements IDisposable
 
-@* <OpponentBoard /> *@
+<CascadingValue Value="@GameMode">
+    @* <hr>
+    <h1>Opponent board</h1> *@
 
-<hr>
+    @* <OpponentBoard /> *@
 
-<hr>
-<Setup />
-@* <h1>Your board</h1> *@
-@* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
+    <hr>
+    <span>@GameMode.ToString()</span>
+
+    <hr>
+    @if(GameMode == GameMode.Setup){
+        <Setup></Setup>
+    }
+    @* <h1>Your board</h1> *@
+    @* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
+</CascadingValue>
 
 @code {
-    private bool IsAllShipsMarked;
-    private List<string> items = new List<string>();
-
-    public List<IShip> ships = new List<IShip>();
-
+    public GameMode GameMode;
     protected override async Task OnInitializedAsync()
     {
-        var generator = new ShipGenerator();
-        ships = generator.Generate().ToList();
 
-        items = ships.Select(ship => ship.Name).ToList();
+        // FOR TEST
+        GameMode = GameMode.Setup;
+        SubscribeToEvents();
+        var generator = new ShipGenerator();
+        var ships = generator.Generate().ToList();
+
+        // items = ships.Select(ship => ship.Name).ToList();
     }
 
-    public void OnAllShipsMarked(Models.AllShipsMarkedEventArgs eventArgs)
+    public void SubscribeToEvents()
     {
-        IsAllShipsMarked = true;
+        EventService.GameModeEventChanged += HandleGameModeChaged;
+    }
+
+    private void HandleGameModeChaged(object sender, GameMode gameMode) {
+        GameMode = gameMode;
         StateHasChanged();
-        // TODO: Sen api call, all ships are marked    
+    } 
+
+    public void Dispose()
+    {
+        EventService.GameModeEventChanged -= HandleGameModeChaged;
     }
 }
