@@ -5,5 +5,6 @@ namespace BlazorApp.Client.Models
         None,
         Flag,
         X,
+        Target
     }
 }
