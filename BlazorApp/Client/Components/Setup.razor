@@ -52,21 +52,24 @@
 }
 
 @code {
-   
+    [CascadingParameter]
+    public Player Player { get; set; }
     private List<ShipType> ShipsTypesToCreate;
     private List<CoordinateContainer> CoordinatesForCurrentShip;
     private List<Ship> Ships { get; set; }
     private Dictionary<string, CoordinateContainer> MarkedCoordinates;
 
-    private string ErrorMessage = String.Empty;
+    private string ErrorMessage;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         Ships = new List<Ship>();
         CoordinatesForCurrentShip = new List<CoordinateContainer>();
         MarkedCoordinates = new Dictionary<string, CoordinateContainer>();
 
         ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
+
+        return Task.CompletedTask;
     }
 
     public void OnCoordinateClicked(CoordEventArgs eventArgs)
@@ -91,8 +94,7 @@
     }
     public async Task OnReady()
     {
-        @* await GamePlayService.PlayerReadyAsync(Ships); *@
-        // await OnAllShipsMarked.InvokeAsync(new AllShipsMarkedEventArgs(Ships.ToList())); 
+        await GamePlayService.PlayerReadyAsync(Ships, Player.Id);
     }
 
     private void TryCreateShip(ShipType currentShipType)

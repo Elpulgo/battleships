@@ -16,10 +16,11 @@ namespace BlazorApp.Client.Services
         Task<bool> IsPlayerSlotAvailableAsync();
         Task<bool> IsOtherPlayerCreated();
         Task PreLoadPlayerSlotAvailable();
+        Task PlayerReadyAsync(List<Ship> ships, Guid playerId);
+
         Task<ICollection<Ship>> GetShipsAsync();
         Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
-        Task PlayerReadyAsync(List<Ship> ships);
         bool IsPlayerSlotAvailable { get; }
     }
 
@@ -59,13 +60,11 @@ namespace BlazorApp.Client.Services
 
         }
 
-        public async Task PlayerReadyAsync(List<Ship> ships)
+        public async Task PlayerReadyAsync(List<Ship> ships, Guid playerId)
         {
-            // Do http call to 'setup/ready/{playerId}' which is a Guid..
-
             var response = await _httpClient.PostAsJsonAsync(
-                "setup/ready/b43a3a53-eacf-4b05-9984-8d8fbdfa0cd6",
-               ships);
+                $"setup/ready/{playerId}",
+                ships);
 
             response.EnsureSuccessStatusCode();
         }
