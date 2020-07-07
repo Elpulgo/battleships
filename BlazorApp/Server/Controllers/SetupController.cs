@@ -9,6 +9,7 @@ using Core.Models.Ships;
 using Shared;
 using Microsoft.AspNetCore.SignalR;
 using BlazorApp.Server.Managers;
+using BlazorApp.Server.Services;
 
 namespace BlazorApp.Server.Controllers
 {
@@ -16,16 +17,16 @@ namespace BlazorApp.Server.Controllers
     [Route("[controller]")]
     public class SetupController : ControllerBase
     {
-        private readonly IHubContext<BattleshipHub> _hubContext;
+        private readonly IPushNotificationService _pushNotificationService;
         private readonly ConnectionManager<Player> _connectionManager;
         private readonly PlayerManager _playerManager;
 
         public SetupController(
-            IHubContext<BattleshipHub> hubContext,
+            IPushNotificationService pushNotificationService,
             ConnectionManager<Player> connectionManager,
             PlayerManager playerManager)
         {
-            _hubContext = hubContext;
+            _pushNotificationService = pushNotificationService;
             _connectionManager = connectionManager;
             _playerManager = playerManager;
         }
@@ -50,13 +51,13 @@ namespace BlazorApp.Server.Controllers
             {
                 case (true, 1):
                     _playerManager.PlayVsComputer();
-                    await _hubContext.Clients.Client(connectionId).SendAsync("GameModeChanged", GameMode.Setup);
+                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.Setup, connectionId);
                     break;
                 case (false, 2):
-                    await _hubContext.Clients.All.SendAsync("GameModeChanged", GameMode.Setup);
+                    await _pushNotificationService.GameModeChangedAllAsync(GameMode.Setup);
                     break;
                 default:
-                    await _hubContext.Clients.Client(connectionId).SendAsync("GameModeChanged", GameMode.WaitingForPlayer);
+                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayer, connectionId);
                     break;
             }
 
@@ -66,7 +67,7 @@ namespace BlazorApp.Server.Controllers
         [HttpPost("Ready/{playerId}")]
         public async Task<IActionResult> PlayerReady([FromBody] List<Ship> request, Guid playerId)
         {
-            var apa = Core.Models.GameMode.WaitingForPlayer;
+            var apa = GameMode.WaitingForPlayer;
 
             Console.WriteLine("Connections is: " + _connectionManager.Count);
             // _hubContext.Clients.

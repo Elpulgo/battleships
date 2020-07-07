@@ -9,6 +9,7 @@ using System.Linq;
 using BlazorApp.Server.Hubs;
 using BlazorApp.Server.Managers;
 using Core.Models;
+using BlazorApp.Server.Services;
 
 namespace BlazorApp.Server
 {
@@ -35,6 +36,8 @@ namespace BlazorApp.Server
             services.AddRazorPages();
             services.AddSingleton<ConnectionManager<Player>>();
             services.AddSingleton<PlayerManager>();
+
+            services.AddTransient<IPushNotificationService, PushNotificationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
