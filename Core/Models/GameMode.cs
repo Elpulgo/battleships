@@ -5,9 +5,10 @@ namespace Core.Models
     public enum GameMode
     {
         CreatingPlayer,
+        WaitingForPlayerToJoin,
         Setup,
-        WaitingForPlayer,
         GamePlay,
+        WaitingForOpponent,
         GameEnded,
         Exit
     }

@@ -1,6 +1,5 @@
 ﻿@page "/"
 @using Core.Utilities
-@using Core.Models.Ships
 @using Core.Models
 
 @using BlazorApp.Client.Components
@@ -16,7 +15,6 @@
     <CascadingValue Value="@Player">
     <hr>
         <span>@GameMode.ToString()</span>
-        <span>@Player?.Name.ToString()</span>
 
         <hr>
         @switch (GameMode)
@@ -27,8 +25,12 @@
             case GameMode.Setup:
                 <Setup></Setup>
                 break;
-            case GameMode.WaitingForPlayer:
-                <div>Waiting for other player..</div>
+            case GameMode.WaitingForPlayerToJoin:
+                <div>Waiting for other player to join game..</div>
+                break;
+            case GameMode.GamePlay:
+                break;
+            case GameMode.GameEnded:
                 break;
             default:
                 break;

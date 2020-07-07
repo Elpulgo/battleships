@@ -57,7 +57,7 @@ namespace BlazorApp.Server.Controllers
                     await _pushNotificationService.GameModeChangedAllAsync(GameMode.Setup);
                     break;
                 default:
-                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayer, connectionId);
+                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerToJoin, connectionId);
                     break;
             }
 
@@ -67,7 +67,7 @@ namespace BlazorApp.Server.Controllers
         [HttpPost("Ready/{playerId}")]
         public async Task<IActionResult> PlayerReady([FromBody] List<Ship> request, Guid playerId)
         {
-            var apa = GameMode.WaitingForPlayer;
+            var apa = GameMode.WaitingForPlayerToJoin;
 
             Console.WriteLine("Connections is: " + _connectionManager.Count);
             // _hubContext.Clients.

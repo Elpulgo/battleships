@@ -12,48 +12,54 @@
 
 <h4>Setup</h4>
 <hr>
-<BoardWrapper>
-    @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
-    {   
-        <div class="row no-gutters">
-            <div class="col table-cell-row">
-                @row
-            </div>
-            @foreach(Column column in Enum.GetValues(typeof(Column))){
-                @if(MarkedCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coordContainer)){
-                    <BlazorApp.Client.Components.Cell 
-                        Type="@CellType.Flag"
-                        Column="@column"
-                        Row="@row"
-                        Color="@coordContainer.Color">
-                    </BlazorApp.Client.Components.Cell>
-                } else {
-                    <BlazorApp.Client.Components.Cell 
-                        Type="@CellType.None"
-                        Column="@column"
-                        Row="@row"
-                        OnClicked="@OnCoordinateClicked">
-                    </BlazorApp.Client.Components.Cell>
+@if(IsReady){
+    <small>Waiting for other player to finish setup.. Hold on.</small>
+} else {
+    <BoardWrapper>
+        @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
+        {   
+            <div class="row no-gutters">
+                <div class="col table-cell-row">
+                    @row
+                </div>
+                @foreach(Column column in Enum.GetValues(typeof(Column))){
+                    @if(MarkedCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coordContainer)){
+                        <BlazorApp.Client.Components.Cell 
+                            Type="@CellType.Flag"
+                            Column="@column"
+                            Row="@row"
+                            Color="@coordContainer.Color">
+                        </BlazorApp.Client.Components.Cell>
+                    } else {
+                        <BlazorApp.Client.Components.Cell 
+                            Type="@CellType.None"
+                            Column="@column"
+                            Row="@row"
+                            OnClicked="@OnCoordinateClicked">
+                        </BlazorApp.Client.Components.Cell>
 
+                    }
                 }
-            }
-        </div>
+            </div>
+        }
+    </BoardWrapper>
+    @if(!String.IsNullOrEmpty(ErrorMessage)){
+        <ErrorMessage Error="@ErrorMessage"></ErrorMessage>
     }
-</BoardWrapper>
-@if(!String.IsNullOrEmpty(ErrorMessage)){
-    <ErrorMessage Error="@ErrorMessage"></ErrorMessage>
-}
-<hr>
-<SetupIndicator ShipsTypesToCreate="@ShipsTypesToCreate" CoordinateCount="@CoordinatesForCurrentShip.Count">
-</SetupIndicator>
+    <hr>
+    <SetupIndicator ShipsTypesToCreate="@ShipsTypesToCreate" CoordinateCount="@CoordinatesForCurrentShip.Count">
+    </SetupIndicator>
 
-@if(!ShipsTypesToCreate.Any()){
-    <button class="btn btn-success" @onclick=@OnReady>Start game!</button>
+    @if(!ShipsTypesToCreate.Any()){
+        <button class="btn btn-success" @onclick=@OnReady>Start game!</button>
+    }
 }
 
 @code {
     [CascadingParameter]
     public Player Player { get; set; }
+
+    public bool IsReady;
     private List<ShipType> ShipsTypesToCreate;
     private List<CoordinateContainer> CoordinatesForCurrentShip;
     private List<Ship> Ships { get; set; }
@@ -95,6 +101,7 @@
     public async Task OnReady()
     {
         await GamePlayService.PlayerReadyAsync(Ships, Player.Id);
+        IsReady = true;
     }
 
     private void TryCreateShip(ShipType currentShipType)
