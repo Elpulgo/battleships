@@ -46,9 +46,18 @@ namespace BlazorApp.Server.Controllers
             _connectionManager.Add(player, connectionId);
             _playerManager.AddPlayerToGame(player);
 
-            if (dto.PlayVsComputer)
+            switch (dto.PlayVsComputer, _connectionManager.Count)
             {
-                _playerManager.PlayVsComputer();
+                case (true, 1):
+                    _playerManager.PlayVsComputer();
+                    await _hubContext.Clients.Client(connectionId).SendAsync("GameModeChanged", GameMode.Setup);
+                    break;
+                case (false, 2):
+                    await _hubContext.Clients.All.SendAsync("GameModeChanged", GameMode.Setup);
+                    break;
+                default:
+                    await _hubContext.Clients.Client(connectionId).SendAsync("GameModeChanged", GameMode.WaitingForPlayer);
+                    break;
             }
 
             return Ok(player);
