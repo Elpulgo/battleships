@@ -38,6 +38,6 @@ namespace BlazorApp.Server.Services
             => hub.Clients.All.SendAsync(methodName, param);
 
         public static Task SendClient(this IHubContext<BattleshipHub> hub, string connectionId, object param, string methodName)
-            => hub.Clients.All.SendAsync(methodName, param);
+            => hub.Clients.Client(connectionId).SendAsync(methodName, param);
     }
 }
