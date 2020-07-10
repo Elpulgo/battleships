@@ -53,7 +53,11 @@ namespace BlazorApp.Client.Services
             });
 
 
-            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventService.GameModeChanged(gameMode));
+            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) =>
+            {
+                _eventService.GameModeChanged(gameMode);
+            });
+
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();
         }

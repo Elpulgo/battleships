@@ -16,11 +16,15 @@ namespace BlazorApp.Client.Services
         Task<bool> IsPlayerSlotAvailableAsync();
         Task<bool> IsOtherPlayerCreated();
         Task PreLoadPlayerSlotAvailable();
-        Task PlayerReadyAsync(List<Ship> ships, Guid playerId);
+        Task PlayerReadyAsync(List<Ship> ships);
+        Task LoadGameBoardAsync();
 
         Task<ICollection<Ship>> GetShipsAsync();
         Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
+
+
+        Guid PlayerId { get; }
         bool IsPlayerSlotAvailable { get; }
     }
 
@@ -32,6 +36,8 @@ namespace BlazorApp.Client.Services
         private readonly IEventService _eventService;
 
         public bool IsPlayerSlotAvailable { get; private set; } = true;
+
+        public Guid PlayerId { get; private set; }
 
         public GamePlayService(
             HttpClient httpClient,
@@ -57,16 +63,21 @@ namespace BlazorApp.Client.Services
 
         public async Task MarkCoordinateAsync(Column column, int row)
         {
-
         }
 
-        public async Task PlayerReadyAsync(List<Ship> ships, Guid playerId)
+        public async Task PlayerReadyAsync(List<Ship> ships)
         {
             var response = await _httpClient.PostAsJsonAsync(
-                $"setup/ready/{playerId}",
+                $"setup/ready/{PlayerId}",
                 ships);
 
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task LoadGameBoardAsync()
+        {
+            var gameBoard = await GetRequest<GameBoard>($"gameplay/gameboard/{PlayerId}");
+            _eventService.GameBoardChanged(gameBoard);
         }
 
         public Task<bool> IsPlayerSlotAvailableAsync() => GetRequest<bool>("setup/IsPlayerSlotAvailable");
@@ -84,6 +95,7 @@ namespace BlazorApp.Client.Services
                 response.EnsureSuccessStatusCode();
 
                 var player = await response.Content.ReadFromJsonAsync<Player>();
+                PlayerId = player.Id;
                 _eventService.PlayerCreated(player);
             }
             catch (Exception exception)
