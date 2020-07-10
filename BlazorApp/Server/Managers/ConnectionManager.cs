@@ -6,8 +6,8 @@ namespace BlazorApp.Server.Managers
 {
     public class ConnectionManager<T>
     {
-        private readonly Dictionary<T, HashSet<string>> _connections =
-            new Dictionary<T, HashSet<string>>();
+        private readonly Dictionary<T, string> _connections =
+            new Dictionary<T, string>();
 
         public int Count => _connections.Count;
 
@@ -15,45 +15,25 @@ namespace BlazorApp.Server.Managers
         {
             lock (_connections)
             {
-                HashSet<string> connections;
-                if (!_connections.TryGetValue(key, out connections))
-                {
-                    connections = new HashSet<string>();
-                    _connections.Add(key, connections);
-                }
-
-                lock (connections)
-                {
-                    connections.Add(connectionId);
-                }
+                _connections.TryAdd(key, connectionId);
             }
         }
 
-        public IEnumerable<string> GetConnections(T key)
+        public string GetConnection(T key)
         {
-            HashSet<string> connections;
-            if (_connections.TryGetValue(key, out connections))
-                return connections;
+            if (_connections.TryGetValue(key, out var connectionId))
+                return connectionId;
 
-            return Enumerable.Empty<string>();
+            return string.Empty;
         }
 
         public void Remove(T key, string connectionId)
         {
             lock (_connections)
             {
-                HashSet<string> connections;
-                if (!_connections.TryGetValue(key, out connections))
-                    return;
-
-                lock (connections)
+                if (_connections.ContainsKey(key))
                 {
-                    connections.Remove(connectionId);
-
-                    if (connections.Count == 0)
-                    {
-                        _connections.Remove(key);
-                    }
+                    _connections.Remove(key);
                 }
             }
         }
