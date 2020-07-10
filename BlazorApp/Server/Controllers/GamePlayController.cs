@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+using Core.Managers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorApp.Server.Controllers
@@ -6,9 +9,11 @@ namespace BlazorApp.Server.Controllers
     [Route("[controller]")]
     public class GamePlayController : ControllerBase
     {
-        public GamePlayController()
-        {
+        private readonly IGameManager _gameManager;
 
+        public GamePlayController(IGameManager gameManager)
+        {
+            _gameManager = gameManager;
         }
 
         [HttpPost]
@@ -19,14 +24,7 @@ namespace BlazorApp.Server.Controllers
             return null;
         }
 
-        [HttpPost]
-        public IActionResult PlayerReady()
-        {
-            // Send SignalR that player is ready?
-            return null;
-
-        }
-
-
+        [HttpGet("gameboard/{playerid}")]
+        public IActionResult GetGameBoard(Guid playerId) => Ok(_gameManager.GetGameBoard(playerId));
     }
 }
