@@ -9,6 +9,7 @@ using System.Linq;
 using BlazorApp.Server.Hubs;
 using BlazorApp.Server.Managers;
 using Core.Models;
+using Core.Managers;
 using BlazorApp.Server.Services;
 
 namespace BlazorApp.Server
@@ -36,6 +37,7 @@ namespace BlazorApp.Server
             services.AddRazorPages();
             services.AddSingleton<ConnectionManager<Player>>();
             services.AddSingleton<PlayerManager>();
+            services.AddSingleton<IGameManager, GameManager>();
 
             services.AddTransient<IPushNotificationService, PushNotificationService>();
         }

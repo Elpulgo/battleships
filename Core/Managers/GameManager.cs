@@ -54,6 +54,8 @@ namespace Core.Managers
         /// </remarks>
         /// <returns>Indication if a ship was found on the coordinate, and if so, the ship has been destroyed.</returns>
         (bool shipFound, bool shipDestroyed) MarkCoordinate(Guid playerId, string coordinateKey);
+
+        bool IsAllBoardsSetup { get; }
     }
 
     ///<summary>
@@ -64,6 +66,8 @@ namespace Core.Managers
     {
         private const int MaxNumberOfBoards = 2;
         private ConcurrentDictionary<Guid, GameBoard> _gameBoardLookup;
+        public bool IsAllBoardsSetup => _gameBoardLookup.Count == MaxNumberOfBoards;
+
         public GameManager()
         {
             _gameBoardLookup = new ConcurrentDictionary<Guid, GameBoard>();
