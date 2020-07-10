@@ -100,7 +100,7 @@
     }
     public async Task OnReady()
     {
-        await GamePlayService.PlayerReadyAsync(Ships, Player.Id);
+        await GamePlayService.PlayerReadyAsync(Ships);
         IsReady = true;
     }
 
@@ -108,7 +108,15 @@
     {
         try
         {
-            var ship = new Ship(currentShipType, CoordinatesForCurrentShip.Select(s => (s.Column, s.Row)));
+            var ship = new Ship(currentShipType, CoordinatesForCurrentShip.Select(s => (s.Column, s.Row)).ToList());
+
+            Console.WriteLine(ship.Name);
+
+            foreach (var coord in ship.Coordinates)
+            {
+                Console.WriteLine(coord.Key);
+            }
+
             Ships.Add(ship);
             ShipsTypesToCreate.RemoveAt(0);
         }

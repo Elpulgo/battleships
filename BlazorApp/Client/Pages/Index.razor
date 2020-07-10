@@ -14,29 +14,28 @@
     <CascadingValue Value="@GameMode">
     <CascadingValue Value="@Player">
     <hr>
-        <span>@GameMode.ToString()</span>
-
-        <hr>
-        @switch (GameMode)
-        {
-            case GameMode.CreatingPlayer:
-                <CreatePlayer></CreatePlayer>
-                break;
-            case GameMode.Setup:
-                <Setup></Setup>
-                break;
-            case GameMode.WaitingForPlayerToJoin:
-                <div>Waiting for other player to join game..</div>
-                break;
-            case GameMode.GamePlay:
-                break;
-            case GameMode.GameEnded:
-                break;
-            default:
-                break;
-        }
-        @* <h1>Your board</h1> *@
-        @* <PlayerBoard GameMode=@GameMode.Setup OnAllShipsMarked=@OnAllShipsMarked /> *@
+    @switch (GameMode)
+    {
+        case GameMode.CreatingPlayer:
+            <CreatePlayer></CreatePlayer>
+            break;
+        case GameMode.WaitingForPlayerToJoin:
+            <div>Waiting for other player to join game.. Hold on.</div>
+            break;
+        case GameMode.Setup:
+            <Setup></Setup>
+            break;
+        case GameMode.WaitingForPlayerSetup:
+            <div>Waiting for other player to setup ships.. Hold on.</div>
+            break;
+        case GameMode.GamePlay:
+            <h3>GAMEPLAY MODE!!!</h3>
+            break;
+        case GameMode.GameEnded:
+            break;
+        default:
+            break;
+    }
     </CascadingValue>
     </CascadingValue>
 } else {
@@ -45,6 +44,7 @@
 
 @code {
     public GameMode GameMode = GameMode.CreatingPlayer;
+    public GameBoard GameBoard;
     public Player Player;
     public bool GameIsAvailable = false;
 
@@ -52,18 +52,21 @@
     {
         GameIsAvailable = GamePlayService.IsPlayerSlotAvailable;
         SubscribeToEvents();
-        var generator = new ShipGenerator();
-        var ships = generator.Generate().ToList();
     }
 
     public void SubscribeToEvents()
     {
         EventService.GameModeEventChanged += HandleGameModeChanged;
         EventService.PlayerCreatedEventChanged += HandlePlayerCreatedChanged;
+        EventService.GameBoardEventChanged += HandleGameBoardChanged;
     }
 
-    private void HandleGameModeChanged(object sender, GameMode gameMode)
+    private async void HandleGameModeChanged(object sender, GameMode gameMode)
     {
+        if (gameMode == GameMode.GamePlay)
+        {
+            await GamePlayService.LoadGameBoardAsync();
+        }
         GameMode = gameMode;
         StateHasChanged();
     }
@@ -73,10 +76,16 @@
         Player = player;
         StateHasChanged();
     }
+    private void HandleGameBoardChanged(object sender, GameBoard gameBoard)
+    {
+        GameBoard = gameBoard;
+        StateHasChanged();
+    }
 
     public void Dispose()
     {
         EventService.GameModeEventChanged -= HandleGameModeChanged;
         EventService.PlayerCreatedEventChanged -= HandlePlayerCreatedChanged;
+        EventService.GameBoardEventChanged -= HandleGameBoardChanged;
     }
 }
