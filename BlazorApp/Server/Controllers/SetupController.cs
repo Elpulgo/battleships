@@ -1,15 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using BlazorApp.Server.Hubs;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Models;
 using Core.Models.Ships;
 using Shared;
-using Microsoft.AspNetCore.SignalR;
 using BlazorApp.Server.Managers;
 using BlazorApp.Server.Services;
+using Core.Managers;
 
 namespace BlazorApp.Server.Controllers
 {
@@ -20,15 +18,18 @@ namespace BlazorApp.Server.Controllers
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ConnectionManager<Player> _connectionManager;
         private readonly PlayerManager _playerManager;
+        private readonly IGameManager _gameManager;
 
         public SetupController(
             IPushNotificationService pushNotificationService,
             ConnectionManager<Player> connectionManager,
-            PlayerManager playerManager)
+            PlayerManager playerManager,
+            IGameManager gameManager)
         {
             _pushNotificationService = pushNotificationService;
             _connectionManager = connectionManager;
             _playerManager = playerManager;
+            _gameManager = gameManager;
         }
 
         [HttpGet("isplayerslotavailable")]
@@ -65,19 +66,22 @@ namespace BlazorApp.Server.Controllers
         }
 
         [HttpPost("Ready/{playerId}")]
-        public async Task<IActionResult> PlayerReady([FromBody] List<Ship> request, Guid playerId)
+        public async Task<IActionResult> PlayerReady([FromBody] List<Ship> ships, Guid playerId)
         {
-            var apa = GameMode.WaitingForPlayerToJoin;
+            var player = _playerManager.GetPlayerById(playerId);
 
-            Console.WriteLine("Connections is: " + _connectionManager.Count);
-            // _hubContext.Clients.
+            _gameManager.AddBoard(new GameBoard(player).WithShips(ships));
 
-            Console.WriteLine("GM IS: " + apa);
-            // await _battleShipHub.SendMessage("aaa", "sss");
-            // await _battleShipHub.GameModeChanged(apa);
-            // System.Console.WriteLine(request.FirstOrDefault().Name);
-            // Body with list of ships? and player
-            // Return succes or false, depending on validation?
+            if (_gameManager.IsAllBoardsSetup)
+            {
+                await _pushNotificationService.GameModeChangedAllAsync(GameMode.GamePlay);
+            }
+            else
+            {
+                var connectionId = _connectionManager.GetConnection(player);
+                await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerSetup, connectionId);
+            }
+
             return Ok();
         }
     }
