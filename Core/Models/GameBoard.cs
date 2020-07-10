@@ -12,15 +12,21 @@ namespace Core.Models
         private Dictionary<string, CoordinateContainer> _matrix;
         private List<Ship> _ships;
         public Player Player { get; }
+
+        public GameBoard()
+        {
+
+        }
+
         public GameBoard(Player player)
         {
             _matrix = new Dictionary<string, CoordinateContainer>();
+            _ships = new List<Ship>();
             Player = player;
         }
 
         public GameBoard WithShips(List<Ship> ships)
         {
-
             _ships = ships;
 
             _matrix = ships

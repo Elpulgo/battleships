@@ -8,17 +8,18 @@ namespace Core.Models.Ships
     public class Ship
     {
         public Ship()
-        {            
+        {
         }
-        
+
         public Ship(ShipType shipType, IEnumerable<(Column column, int row)> coordinates)
         {
             ShipType = shipType;
             ShipValidator.ValidateCoordinates<Ship>(this, coordinates.ToList());
-            SetCoordinates(coordinates);
+
+            Coordinates = BuildCoordinates(coordinates).ToList();
         }
 
-        public ICollection<CoordinateContainer> Coordinates { get; private set; }
+        public ICollection<CoordinateContainer> Coordinates { get; set; }
         public bool IsDestroyed => Coordinates.All(coord => coord.IsMarked);
 
         public int Boxes => ShipType.NrOfBoxes();
@@ -33,13 +34,11 @@ namespace Core.Models.Ships
 
         public void MarkCoordinate(string key) => Coordinates.Single(coord => coord.Key == key).Mark();
 
-        private void SetCoordinates(IEnumerable<(Column column, int row)> coordinates)
+        private IEnumerable<CoordinateContainer> BuildCoordinates(IEnumerable<(Column column, int row)> coordinates)
         {
-            Coordinates = new List<CoordinateContainer>();
-
             foreach (var coord in coordinates)
             {
-                Coordinates.Add(new CoordinateContainer(coord.column, coord.row).WithShip().WithColor(Color));
+                yield return new CoordinateContainer(coord.column, coord.row).WithShip().WithColor(Color);
             }
         }
     }

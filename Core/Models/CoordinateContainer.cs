@@ -6,18 +6,22 @@ namespace Core.Models
 {
     public class CoordinateContainer
     {
-        public int Row { get; }
+        public int Row { get; set; }
 
-        public Column Column { get; }
+        public Column Column { get; set;}
 
-        public bool HasShip { get; private set; }
+        public bool HasShip { get; set; }
 
-        public bool IsMarked { get; private set; }
+        public bool IsMarked { get; set; }
 
-        public Color Color { get; private set; }
+        public Color Color { get; set; }
 
         public string Key => CoordinateKey.Build(Column, Row);
 
+        public CoordinateContainer()
+        {
+
+        }
         public CoordinateContainer(Column column, int row)
         {
             Row = row;
