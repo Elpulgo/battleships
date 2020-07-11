@@ -8,11 +8,12 @@ namespace Core.Models
     {
         public int Row { get; set; }
 
-        public Column Column { get; set;}
+        public Column Column { get; set; }
 
         public bool HasShip { get; set; }
 
         public bool IsMarked { get; set; }
+        public bool IsShipDestroyed => HasShip && IsMarked;
 
         public Color Color { get; set; }
 

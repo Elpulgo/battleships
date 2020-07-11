@@ -15,7 +15,8 @@ namespace Core.Models.Ships
         Blue,
         Cyan,
         Grey,
-        LightGrey
+        LightGrey,
+        Red
     }
 }
 

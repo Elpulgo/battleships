@@ -9,9 +9,9 @@ namespace Core.Models
 {
     public class GameBoard
     {
-        private Dictionary<string, CoordinateContainer> _matrix;
         private List<Ship> _ships;
         public Player Player { get; }
+        public Dictionary<string, CoordinateContainer> Matrix { get; set; }
 
         public GameBoard()
         {
@@ -20,7 +20,7 @@ namespace Core.Models
 
         public GameBoard(Player player)
         {
-            _matrix = new Dictionary<string, CoordinateContainer>();
+            Matrix = new Dictionary<string, CoordinateContainer>();
             _ships = new List<Ship>();
             Player = player;
         }
@@ -29,12 +29,11 @@ namespace Core.Models
         {
             _ships = ships;
 
-            _matrix = ships
+            Matrix = ships
                 .SelectMany(ship => ship.Coordinates)
                 .ToDictionary(coord => coord.Key);
 
             FillMatrix();
-
             return this;
         }
 
@@ -45,7 +44,7 @@ namespace Core.Models
 
         public (bool shipFound, bool shipDestroyed) MarkCoordinate(string key)
         {
-            _matrix[key].Mark();
+            Matrix[key].Mark();
             var ship = _ships.SingleOrDefault(ship => ship.HasCoordinate(key));
             if (ship == null)
                 return (false, false);
@@ -61,7 +60,7 @@ namespace Core.Models
                 foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
                 {
                     var key = CoordinateKey.Build(column, row);
-                    _matrix.TryAdd(key, new CoordinateContainer(column, row));
+                    Matrix.TryAdd(key, new CoordinateContainer(column, row));
                 }
             }
         }

@@ -13,6 +13,9 @@
 @if(GameIsAvailable){
     <CascadingValue Value="@GameMode">
     <CascadingValue Value="@Player">
+    <CascadingValue Value="@GameBoard" Name="GameBoard">
+    <CascadingValue Value="@OpponentGameBoard" Name="OpponentGameBoard">
+
     <hr>
     @switch (GameMode)
     {
@@ -29,7 +32,16 @@
             <div>Waiting for other player to setup ships.. Hold on.</div>
             break;
         case GameMode.GamePlay:
-            <h3>GAMEPLAY MODE!!!</h3>
+            <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <OpponentBoard></OpponentBoard>
+                    </div>
+                    <div class="col-6">
+                        <PlayerBoard></PlayerBoard>
+                    </div>
+                </div>
+            </div>            
             break;
         case GameMode.GameEnded:
             break;
@@ -38,20 +50,25 @@
     }
     </CascadingValue>
     </CascadingValue>
+    </CascadingValue>
+    </CascadingValue>
 } else {
     <div>Game is not available. Has already reached max number of players!</div>
 }
 
 @code {
     public GameMode GameMode = GameMode.CreatingPlayer;
-    public GameBoard GameBoard;
-    public Player Player;
+    protected GameBoard GameBoard { get; private set; }
+    protected GameBoard OpponentGameBoard { get; private set; }
+
+    public Player Player { get; private set; }
     public bool GameIsAvailable = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         GameIsAvailable = GamePlayService.IsPlayerSlotAvailable;
         SubscribeToEvents();
+        return Task.CompletedTask;
     }
 
     public void SubscribeToEvents()
@@ -59,6 +76,7 @@
         EventService.GameModeEventChanged += HandleGameModeChanged;
         EventService.PlayerCreatedEventChanged += HandlePlayerCreatedChanged;
         EventService.GameBoardEventChanged += HandleGameBoardChanged;
+        EventService.OpponentGameBoardEventChanged += HandleOpponentGameBoardChanged;
     }
 
     private async void HandleGameModeChanged(object sender, GameMode gameMode)
@@ -66,6 +84,7 @@
         if (gameMode == GameMode.GamePlay)
         {
             await GamePlayService.LoadGameBoardAsync();
+            await GamePlayService.LoadOpponentGameBoardAsync();
         }
         GameMode = gameMode;
         StateHasChanged();
@@ -82,10 +101,18 @@
         StateHasChanged();
     }
 
+    private void HandleOpponentGameBoardChanged(object sender, GameBoard gameBoard)
+    {
+        OpponentGameBoard = gameBoard;
+        StateHasChanged();
+    }
+
+
     public void Dispose()
     {
         EventService.GameModeEventChanged -= HandleGameModeChanged;
         EventService.PlayerCreatedEventChanged -= HandlePlayerCreatedChanged;
         EventService.GameBoardEventChanged -= HandleGameBoardChanged;
+        EventService.OpponentGameBoardEventChanged -= HandleOpponentGameBoardChanged;
     }
 }
