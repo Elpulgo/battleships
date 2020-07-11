@@ -26,5 +26,8 @@ namespace BlazorApp.Server.Controllers
 
         [HttpGet("gameboard/{playerid}")]
         public IActionResult GetGameBoard(Guid playerId) => Ok(_gameManager.GetGameBoard(playerId));
+
+        [HttpGet("opponentgameboard/{playerid}")]
+        public IActionResult GetOpponentGameBoard(Guid playerId) => Ok(_gameManager.GetOpponentBoard(playerId));
     }
 }

@@ -18,6 +18,8 @@ namespace BlazorApp.Client.Services
         Task PreLoadPlayerSlotAvailable();
         Task PlayerReadyAsync(List<Ship> ships);
         Task LoadGameBoardAsync();
+        Task LoadOpponentGameBoardAsync();
+
 
         Task<ICollection<Ship>> GetShipsAsync();
         Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
@@ -51,18 +53,19 @@ namespace BlazorApp.Client.Services
 
         public async Task PreLoadPlayerSlotAvailable() => IsPlayerSlotAvailable = await IsPlayerSlotAvailableAsync();
 
-        public async Task<ICollection<Ship>> GetShipsAsync()
+        public Task<ICollection<Ship>> GetShipsAsync()
         {
             return null;
         }
 
-        public async Task<ICollection<CoordinateContainer>> GetCoordinatesAsync()
+        public Task<ICollection<CoordinateContainer>> GetCoordinatesAsync()
         {
             return null;
         }
 
-        public async Task MarkCoordinateAsync(Column column, int row)
+        public Task MarkCoordinateAsync(Column column, int row)
         {
+            return null;
         }
 
         public async Task PlayerReadyAsync(List<Ship> ships)
@@ -78,6 +81,12 @@ namespace BlazorApp.Client.Services
         {
             var gameBoard = await GetRequest<GameBoard>($"gameplay/gameboard/{PlayerId}");
             _eventService.GameBoardChanged(gameBoard);
+        }
+
+        public async Task LoadOpponentGameBoardAsync()
+        {
+            var gameBoard = await GetRequest<GameBoard>($"gameplay/opponentgameboard/{PlayerId}");
+            _eventService.OpponentGameBoardChanged(gameBoard);
         }
 
         public Task<bool> IsPlayerSlotAvailableAsync() => GetRequest<bool>("setup/IsPlayerSlotAvailable");
