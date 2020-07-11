@@ -4,6 +4,7 @@
 @using Client.Models 
 @using static Core.Models.CoordinatesHelper
 
+<h3>Your board</h3>
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
@@ -12,62 +13,59 @@
                 @row
             </div>
             @foreach(Column column in Enum.GetValues(typeof(Column))){
-                @if(_shipCoordinates.ContainsKey(CoordinateKey.Build(column, row))){
-                    <BlazorApp.Client.Components.Cell 
-                        Type=CellType.Flag
-                        Column=column
-                        Row=row
-                        />
-                } else {
-                    <BlazorApp.Client.Components.Cell 
-                        Type=CellType.None
-                        Column=column
-                        Row=row
-                        OnClicked=@OnCoordinateClicked />
+                {
+                    var coordContainer = GameBoard.Matrix[CoordinateKey.Build(column, row)];
+                    if(coordContainer.IsShipDestroyed) {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.Target
+                            Column=column
+                            Row=row
+                            Color=Color.Red         
+                            />
+                    } else if(coordContainer.HasShip) {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.Flag
+                            Column=column
+                            Row=row
+                            Color=coordContainer.Color
+                             />
+                    } else if(coordContainer.IsMarked) {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.X
+                            Column=column
+                            Row=row
+                            Color=Color.LightGrey
+                            />
+                    } else {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.None
+                            Column=column
+                            Row=row
+                            />
+                    }
                 }
             }
         </div>
     }
 </BoardWrapper>
 
-@if(GameMode == GameMode.Setup && AllShipsSetup){
-    <button class="btn btn-primary" @onclick=@OnReady>Ready</button>
-}
 
 @code {
-    [Parameter]
-    public GameMode GameMode { get; set; }
-    [Parameter]
-    public EventCallback<AllShipsMarkedEventArgs> OnAllShipsMarked { get; set; }
-
-    public IEnumerable<Ship> Ships { get; set; }
-    public Dictionary<string, string> _shipCoordinates;
-    private bool AllShipsSetup { get; set; }
+    [CascadingParameter(Name = "GameBoard")]
+    protected GameBoard GameBoard { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        Ships = new List<Ship>();
-        _shipCoordinates = new Dictionary<string, string>();
-        _shipCoordinates.Add("A3", "A3");
-        _shipCoordinates.Add("B6", "B6");
-        _shipCoordinates.Add("E7", "E7");
-        _shipCoordinates.Add("E9", "E9");
-        _shipCoordinates.Add("E8", "E8");
-
-
         return Task.CompletedTask;
     }
 
     public void OnCoordinateClicked(CoordEventArgs eventArgs)
     {
-        AllShipsSetup = true;
+        @* var (shipFound, shipDestroyed) = GameBoard.MarkCoordinate(CoordinateKey.Build(eventArgs.Column, eventArgs.Row));
+
+        Console.WriteLine("Ship was found: " + shipFound);
+        Console.WriteLine("Ship was destoryed: " + shipDestroyed); *@
+
+        StateHasChanged();
     }
-
-    public async Task OnReady()
-    {
-        await OnAllShipsMarked.InvokeAsync(new AllShipsMarkedEventArgs(Ships.ToList()));
-    }
-
-    // TODO: Show board.. pass down from parent.
-
 }

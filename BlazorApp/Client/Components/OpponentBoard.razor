@@ -1,15 +1,11 @@
-@using Core.Utilities
-@using Core.Models
+@using Core.Utilities 
+@using Core.Models.Ships 
+@using Core.Models 
+@using Client.Models 
 @using static Core.Models.CoordinatesHelper
-@using Client.Models
 
-<div class="container-fluid p-0">
-    <div class="row no-gutters">
-        <div class="col table-cell-column"></div>
-        @foreach(var column in Enum.GetValues(typeof(Core.Models.CoordinatesHelper.Column))){
-            <div class="col table-cell-column">@column.ToString()</div>
-        }
-    </div>
+<h3>Opponent board</h3>
+<BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
         <div class="row no-gutters">
@@ -17,30 +13,62 @@
                 @row
             </div>
             @foreach(Column column in Enum.GetValues(typeof(Column))){
-                @if(MarkedCoordinates.Any(a => a.Key == CoordinateKey.Build(column, row))){
-                   <div class="col table-cell">*</div>
-                } else {
-                    <div class="col table-cell"></div>
+                {
+                    var coordContainer = OpponentGameBoard.Matrix[CoordinateKey.Build(column, row)];
+                    if(coordContainer.IsShipDestroyed) {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.Target
+                            Column=column
+                            Row=row
+                            Color=Color.Red         
+                            />
+                    } else if(coordContainer.HasShip) {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.Flag
+                            Column=column
+                            Row=row
+                            Color=coordContainer.Color
+                             />
+                    } else if(coordContainer.IsMarked) {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.X
+                            Column=column
+                            Row=row
+                            Color=Color.LightGrey
+                            />
+                    } else {
+                        <BlazorApp.Client.Components.Cell 
+                            Type=CellType.None
+                            Column=column
+                            Row=row
+                            />
+                    }
                 }
             }
         </div>
     }
-</div>
+</BoardWrapper>
+
 
 @code {
-    // TODO: OnClick and mark and pass upstream to get hit/miss
+    [CascadingParameter(Name = "OpponentGameBoard")]
+    protected GameBoard OpponentGameBoard { get; set; }
 
-    [Parameter]
-    public bool IsOpponentTurn { get; set; }
-    [Parameter]
-    public EventCallback<CoordEventArgs> OnCoordMarked { get; set; }
-    [Parameter]
-    public List<CoordinateContainer> MarkedCoordinates { get; set; }
     protected override Task OnInitializedAsync()
     {
         return Task.CompletedTask;
     }
 
-    // TODO: Show board.. pass down from parent.
+    public void OnCoordinateClicked(CoordEventArgs eventArgs)
+    {
 
+        // Pass key to GamePlayService, and gameboard will be updated thorugh cascading value..
+        // don't do like below..
+
+        @* var (shipFound, shipDestroyed) = GameBoard.MarkCoordinate(CoordinateKey.Build(eventArgs.Column, eventArgs.Row));
+        Console.WriteLine("Ship was found: " + shipFound);
+        Console.WriteLine("Ship was destoryed: " + shipDestroyed); *@
+
+        StateHasChanged();
+    }
 }
