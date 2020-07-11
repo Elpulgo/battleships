@@ -23,7 +23,7 @@
                     @row
                 </div>
                 @foreach(Column column in Enum.GetValues(typeof(Column))){
-                    @if(MarkedCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainer coordContainer)){
+                    @if(MarkedCoordinates.TryGetValue(CoordinateKey.Build(column, row), out CoordinateContainerBase coordContainer)){
                         <BlazorApp.Client.Components.Cell 
                             Type="@CellType.Flag"
                             Column="@column"
@@ -61,19 +61,25 @@
 
     public bool IsReady;
     private List<ShipType> ShipsTypesToCreate;
-    private List<CoordinateContainer> CoordinatesForCurrentShip;
+    private List<CoordinateContainerBase> CoordinatesForCurrentShip;
     private List<Ship> Ships { get; set; }
-    private Dictionary<string, CoordinateContainer> MarkedCoordinates;
+    private Dictionary<string, CoordinateContainerBase> MarkedCoordinates;
 
     private string ErrorMessage;
 
     protected override Task OnInitializedAsync()
     {
         Ships = new List<Ship>();
-        CoordinatesForCurrentShip = new List<CoordinateContainer>();
-        MarkedCoordinates = new Dictionary<string, CoordinateContainer>();
+        CoordinatesForCurrentShip = new List<CoordinateContainerBase>();
+        MarkedCoordinates = new Dictionary<string, CoordinateContainerBase>();
 
         ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
+
+        // FOR TEST
+        var ships = new ShipGenerator().Generate().ToList();
+        Ships = ships.ToList();
+        ShipsTypesToCreate.Clear();
+        // END TEST
 
         return Task.CompletedTask;
     }
@@ -87,7 +93,7 @@
 
         var currentShipType = ShipsTypesToCreate.FirstOrDefault();
 
-        var coordContainer = new CoordinateContainer(eventArgs.Column, eventArgs.Row)
+        var coordContainer = new CoordinateContainerBase(eventArgs.Column, eventArgs.Row)
             .WithColor(ShipConstants.GetColor(currentShipType));
 
         CoordinatesForCurrentShip.Add(coordContainer);

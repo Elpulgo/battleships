@@ -19,7 +19,7 @@ namespace Core.Models.Ships
             Coordinates = BuildCoordinates(coordinates).ToList();
         }
 
-        public ICollection<CoordinateContainer> Coordinates { get; set; }
+        public ICollection<CoordinateContainerBase> Coordinates { get; set; }
         public bool IsDestroyed => Coordinates.All(coord => coord.IsMarked);
 
         public int Boxes => ShipType.NrOfBoxes();
@@ -34,11 +34,11 @@ namespace Core.Models.Ships
 
         public void MarkCoordinate(string key) => Coordinates.Single(coord => coord.Key == key).Mark();
 
-        private IEnumerable<CoordinateContainer> BuildCoordinates(IEnumerable<(Column column, int row)> coordinates)
+        private IEnumerable<CoordinateContainerBase> BuildCoordinates(IEnumerable<(Column column, int row)> coordinates)
         {
             foreach (var coord in coordinates)
             {
-                yield return new CoordinateContainer(coord.column, coord.row).WithShip().WithColor(Color);
+                yield return new CoordinateContainerBase(coord.column, coord.row).WithShip().WithColor(Color);
             }
         }
     }

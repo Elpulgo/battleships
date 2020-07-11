@@ -4,7 +4,7 @@ using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
 {
-    public class CoordinateContainer
+    public class CoordinateContainerBase
     {
         public int Row { get; set; }
 
@@ -19,26 +19,37 @@ namespace Core.Models
 
         public string Key => CoordinateKey.Build(Column, Row);
 
-        public CoordinateContainer()
+        public CoordinateContainerBase()
         {
 
         }
-        public CoordinateContainer(Column column, int row)
+        public CoordinateContainerBase(Column column, int row)
         {
             Row = row;
             Column = column;
         }
 
-        public CoordinateContainer WithShip()
+        public CoordinateContainerBase WithShip()
         {
             HasShip = true;
             return this;
         }
 
-        public CoordinateContainer WithColor(Color color)
+        public CoordinateContainerBase WithColor(Color color)
         {
             Color = color;
             return this;
+        }
+
+        public CoordinateContainerBase ForOpponent()
+        {
+            if (HasShip && IsMarked)
+            {
+                return (CoordinateContainerBase)this.MemberwiseClone();
+            }
+
+            HasShip = false;
+            return (CoordinateContainerBase)this.MemberwiseClone();
         }
 
         public void Mark()

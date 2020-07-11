@@ -70,7 +70,7 @@ namespace BlazorApp.Server.Controllers
         {
             var player = _playerManager.GetPlayerById(playerId);
 
-            _gameManager.AddBoard(new GameBoard(player).WithShips(ships));
+            _gameManager.AddBoard(new GameBoardBase(player).WithShips(ships));
 
             if (_gameManager.IsAllBoardsSetup)
             {

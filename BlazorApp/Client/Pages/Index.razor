@@ -58,8 +58,8 @@
 
 @code {
     public GameMode GameMode = GameMode.CreatingPlayer;
-    protected GameBoard GameBoard { get; private set; }
-    protected GameBoard OpponentGameBoard { get; private set; }
+    protected GameBoardBase GameBoard { get; private set; }
+    protected GameBoardBase OpponentGameBoard { get; private set; }
 
     public Player Player { get; private set; }
     public bool GameIsAvailable = false;
@@ -95,13 +95,13 @@
         Player = player;
         StateHasChanged();
     }
-    private void HandleGameBoardChanged(object sender, GameBoard gameBoard)
+    private void HandleGameBoardChanged(object sender, GameBoardBase gameBoard)
     {
         GameBoard = gameBoard;
         StateHasChanged();
     }
 
-    private void HandleOpponentGameBoardChanged(object sender, GameBoard gameBoard)
+    private void HandleOpponentGameBoardChanged(object sender, GameBoardBase gameBoard)
     {
         OpponentGameBoard = gameBoard;
         StateHasChanged();

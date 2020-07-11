@@ -22,7 +22,7 @@ namespace BlazorApp.Client.Services
 
 
         Task<ICollection<Ship>> GetShipsAsync();
-        Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
+        // Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
 
 
@@ -58,10 +58,10 @@ namespace BlazorApp.Client.Services
             return null;
         }
 
-        public Task<ICollection<CoordinateContainer>> GetCoordinatesAsync()
-        {
-            return null;
-        }
+        // public Task<ICollection<CoordinateContainer>> GetCoordinatesAsync()
+        // {
+        //     return null;
+        // }
 
         public Task MarkCoordinateAsync(Column column, int row)
         {
@@ -79,13 +79,13 @@ namespace BlazorApp.Client.Services
 
         public async Task LoadGameBoardAsync()
         {
-            var gameBoard = await GetRequest<GameBoard>($"gameplay/gameboard/{PlayerId}");
+            var gameBoard = await GetRequest<GameBoardBase>($"gameplay/gameboard/{PlayerId}");
             _eventService.GameBoardChanged(gameBoard);
         }
 
         public async Task LoadOpponentGameBoardAsync()
         {
-            var gameBoard = await GetRequest<GameBoard>($"gameplay/opponentgameboard/{PlayerId}");
+            var gameBoard = await GetRequest<GameBoardBase>($"gameplay/opponentgameboard/{PlayerId}");
             _eventService.OpponentGameBoardChanged(gameBoard);
         }
 

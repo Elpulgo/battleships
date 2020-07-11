@@ -13,21 +13,21 @@ namespace Core.Managers
     {
         /// <summary>
         /// Adds a board to the manager. Maximum number of boards per game is 2
-        /// Takes <see cref="Core.Models.GameBoard"/>
+        /// Takes <see cref="Core.Models.GameBoardBase"/>
         /// </summary>
-        void AddBoard(GameBoard board);
+        void AddBoard(GameBoardBase board);
 
         /// <summary>
         /// Get the board for specified player <paramref name="playerId"/>.
         /// </summary>
-        /// <returns><see cref="Core.Models.GameBoard"/></returns>
-        GameBoard GetGameBoard(Guid playerId);
+        /// <returns><see cref="Core.Models.GameBoardBase"/></returns>
+        GameBoardBase GetGameBoard(Guid playerId);
         /// <summary>
         /// Get the board for opponent player. Note that <paramref name="playerId"/> should be current player 
         /// to get desired result.
         /// </summary>
-        /// <returns><see cref="Core.Models.GameBoard"/></returns>
-        GameBoard GetOpponentBoard(Guid playerId);
+        /// <returns><see cref="Core.Models.GameBoardBase"/></returns>
+        GameBoardBase GetOpponentBoard(Guid playerId);
 
         /// <summary>
         /// Check if all ships on the board for player is destroyed <paramref name="playerId"/>.
@@ -65,15 +65,15 @@ namespace Core.Managers
     public class GameManager : IGameManager
     {
         private const int MaxNumberOfBoards = 2;
-        private ConcurrentDictionary<Guid, GameBoard> _gameBoardLookup;
+        private ConcurrentDictionary<Guid, GameBoardBase> _gameBoardLookup;
         public bool IsAllBoardsSetup => _gameBoardLookup.Count == MaxNumberOfBoards;
 
         public GameManager()
         {
-            _gameBoardLookup = new ConcurrentDictionary<Guid, GameBoard>();
+            _gameBoardLookup = new ConcurrentDictionary<Guid, GameBoardBase>();
         }
 
-        public void AddBoard(GameBoard board)
+        public void AddBoard(GameBoardBase board)
         {
             if (_gameBoardLookup.Count == MaxNumberOfBoards)
                 throw new Exception("Only 2 boards are allowed per game!");
@@ -84,11 +84,11 @@ namespace Core.Managers
             }
         }
 
-        public GameBoard GetGameBoard(Guid playerId)
+        public GameBoardBase GetGameBoard(Guid playerId)
             => FindBoard(playerId);
 
-        public GameBoard GetOpponentBoard(Guid playerId)
-            => FindBoard(_gameBoardLookup.SingleOrDefault(f => f.Key != playerId).Key);
+        public GameBoardBase GetOpponentBoard(Guid playerId)
+            => FindBoard(_gameBoardLookup.SingleOrDefault(f => f.Key != playerId).Key).ForOpponent();
 
         public bool IsAllShipsDestroyedForOpponent(Guid playerId)
             => FindBoard(_gameBoardLookup.SingleOrDefault(f => f.Key != playerId).Key).IsAllDestroyed();
@@ -99,7 +99,7 @@ namespace Core.Managers
         public (bool shipFound, bool shipDestroyed) MarkCoordinate(Guid playerId, string coordinateKey)
             => FindBoard(playerId).MarkCoordinate(coordinateKey);
 
-        private GameBoard FindBoard(Guid playerId)
+        private GameBoardBase FindBoard(Guid playerId)
         {
             if (_gameBoardLookup.TryGetValue(playerId, out var gameBoard))
             {
