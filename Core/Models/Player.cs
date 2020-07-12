@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Core.Models
 {
+    [Serializable]
     public class Player
     {
         public Player()

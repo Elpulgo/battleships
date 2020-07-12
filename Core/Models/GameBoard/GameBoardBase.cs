@@ -7,6 +7,7 @@ using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
 {
+    [Serializable]
     public class GameBoardBase
     {
         private List<Ship> _ships;
@@ -43,11 +44,13 @@ namespace Core.Models
         /// </summary>
         public GameBoardBase ForOpponent()
         {
-            Matrix = Matrix
+            var clone = this.DeepClone();
+            
+            clone.Matrix = Matrix
                   .Select(s => KeyValuePair.Create(s.Key, s.Value.ForOpponent()))
                   .ToDictionary(d => d.Key, value => value.Value);
 
-            return (GameBoardBase)this.MemberwiseClone();
+            return clone;
         }
 
         public bool IsAllDestroyed()
@@ -58,7 +61,9 @@ namespace Core.Models
         public (bool shipFound, bool shipDestroyed) MarkCoordinate(string key)
         {
             Matrix[key].Mark();
+
             var ship = _ships.SingleOrDefault(ship => ship.HasCoordinate(key));
+
             if (ship == null)
                 return (false, false);
 

@@ -1,9 +1,11 @@
+using System;
 using Core.Models.Ships;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models
 {
+    [Serializable]
     public class CoordinateContainerBase
     {
         public int Row { get; set; }
@@ -41,15 +43,18 @@ namespace Core.Models
             return this;
         }
 
+        /// <summary>
+        /// Will clone the Coordinate so the original object is not tampered with since
+        /// the state of the coordinate should be intact.
+        /// </summary>
         public CoordinateContainerBase ForOpponent()
         {
             if (HasShip && IsMarked)
-            {
-                return (CoordinateContainerBase)this.MemberwiseClone();
-            }
+                return this;
 
-            HasShip = false;
-            return (CoordinateContainerBase)this.MemberwiseClone();
+            var clone = this.DeepClone();
+            clone.HasShip = false;
+            return clone;
         }
 
         public void Mark()

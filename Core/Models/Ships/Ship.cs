@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Utilities;
@@ -5,6 +6,7 @@ using static Core.Models.CoordinatesHelper;
 
 namespace Core.Models.Ships
 {
+    [Serializable]
     public class Ship
     {
         public Ship()
