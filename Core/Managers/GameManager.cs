@@ -66,6 +66,8 @@ namespace Core.Managers
     {
         private const int MaxNumberOfBoards = 2;
         private ConcurrentDictionary<Guid, GameBoardBase> _gameBoardLookup;
+
+        private object m_Lock = new object();
         public bool IsAllBoardsSetup => _gameBoardLookup.Count == MaxNumberOfBoards;
 
         public GameManager()
@@ -97,13 +99,16 @@ namespace Core.Managers
             => FindBoard(playerId).IsAllDestroyed();
 
         public (bool shipFound, bool shipDestroyed) MarkCoordinate(Guid playerId, string coordinateKey)
-            => FindBoard(playerId).MarkCoordinate(coordinateKey);
+            => FindBoard(_gameBoardLookup.SingleOrDefault(f => f.Key != playerId).Key).MarkCoordinate(coordinateKey);
 
         private GameBoardBase FindBoard(Guid playerId)
         {
-            if (_gameBoardLookup.TryGetValue(playerId, out var gameBoard))
+            lock (m_Lock)
             {
-                return gameBoard;
+                if (_gameBoardLookup.TryGetValue(playerId, out var gameBoard))
+                {
+                    return gameBoard;
+                }
             }
 
             throw new Exception($"Player with id '{playerId}' doesn't exist in this game!");
