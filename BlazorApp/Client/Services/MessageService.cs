@@ -33,30 +33,15 @@ namespace BlazorApp.Client.Services
                        .Build();
         }
 
-
-
-        // Task Send() =>
-        //         hubConnection.SendAsync("SendMessage", userInput, messageInput); *@
-
         public bool IsConnected => _hubConnection.State == HubConnectionState.Connected;
 
         public async Task InitializeAsync()
         {
-            _hubConnection.On<string, string>("CoordinateMarked", (user, message) =>
-            {
-                var encodedMsg = $"{user}: {message}";
-            });
+            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventService.GameModeChanged(gameMode));
 
-            _hubConnection.On<string, string>("GameFinished", (user, message) =>
-            {
-                var encodedMsg = $"{user}: {message}";
-            });
+            _hubConnection.On<string>("ReloadGameBoard", (placeHolder) => _eventService.ReloadGameBoard());
 
-
-            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) =>
-            {
-                _eventService.GameModeChanged(gameMode);
-            });
+            _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventService.ReloadOpponentGameBoard());
 
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();

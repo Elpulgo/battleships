@@ -19,18 +19,11 @@ namespace BlazorApp.Client.Services
         Task PlayerReadyAsync(List<Ship> ships);
         Task LoadGameBoardAsync();
         Task LoadOpponentGameBoardAsync();
-
-
-        Task<ICollection<Ship>> GetShipsAsync();
-        // Task<ICollection<CoordinateContainer>> GetCoordinatesAsync();
         Task MarkCoordinateAsync(Column column, int row);
-
-
         Guid PlayerId { get; }
         bool IsPlayerSlotAvailable { get; }
     }
 
-    // Should handle gameplay related stuff, such as mark coordinate, get ships, get coordinates
     public class GamePlayService : IGamePlayService
     {
         private readonly HttpClient _httpClient;
@@ -53,19 +46,14 @@ namespace BlazorApp.Client.Services
 
         public async Task PreLoadPlayerSlotAvailable() => IsPlayerSlotAvailable = await IsPlayerSlotAvailableAsync();
 
-        public Task<ICollection<Ship>> GetShipsAsync()
+        public async Task MarkCoordinateAsync(Column column, int row)
         {
-            return null;
-        }
+            var shipMarked = await PostRequest<ShipMarkedDto, MarkCoordinateDto>(
+                $"gameplay/markcoordinate/{PlayerId}",
+                new MarkCoordinateDto(column, row));
 
-        // public Task<ICollection<CoordinateContainer>> GetCoordinatesAsync()
-        // {
-        //     return null;
-        // }
-
-        public Task MarkCoordinateAsync(Column column, int row)
-        {
-            return null;
+            //  TODO: Should pass this to event server so we can display the outcome of our action
+            Console.WriteLine($"Ship found: {shipMarked.ShipFound}, ship destroyed: {shipMarked.ShipDestroyed}");
         }
 
         public async Task PlayerReadyAsync(List<Ship> ships)
@@ -97,13 +85,10 @@ namespace BlazorApp.Client.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync(
+                var player = await PostRequest<Player, CreatePlayerDto>(
                     $"setup/createplayer/{_messageService.HubConnectionId}",
                     new CreatePlayerDto(type, name, playVsComputer));
 
-                response.EnsureSuccessStatusCode();
-
-                var player = await response.Content.ReadFromJsonAsync<Player>();
                 PlayerId = player.Id;
                 _eventService.PlayerCreated(player);
             }
@@ -116,6 +101,17 @@ namespace BlazorApp.Client.Services
         private async Task<T> GetRequest<T>(string url)
         {
             var response = await _httpClient.GetAsync(url);
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<T>();
+        }
+
+        private async Task<T> PostRequest<T, TValue>(string url, TValue body)
+        {
+            var response = await _httpClient.PostAsJsonAsync<TValue>(
+               url,
+               body);
 
             response.EnsureSuccessStatusCode();
 
