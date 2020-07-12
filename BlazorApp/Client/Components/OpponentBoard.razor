@@ -3,6 +3,9 @@
 @using Core.Models 
 @using Client.Models 
 @using static Core.Models.CoordinatesHelper
+@using Client.Services
+
+@inject IGamePlayService GamePlayService
 
 <h3>Opponent board</h3>
 <BoardWrapper>
@@ -41,6 +44,7 @@
                             Type=CellType.None
                             Column=column
                             Row=row
+                            OnClicked=@OnCoordinateClicked
                             />
                     }
                 }
@@ -53,22 +57,6 @@
 @code {
     [CascadingParameter(Name = "OpponentGameBoard")]
     protected GameBoardBase OpponentGameBoard { get; set; }
-
-    protected override Task OnInitializedAsync()
-    {
-        return Task.CompletedTask;
-    }
-
-    public void OnCoordinateClicked(CoordEventArgs eventArgs)
-    {
-
-        // Pass key to GamePlayService, and gameboard will be updated thorugh cascading value..
-        // don't do like below..
-
-        @* var (shipFound, shipDestroyed) = GameBoard.MarkCoordinate(CoordinateKey.Build(eventArgs.Column, eventArgs.Row));
-        Console.WriteLine("Ship was found: " + shipFound);
-        Console.WriteLine("Ship was destoryed: " + shipDestroyed); *@
-
-        StateHasChanged();
-    }
+    public async void OnCoordinateClicked(CoordEventArgs eventArgs)
+        => await GamePlayService.MarkCoordinateAsync(eventArgs.Column, eventArgs.Row);
 }

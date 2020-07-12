@@ -77,6 +77,8 @@
         EventService.PlayerCreatedEventChanged += HandlePlayerCreatedChanged;
         EventService.GameBoardEventChanged += HandleGameBoardChanged;
         EventService.OpponentGameBoardEventChanged += HandleOpponentGameBoardChanged;
+        EventService.ReloadGameBoardEventChanged += HandleGameBoardReload;
+        EventService.ReloadOpponentGameBoardEventChanged += HandleOpponentGameBoardReload;
     }
 
     private async void HandleGameModeChanged(object sender, GameMode gameMode)
@@ -107,6 +109,17 @@
         StateHasChanged();
     }
 
+    private async void HandleGameBoardReload(object sender, EventArgs e)
+    {
+        await GamePlayService.LoadGameBoardAsync();
+        StateHasChanged();
+    }
+
+    private async void HandleOpponentGameBoardReload(object sender, EventArgs e)
+    {
+        await GamePlayService.LoadOpponentGameBoardAsync();
+        StateHasChanged();
+    }
 
     public void Dispose()
     {
@@ -114,5 +127,7 @@
         EventService.PlayerCreatedEventChanged -= HandlePlayerCreatedChanged;
         EventService.GameBoardEventChanged -= HandleGameBoardChanged;
         EventService.OpponentGameBoardEventChanged -= HandleOpponentGameBoardChanged;
+        EventService.ReloadGameBoardEventChanged -= HandleGameBoardReload;
+        EventService.ReloadOpponentGameBoardEventChanged -= HandleOpponentGameBoardReload;
     }
 }
