@@ -13,7 +13,8 @@ namespace BlazorApp.Server.Services
     {
         Task GameModeChangedAllAsync(GameMode gameMode);
         Task GameModeChangedClientAsync(GameMode gameMode, string connectionId);
-
+        Task ReloadGameBoardAsync(string connectionId);
+        Task ReloadOpponentGameBoardAsync(string connectionId);
     }
 
     public class PushNotificationService : IPushNotificationService
@@ -29,6 +30,12 @@ namespace BlazorApp.Server.Services
             => await _hubContext.SendAll(gameMode, "GameModeChanged");
         public async Task GameModeChangedClientAsync(GameMode gameMode, string connectionId)
             => await _hubContext.SendClient(connectionId, gameMode, "GameModeChanged");
+
+        public async Task ReloadGameBoardAsync(string connectionId)
+            => await _hubContext.SendClient(connectionId, string.Empty, "ReloadGameBoard");
+        
+        public async Task ReloadOpponentGameBoardAsync(string connectionId)
+            => await _hubContext.SendClient(connectionId, string.Empty, "ReloadOpponentGameBoard");
 
     }
 

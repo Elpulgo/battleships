@@ -24,5 +24,7 @@ namespace BlazorApp.Server.Managers
 
         public Player GetPlayerById(Guid id) => _players.SingleOrDefault(s => s.Id == id);
 
+        public Player GetOpponent(Guid id) => _players.SingleOrDefault(s => s.Id != id);
+
     }
 }
