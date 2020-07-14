@@ -16,8 +16,8 @@ namespace Shared
             ShipDestroyed = shipDestroyed;
         }
 
-        public bool ShipFound { get; private set; }
+        public bool ShipFound { get; set; }
 
-        public bool ShipDestroyed { get; private set; }
+        public bool ShipDestroyed { get; set; }
     }
 }
