@@ -12,38 +12,24 @@
             <div class="col table-cell-row">
                 @row
             </div>
-            @foreach(Column column in Enum.GetValues(typeof(Column))){
-                {
-                    var coordContainer = GameBoard.Matrix[CoordinateKey.Build(column, row)];
-                    if(coordContainer.IsShipDestroyed) {
-                        <BlazorApp.Client.Components.Cell 
-                            Type=CellType.Target
-                            Column=column
-                            Row=row
-                            Color=Color.Red         
-                            />
-                    } else if(coordContainer.HasShip) {
-                        <BlazorApp.Client.Components.Cell 
-                            Type=CellType.Flag
-                            Column=column
-                            Row=row
-                            Color=coordContainer.Color
-                             />
-                    } else if(coordContainer.IsMarked) {
-                        <BlazorApp.Client.Components.Cell 
-                            Type=CellType.X
-                            Column=column
-                            Row=row
-                            Color=Color.LightGrey
-                            />
-                    } else {
-                        <BlazorApp.Client.Components.Cell 
-                            Type=CellType.None
-                            Column=column
-                            Row=row
-                            />
-                    }
-                }
+            @foreach(Column column in Enum.GetValues(typeof(Column))){              
+                var coordContainer = GameBoard.Matrix[CoordinateKey.Build(column, row)];
+
+                var (cellType, color) = 
+                    (coordContainer.IsShipDestroyed, coordContainer.HasShip, coordContainer.IsMarked) switch{
+                        (true, _, _) => (CellType.Target, coordContainer.Color),
+                        (false, true, true) => (CellType.Flag, Color.Red),
+                        (false, true, false) => (CellType.Flag, coordContainer.Color),
+                        (false, false, true) => (CellType.X, Color.LightGrey),
+                        _ => (CellType.None, Color.None)
+                    };
+
+                <BlazorApp.Client.Components.Cell 
+                    Type=cellType
+                    Column=column
+                    Row=row
+                    Color=color      
+                />
             }
         </div>
     }
@@ -57,15 +43,5 @@
     protected override Task OnInitializedAsync()
     {
         return Task.CompletedTask;
-    }
-
-    public void OnCoordinateClicked(CoordEventArgs eventArgs)
-    {
-        @* var (shipFound, shipDestroyed) = GameBoard.MarkCoordinate(CoordinateKey.Build(eventArgs.Column, eventArgs.Row));
-
-        Console.WriteLine("Ship was found: " + shipFound);
-        Console.WriteLine("Ship was destoryed: " + shipDestroyed); *@
-
-        StateHasChanged();
     }
 }

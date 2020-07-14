@@ -18,17 +18,14 @@
     [Parameter]
     public EventCallback<CoordEventArgs> OnClicked { get; set; }
 
-    private string IconName;
+    private string IconName => Type switch
+    {
+        CellType.None => String.Empty,
+        CellType.Flag => "oi oi-flag",
+        CellType.X => "oi oi-x",
+        CellType.Target => "oi oi-target",
+        _ => String.Empty
+    };
 
     public void OnMarked() => OnClicked.InvokeAsync(new CoordEventArgs(Column, Row));
-
-    protected override void OnInitialized() =>
-        IconName = Type switch
-        {
-            CellType.None => String.Empty,
-            CellType.Flag => "oi oi-flag",
-            CellType.X => "oi oi-x",
-            CellType.Target => "oi oi-target",
-            _ => String.Empty
-        };
 }

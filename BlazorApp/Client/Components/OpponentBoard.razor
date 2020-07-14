@@ -18,34 +18,30 @@
             @foreach(Column column in Enum.GetValues(typeof(Column))){
                 {
                     var coordContainer = OpponentGameBoard.Matrix[CoordinateKey.Build(column, row)];
-                    if(coordContainer.IsShipDestroyed) {
+
+                    var (cellType, color) = 
+                        (coordContainer.IsShipDestroyed, coordContainer.HasShip, coordContainer.IsMarked) switch{
+                            (true, _, _) => (CellType.Target, coordContainer.Color),
+                            (false, true, true) => (CellType.Target, Color.Red),
+                            (false, false, true) => (CellType.X, Color.LightGrey),
+                            _ => (CellType.None, Color.None)
+                        };
+
+                    if(cellType != CellType.None){
                         <BlazorApp.Client.Components.Cell 
-                            Type=CellType.Target
+                            Type=cellType
                             Column=column
                             Row=row
-                            Color=coordContainer.Color         
-                            />
-                    } else if(coordContainer.HasShip) {
-                        <BlazorApp.Client.Components.Cell 
-                            Type=CellType.Target
-                            Column=column
-                            Row=row
-                            Color=Color.Red
-                             />
-                    } else if(coordContainer.IsMarked) {
-                        <BlazorApp.Client.Components.Cell 
-                            Type=CellType.X
-                            Column=column
-                            Row=row
-                            Color=Color.LightGrey
-                            />
+                            Color=color      
+                        />
                     } else {
                         <BlazorApp.Client.Components.Cell 
-                            Type=CellType.None
+                            Type=cellType
                             Column=column
                             Row=row
-                            OnClicked=@OnCoordinateClicked
-                            />
+                            Color=color   
+                            OnClicked=@OnCoordinateClicked   
+                        />
                     }
                 }
             }
