@@ -7,7 +7,7 @@
 
 @inject IGamePlayService GamePlayService
 
-<h3>Opponent board</h3>
+<h3>@OpponentGameBoard?.Player?.Name</h3>
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
@@ -23,14 +23,14 @@
                             Type=CellType.Target
                             Column=column
                             Row=row
-                            Color=Color.Red         
+                            Color=coordContainer.Color         
                             />
                     } else if(coordContainer.HasShip) {
                         <BlazorApp.Client.Components.Cell 
-                            Type=CellType.Flag
+                            Type=CellType.Target
                             Column=column
                             Row=row
-                            Color=coordContainer.Color
+                            Color=Color.Red
                              />
                     } else if(coordContainer.IsMarked) {
                         <BlazorApp.Client.Components.Cell 
@@ -57,6 +57,7 @@
 @code {
     [CascadingParameter(Name = "OpponentGameBoard")]
     protected GameBoardBase OpponentGameBoard { get; set; }
+
     public async void OnCoordinateClicked(CoordEventArgs eventArgs)
         => await GamePlayService.MarkCoordinateAsync(eventArgs.Column, eventArgs.Row);
 }
