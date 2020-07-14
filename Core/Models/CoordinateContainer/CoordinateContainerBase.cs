@@ -6,7 +6,7 @@ using static Core.Models.CoordinatesHelper;
 namespace Core.Models
 {
     [Serializable]
-    public class CoordinateContainerBase
+    public class CoordinateContainerBase : ICloneable<CoordinateContainerBase>
     {
         public int Row { get; set; }
 
@@ -15,7 +15,7 @@ namespace Core.Models
         public bool HasShip { get; set; }
 
         public bool IsMarked { get; set; }
-        public bool IsShipDestroyed => HasShip && IsMarked;
+        public bool IsShipDestroyed { get; set; }
 
         public Color Color { get; set; }
 
@@ -60,6 +60,11 @@ namespace Core.Models
         public void Mark()
         {
             IsMarked = true;
+        }
+
+        public void ShipWasDestroyed()
+        {
+            IsShipDestroyed = true;
         }
     }
 }

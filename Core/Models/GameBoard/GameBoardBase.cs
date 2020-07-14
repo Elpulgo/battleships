@@ -8,10 +8,10 @@ using static Core.Models.CoordinatesHelper;
 namespace Core.Models
 {
     [Serializable]
-    public class GameBoardBase
+    public class GameBoardBase : ICloneable<GameBoardBase>
     {
         private List<Ship> _ships;
-        public Player Player { get; }
+        public Player Player { get; set; }
         public Dictionary<string, CoordinateContainerBase> Matrix { get; set; }
 
         public GameBoardBase()
@@ -45,10 +45,12 @@ namespace Core.Models
         public GameBoardBase ForOpponent()
         {
             var clone = this.DeepClone();
-            
+
             clone.Matrix = Matrix
                   .Select(s => KeyValuePair.Create(s.Key, s.Value.ForOpponent()))
                   .ToDictionary(d => d.Key, value => value.Value);
+
+            clone.Player = Player.ForOpponent();
 
             return clone;
         }
@@ -68,6 +70,15 @@ namespace Core.Models
                 return (false, false);
 
             ship.MarkCoordinate(key);
+
+            if (ship.IsDestroyed)
+            {
+                foreach (var coordKey in ship.Coordinates.Select(s => s.Key))
+                {
+                    Matrix[coordKey].ShipWasDestroyed();
+                }
+            }
+
             return (true, ship.IsDestroyed);
         }
 
