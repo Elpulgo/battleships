@@ -15,6 +15,7 @@
     <CascadingValue Value="@Player">
     <CascadingValue Value="@GameBoard" Name="GameBoard">
     <CascadingValue Value="@OpponentGameBoard" Name="OpponentGameBoard">
+    <CascadingValue Value="@IsPlayerTurn" Name="IsPlayerTurn">
 
     <hr>
     @switch (GameMode)
@@ -52,6 +53,7 @@
     </CascadingValue>
     </CascadingValue>
     </CascadingValue>
+    </CascadingValue>
 } else {
     <div>Game is not available. Has already reached max number of players!</div>
 }
@@ -60,7 +62,7 @@
     public GameMode GameMode = GameMode.CreatingPlayer;
     protected GameBoardBase GameBoard { get; private set; }
     protected GameBoardBase OpponentGameBoard { get; private set; }
-
+    public bool IsPlayerTurn { get; private set; }
     public Player Player { get; private set; }
     public bool GameIsAvailable = false;
 
@@ -79,6 +81,7 @@
         EventService.OpponentGameBoardEventChanged += HandleOpponentGameBoardChanged;
         EventService.ReloadGameBoardEventChanged += HandleGameBoardReload;
         EventService.ReloadOpponentGameBoardEventChanged += HandleOpponentGameBoardReload;
+        EventService.PlayerTurnEventChanged += HandlePlayerTurnChanged;
     }
 
     private async void HandleGameModeChanged(object sender, GameMode gameMode)
@@ -121,6 +124,12 @@
         StateHasChanged();
     }
 
+    private async void HandlePlayerTurnChanged(object sender, bool isPlayerTurn)
+    {
+        IsPlayerTurn = isPlayerTurn;
+        StateHasChanged();
+    }
+
     public void Dispose()
     {
         EventService.GameModeEventChanged -= HandleGameModeChanged;
@@ -129,5 +138,6 @@
         EventService.OpponentGameBoardEventChanged -= HandleOpponentGameBoardChanged;
         EventService.ReloadGameBoardEventChanged -= HandleGameBoardReload;
         EventService.ReloadOpponentGameBoardEventChanged -= HandleOpponentGameBoardReload;
+        EventService.PlayerTurnEventChanged -= HandlePlayerTurnChanged;
     }
 }

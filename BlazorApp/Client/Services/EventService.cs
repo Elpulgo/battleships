@@ -11,6 +11,7 @@ namespace BlazorApp.Client.Services
         event EventHandler<GameBoardBase> OpponentGameBoardEventChanged;
         event EventHandler ReloadGameBoardEventChanged;
         event EventHandler ReloadOpponentGameBoardEventChanged;
+        event EventHandler PlayerTurnEventChanged;
 
         void GameModeChanged(GameMode gameMode);
         void PlayerCreated(Player player);
@@ -18,6 +19,8 @@ namespace BlazorApp.Client.Services
         void OpponentGameBoardChanged(GameBoardBase gameBoard);
         void ReloadGameBoard();
         void ReloadOpponentGameBoard();
+
+        void PlayerTurnChanged(bool isPlayerTurn);
     }
 
     // Should handle events, other services should invoke events here, which are 
@@ -31,6 +34,7 @@ namespace BlazorApp.Client.Services
         public event EventHandler<GameBoardBase> OpponentGameBoardEventChanged;
         public event EventHandler ReloadGameBoardEventChanged;
         public event EventHandler ReloadOpponentGameBoardEventChanged;
+        public event EventHandler PlayerTurnEventChanged;
 
         public EventService()
         {
@@ -45,5 +49,7 @@ namespace BlazorApp.Client.Services
         public void OpponentGameBoardChanged(GameBoardBase gameBoard) => OpponentGameBoardEventChanged?.Invoke(this, gameBoard);
         public void ReloadGameBoard() => ReloadGameBoardEventChanged?.Invoke(this, new EventArgs());
         public void ReloadOpponentGameBoard() => ReloadOpponentGameBoardEventChanged?.Invoke(this, new EventArgs());
+
+        public void PlayerTurnChanged(bool isPlayerTurn) => PlayerTurnEventChanged?.Invoke(this, isPlayerTurn);
     }
 }

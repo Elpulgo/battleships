@@ -43,6 +43,8 @@ namespace BlazorApp.Client.Services
 
             _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventService.ReloadOpponentGameBoard());
 
+            _hubConnection.On<bool>("PlayerTurnChanged", (isPlayerTurn) => _eventService.PlayerTurnChanged(isPlayerTurn));
+            
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();
         }
