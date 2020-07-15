@@ -28,7 +28,7 @@ namespace BlazorApp.Client.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IMessageService _messageService;
-        private readonly IEventService _eventService;
+        private readonly IEventExecutor _eventExecutor;
 
         public bool IsPlayerSlotAvailable { get; private set; } = true;
 
@@ -37,11 +37,11 @@ namespace BlazorApp.Client.Services
         public GamePlayService(
             HttpClient httpClient,
             IMessageService messageService,
-            IEventService eventService)
+            IEventExecutor eventExecutor)
         {
             _httpClient = httpClient;
             _messageService = messageService;
-            _eventService = eventService;
+            _eventExecutor = eventExecutor;
         }
 
         public async Task PreLoadPlayerSlotAvailable() => IsPlayerSlotAvailable = await IsPlayerSlotAvailableAsync();
@@ -68,13 +68,13 @@ namespace BlazorApp.Client.Services
         public async Task LoadGameBoardAsync()
         {
             var gameBoard = await GetRequest<GameBoardBase>($"gameplay/gameboard/{PlayerId}");
-            _eventService.GameBoardChanged(gameBoard);
+            _eventExecutor.GameBoardChanged(gameBoard);
         }
 
         public async Task LoadOpponentGameBoardAsync()
         {
             var gameBoard = await GetRequest<GameBoardBase>($"gameplay/opponentgameboard/{PlayerId}");
-            _eventService.OpponentGameBoardChanged(gameBoard);
+            _eventExecutor.OpponentGameBoardChanged(gameBoard);
         }
 
         public Task<bool> IsPlayerSlotAvailableAsync() => GetRequest<bool>("setup/IsPlayerSlotAvailable");
@@ -90,7 +90,7 @@ namespace BlazorApp.Client.Services
                     new CreatePlayerDto(type, name, playVsComputer));
 
                 PlayerId = player.Id;
-                _eventService.PlayerCreated(player);
+                _eventExecutor.PlayerCreated(player);
             }
             catch (Exception exception)
             {

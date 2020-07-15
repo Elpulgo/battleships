@@ -5,7 +5,7 @@
 @using BlazorApp.Client.Components
 @using Client.Services
 
-@inject IEventService EventService
+@inject IEventListener EventListener
 @inject IMessageService MessageService
 @inject IGamePlayService GamePlayService
 @implements IDisposable
@@ -75,13 +75,13 @@
 
     public void SubscribeToEvents()
     {
-        EventService.GameModeEventChanged += HandleGameModeChanged;
-        EventService.PlayerCreatedEventChanged += HandlePlayerCreatedChanged;
-        EventService.GameBoardEventChanged += HandleGameBoardChanged;
-        EventService.OpponentGameBoardEventChanged += HandleOpponentGameBoardChanged;
-        EventService.ReloadGameBoardEventChanged += HandleGameBoardReload;
-        EventService.ReloadOpponentGameBoardEventChanged += HandleOpponentGameBoardReload;
-        EventService.PlayerTurnEventChanged += HandlePlayerTurnChanged;
+        EventListener.GameModeEventChanged += HandleGameModeChanged;
+        EventListener.PlayerCreatedEventChanged += HandlePlayerCreatedChanged;
+        EventListener.GameBoardEventChanged += HandleGameBoardChanged;
+        EventListener.OpponentGameBoardEventChanged += HandleOpponentGameBoardChanged;
+        EventListener.ReloadGameBoardEventChanged += HandleGameBoardReload;
+        EventListener.ReloadOpponentGameBoardEventChanged += HandleOpponentGameBoardReload;
+        EventListener.PlayerTurnEventChanged += HandlePlayerTurnChanged;
     }
 
     private async void HandleGameModeChanged(object sender, GameMode gameMode)
@@ -132,12 +132,12 @@
 
     public void Dispose()
     {
-        EventService.GameModeEventChanged -= HandleGameModeChanged;
-        EventService.PlayerCreatedEventChanged -= HandlePlayerCreatedChanged;
-        EventService.GameBoardEventChanged -= HandleGameBoardChanged;
-        EventService.OpponentGameBoardEventChanged -= HandleOpponentGameBoardChanged;
-        EventService.ReloadGameBoardEventChanged -= HandleGameBoardReload;
-        EventService.ReloadOpponentGameBoardEventChanged -= HandleOpponentGameBoardReload;
-        EventService.PlayerTurnEventChanged -= HandlePlayerTurnChanged;
+        EventListener.GameModeEventChanged -= HandleGameModeChanged;
+        EventListener.PlayerCreatedEventChanged -= HandlePlayerCreatedChanged;
+        EventListener.GameBoardEventChanged -= HandleGameBoardChanged;
+        EventListener.OpponentGameBoardEventChanged -= HandleOpponentGameBoardChanged;
+        EventListener.ReloadGameBoardEventChanged -= HandleGameBoardReload;
+        EventListener.ReloadOpponentGameBoardEventChanged -= HandleOpponentGameBoardReload;
+        EventListener.PlayerTurnEventChanged -= HandlePlayerTurnChanged;
     }
 }

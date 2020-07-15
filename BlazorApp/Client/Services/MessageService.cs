@@ -19,15 +19,15 @@ namespace BlazorApp.Client.Services
     {
         private const string HUBNAME = "/battleshiphub";
         private readonly HubConnection _hubConnection;
-        private readonly IEventService _eventService;
+        private readonly IEventExecutor _eventExecutor;
 
         public string HubConnectionId => _hubConnection.ConnectionId;
 
         public MessageService(
             NavigationManager navigationManager,
-            IEventService eventService)
+            IEventExecutor eventExecutor)
         {
-            _eventService = eventService;
+            _eventExecutor = eventExecutor;
             _hubConnection = new HubConnectionBuilder()
                        .WithUrl(navigationManager.ToAbsoluteUri(HUBNAME))
                        .Build();
@@ -37,13 +37,13 @@ namespace BlazorApp.Client.Services
 
         public async Task InitializeAsync()
         {
-            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventService.GameModeChanged(gameMode));
+            _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventExecutor.GameModeChanged(gameMode));
 
-            _hubConnection.On<string>("ReloadGameBoard", (placeHolder) => _eventService.ReloadGameBoard());
+            _hubConnection.On<string>("ReloadGameBoard", (placeHolder) => _eventExecutor.ReloadGameBoard());
 
-            _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventService.ReloadOpponentGameBoard());
+            _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventExecutor.ReloadOpponentGameBoard());
 
-            _hubConnection.On<bool>("PlayerTurnChanged", (isPlayerTurn) => _eventService.PlayerTurnChanged(isPlayerTurn));
+            _hubConnection.On<bool>("PlayerTurnChanged", (isPlayerTurn) => _eventExecutor.PlayerTurnChanged(isPlayerTurn));
             
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();

@@ -22,7 +22,10 @@ namespace BlazorApp.Client
 
             builder.Services.AddSingleton<IMessageService, MessageService>();
             builder.Services.AddSingleton<IGamePlayService, GamePlayService>();
-            builder.Services.AddSingleton<IEventService, EventService>();
+
+            builder.Services.AddSingleton<EventService>();
+            builder.Services.AddSingleton<IEventExecutor>(provider => provider.GetRequiredService<EventService>());
+            builder.Services.AddSingleton<IEventListener>(provider => provider.GetRequiredService<EventService>());
 
             var host = builder.Build();
             await host.PreLoad();
