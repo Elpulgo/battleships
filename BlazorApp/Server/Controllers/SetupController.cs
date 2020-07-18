@@ -17,13 +17,13 @@ namespace BlazorApp.Server.Controllers
     public class SetupController : ControllerBase
     {
         private readonly IPushNotificationService _pushNotificationService;
-        private readonly ConnectionManager<Player> _connectionManager;
+        private readonly ConnectionManager _connectionManager;
         private readonly PlayerManager _playerManager;
         private readonly IGameManager _gameManager;
 
         public SetupController(
             IPushNotificationService pushNotificationService,
-            ConnectionManager<Player> connectionManager,
+            ConnectionManager connectionManager,
             PlayerManager playerManager,
             IGameManager gameManager)
         {
@@ -46,20 +46,20 @@ namespace BlazorApp.Server.Controllers
                 return BadRequest("Maximum number of players already in the game!");
 
             var player = new Player(dto.Name, dto.Type);
-            _connectionManager.Add(player, connectionId);
+            _connectionManager.Add(player.Id, connectionId);
             _playerManager.AddPlayerToGame(player);
 
             switch (dto.PlayVsComputer, _connectionManager.Count)
             {
                 case (true, 1):
                     _playerManager.PlayVsComputer();
-                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.Setup, connectionId);
+                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.Setup, player.Id);
                     break;
                 case (false, 2):
                     await _pushNotificationService.GameModeChangedAllAsync(GameMode.Setup);
                     break;
                 default:
-                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerToJoin, connectionId);
+                    await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerToJoin, player.Id);
                     break;
             }
 
@@ -78,21 +78,13 @@ namespace BlazorApp.Server.Controllers
                 await _pushNotificationService.GameModeChangedAllAsync(GameMode.GamePlay);
 
                 var randomPlayer = GetRandomPlayer();
-                var connectionIdPlayerTurn = _connectionManager.GetConnection(randomPlayer);
 
-                var waitPlayer = _playerManager.GetOpponent(randomPlayer.Id);
-                var connectionIdPlayerWait = _connectionManager.GetConnection(waitPlayer);
-
-                if (!string.IsNullOrEmpty(connectionIdPlayerTurn) && !string.IsNullOrEmpty(connectionIdPlayerWait))
-                {
-                    await _pushNotificationService.PlayerTurnChangedAsync(connectionIdPlayerTurn, connectionIdPlayerWait);
-                }
+                await _pushNotificationService.PlayerTurnChangedAsync(randomPlayer.Id);
 
                 return Ok();
             }
 
-            var connectionId = _connectionManager.GetConnection(player);
-            await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerSetup, connectionId);
+            await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerSetup, playerId);
             return Ok();
         }
 

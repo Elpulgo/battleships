@@ -1,17 +1,17 @@
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BlazorApp.Server.Managers
 {
-    public class ConnectionManager<T>
+    public class ConnectionManager
     {
-        private readonly Dictionary<T, string> _connections =
-            new Dictionary<T, string>();
+        private readonly Dictionary<Guid, string> _connections =
+            new Dictionary<Guid, string>();
 
         public int Count => _connections.Count;
 
-        public void Add(T key, string connectionId)
+        public void Add(Guid key, string connectionId)
         {
             lock (_connections)
             {
@@ -19,7 +19,7 @@ namespace BlazorApp.Server.Managers
             }
         }
 
-        public string GetConnection(T key)
+        public string GetConnection(Guid key)
         {
             if (_connections.TryGetValue(key, out var connectionId))
                 return connectionId;
@@ -27,7 +27,7 @@ namespace BlazorApp.Server.Managers
             return string.Empty;
         }
 
-        public void Remove(T key, string connectionId)
+        public void Remove(Guid key, string connectionId)
         {
             lock (_connections)
             {

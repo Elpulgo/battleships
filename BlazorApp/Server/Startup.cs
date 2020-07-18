@@ -35,7 +35,7 @@ namespace BlazorApp.Server
                     new[] { "application/octet-stream" });
             });
             services.AddRazorPages();
-            services.AddSingleton<ConnectionManager<Player>>();
+            services.AddSingleton<ConnectionManager>();
             services.AddSingleton<PlayerManager>();
             services.AddSingleton<IGameManager, GameManager>();
 
