@@ -8,6 +8,7 @@ using Shared;
 using BlazorApp.Server.Managers;
 using BlazorApp.Server.Services;
 using Core.Managers;
+using System.Linq;
 
 namespace BlazorApp.Server.Controllers
 {
@@ -75,14 +76,34 @@ namespace BlazorApp.Server.Controllers
             if (_gameManager.IsAllBoardsSetup)
             {
                 await _pushNotificationService.GameModeChangedAllAsync(GameMode.GamePlay);
-            }
-            else
-            {
-                var connectionId = _connectionManager.GetConnection(player);
-                await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerSetup, connectionId);
+
+                var randomPlayer = GetRandomPlayer();
+                var connectionIdPlayerTurn = _connectionManager.GetConnection(randomPlayer);
+
+                var waitPlayer = _playerManager.GetOpponent(randomPlayer.Id);
+                var connectionIdPlayerWait = _connectionManager.GetConnection(waitPlayer);
+
+                if (!string.IsNullOrEmpty(connectionIdPlayerTurn) && !string.IsNullOrEmpty(connectionIdPlayerWait))
+                {
+                    await _pushNotificationService.PlayerTurnChangedAsync(connectionIdPlayerTurn, connectionIdPlayerWait);
+                }
+
+                return Ok();
             }
 
+            var connectionId = _connectionManager.GetConnection(player);
+            await _pushNotificationService.GameModeChangedClientAsync(GameMode.WaitingForPlayerSetup, connectionId);
             return Ok();
+        }
+
+        private Player GetRandomPlayer()
+        {
+            var random = new Random();
+            var nextRandom = random.Next(0, 1);
+            if (_playerManager.PlayerCount < 2)
+                throw new ArgumentOutOfRangeException("All players have not joined the gamed yet!");
+
+            return _playerManager.Players.Skip(nextRandom).FirstOrDefault();
         }
     }
 }

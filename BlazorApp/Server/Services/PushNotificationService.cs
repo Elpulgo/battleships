@@ -15,7 +15,7 @@ namespace BlazorApp.Server.Services
         Task GameModeChangedClientAsync(GameMode gameMode, string connectionId);
         Task ReloadGameBoardAsync(string connectionId);
         Task ReloadOpponentGameBoardAsync(string connectionId);
-        Task PlayerTurnChangedAsync(bool isPlayerTurn, string connectionId);
+        Task PlayerTurnChangedAsync(string connectionIdPlayerTurn, string connectionIdPlayerWait);
     }
 
     public class PushNotificationService : IPushNotificationService
@@ -38,9 +38,11 @@ namespace BlazorApp.Server.Services
         public async Task ReloadOpponentGameBoardAsync(string connectionId)
             => await _hubContext.SendClient(connectionId, string.Empty, "ReloadOpponentGameBoard");
 
-        public async Task PlayerTurnChangedAsync(bool isPlayerTurn, string connectionId)
-            => await _hubContext.SendClient(connectionId, isPlayerTurn, "PlayerTurnChanged");
-
+        public async Task PlayerTurnChangedAsync(string connectionIdPlayerTurn, string connectionIdPlayerWait)
+        {
+            await _hubContext.SendClient(connectionIdPlayerTurn, true, "PlayerTurnChanged");
+            await _hubContext.SendClient(connectionIdPlayerWait, false, "PlayerTurnChanged");
+        }
     }
 
     internal static class HubExtensions
