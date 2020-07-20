@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Core.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using Shared;
 
 namespace BlazorApp.Client.Services
 {
@@ -39,12 +40,16 @@ namespace BlazorApp.Client.Services
         {
             _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventExecutor.GameModeChanged(gameMode));
 
-            _hubConnection.On<string>("ReloadGameBoard", (placeHolder) => _eventExecutor.ReloadGameBoard());
+            _hubConnection.On<ShipMarkedDto>("ReloadGameBoard", (result) =>
+            {
+                _eventExecutor.OpponentMoveFired(result.ShipFound, result.ShipDestroyed);
+                _eventExecutor.ReloadGameBoard();
+            });
 
             _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventExecutor.ReloadOpponentGameBoard());
 
             _hubConnection.On<bool>("PlayerTurnChanged", (isPlayerTurn) => _eventExecutor.PlayerTurnChanged(isPlayerTurn));
-            
+
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();
         }
