@@ -15,6 +15,8 @@
 @if(IsReady){
     <small>Waiting for other player to finish setup.. Hold on.</small>
 } else {
+    <small>Mark your ships or generate random coordinates for all ships.</small>
+    <hr>
     <BoardWrapper>
         @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
         {   
@@ -51,8 +53,10 @@
     </SetupIndicator>
 
     @if(!ShipsTypesToCreate.Any()){
-        <button class="btn btn-success" @onclick=@OnReady>Start game!</button>
+        <button class="btn btn-success mt-2" @onclick=OnReady>Start game!</button>
     }
+
+    <button class="btn btn-secondary mt-2" @onclick=OnGenerateShips>Generate ships</button>
 }
 
 @code {
@@ -74,12 +78,6 @@
         MarkedCoordinates = new Dictionary<string, CoordinateContainerBase>();
 
         ShipsTypesToCreate = ShipConstants.GetShipTypesPerPlayer().ToList();
-
-        // FOR TEST
-        var ships = new ShipGenerator().Generate().ToList();
-        Ships = ships.ToList();
-        ShipsTypesToCreate.Clear();
-        // END TEST
 
         return Task.CompletedTask;
     }
@@ -108,6 +106,23 @@
     {
         await GamePlayService.PlayerReadyAsync(Ships);
         IsReady = true;
+    }
+
+    public void OnGenerateShips()
+    {
+        Ships = new ShipGenerator().Generate().ToList();
+
+        MarkedCoordinates.Clear();
+
+        foreach (var ship in Ships)
+        {
+            foreach (var coord in ship.Coordinates)
+            {
+                MarkedCoordinates.Add(coord.Key, coord);
+            }
+        }
+
+        ShipsTypesToCreate.Clear();
     }
 
     private void TryCreateShip(ShipType currentShipType)
