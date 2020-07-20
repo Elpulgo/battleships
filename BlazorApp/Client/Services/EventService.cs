@@ -12,6 +12,7 @@ namespace BlazorApp.Client.Services
         public event EventHandler ReloadGameBoardEventChanged;
         public event EventHandler ReloadOpponentGameBoardEventChanged;
         public event EventHandler<bool> PlayerTurnEventChanged;
+        public event EventHandler<(bool shipWasHit, bool shipWasDestroyed)> OpponentMoveFiredEventChanged;
 
         public EventService()
         {
@@ -31,5 +32,8 @@ namespace BlazorApp.Client.Services
             => ReloadOpponentGameBoardEventChanged?.Invoke(this, new EventArgs());
         public void PlayerTurnChanged(bool isPlayerTurn)
             => PlayerTurnEventChanged?.Invoke(this, isPlayerTurn);
+
+        public void OpponentMoveFired(bool shipWasHit, bool shipWasDestroyed)
+            => OpponentMoveFiredEventChanged?.Invoke(this, (shipWasHit, shipWasDestroyed));
     }
 }
