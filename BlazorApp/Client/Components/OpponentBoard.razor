@@ -7,12 +7,12 @@
 
 @inject IGamePlayService GamePlayService
 
-<h3>@OpponentGameBoard?.Player?.Name</h3>
+<h6>@OpponentGameBoard?.Player?.Name</h6>
 <hr>
 @if(IsPlayerTurn){
-    <small>Your turn!</small>
+    <small class="green bold">Your turn!</small>
 } else {
-    <small>Waiting on opponent to make a move!</small>
+    <small class="red bold">Waiting for opponent to make a move..</small>
 }
 <hr>
 <BoardWrapper>

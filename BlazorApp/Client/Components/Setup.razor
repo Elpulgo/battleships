@@ -15,7 +15,7 @@
 @if(IsReady){
     <small>Waiting for other player to finish setup.. Hold on.</small>
 } else {
-    <small>Mark your ships or generate random coordinates for all ships.</small>
+    <small class="light_green">Mark your ships or generate random coordinates for all ships.</small>
     <hr>
     <BoardWrapper>
         @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))

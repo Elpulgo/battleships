@@ -29,3 +29,19 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.light_green {
+  color: lightseagreen;
+}
+
+.green {
+  color: green;
+}
+
+.red {
+  color: red;
+}
+
+.bold {
+  font-weight: bold;
+}

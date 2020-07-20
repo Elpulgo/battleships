@@ -8,9 +8,9 @@
 @inject IEventListener EventListener
 @implements IDisposable
 
-<h3>Your board</h3>
+<h6>Your board</h6>
 <hr>
-<small>@OpponentMove</small>
+<small class="light_green bold">@OpponentMove</small>
 <hr>
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
@@ -35,7 +35,8 @@
                     Type=cellType
                     Column=column
                     Row=row
-                    Color=color      
+                    Color=color   
+                    IsDisabled=true   
                 />
             }
         </div>
