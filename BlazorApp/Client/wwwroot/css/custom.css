@@ -24,3 +24,8 @@
   align-self: center;
   text-align: left;
 }
+
+.is_disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
