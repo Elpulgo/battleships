@@ -3,8 +3,15 @@
 @using Core.Models 
 @using Client.Models 
 @using static Core.Models.CoordinatesHelper
+@using Client.Services
+
+@inject IEventListener EventListener
+@implements IDisposable
 
 <h3>Your board</h3>
+<hr>
+<small>@OpponentMove</small>
+<hr>
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
@@ -39,9 +46,21 @@
 @code {
     [CascadingParameter(Name = "GameBoard")]
     protected GameBoardBase GameBoard { get; set; }
+    protected string OpponentMove { get; set; } = "...";
 
-    protected override Task OnInitializedAsync()
+    protected override void OnInitialized()
+        => EventListener.OpponentMoveFiredEventChanged += HandleOpponentMoveFired;
+
+    private void HandleOpponentMoveFired(object sender, (bool shipWasHit, bool shipWasDestroyed) result)
     {
-        return Task.CompletedTask;
+        OpponentMove = result switch
+        {
+            (true, true) => "Your ship was HIT, and DESTROYED!",
+            (true, false) => "Your ship was HIT!",
+            (_, _) => "Opponent MISSED.."
+        };
     }
+
+    public void Dispose()
+        => EventListener.OpponentMoveFiredEventChanged -= HandleOpponentMoveFired;
 }
