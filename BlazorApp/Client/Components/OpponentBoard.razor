@@ -40,7 +40,7 @@
                             Column=column
                             Row=row
                             Color=color    
-                            IsDisabled=!IsPlayerTurn  
+                            CellState=@(IsPlayerTurn ? CellState.None : CellState.Waiting)  
                         />
                     } else {
                         <BlazorApp.Client.Components.Cell 
@@ -48,7 +48,7 @@
                             Column=column
                             Row=row
                             Color=color 
-                            IsDisabled=!IsPlayerTurn  
+                            CellState=@(!IsPlayerTurn ? CellState.Waiting : CellState.None)  
                             OnClicked=@OnCoordinateClicked   
                         />
                     }

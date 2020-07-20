@@ -2,7 +2,7 @@
 @using static Core.Models.CoordinatesHelper
 @using Core.Models.Ships
 
-<div class="col table-cell @DisabledClass" @onclick=@OnMarked>
+<div class="col table-cell @CellStateClass" @onclick=@OnMarked>
     <span class="@IconName" style="vertical-align:middle; color:@Color;" aria-hidden="true"></span>
 </div>
 
@@ -16,14 +16,16 @@
     [Parameter]
     public Color Color { get; set; }
     [Parameter]
-    public bool IsDisabled { get; set; }
+    public CellState CellState { get; set; } = CellState.None;
     [Parameter]
     public EventCallback<CoordEventArgs> OnClicked { get; set; }
 
-    private string DisabledClass => IsDisabled switch
+    private string CellStateClass => CellState switch
     {
-        true => "is_disabled",
-        false => string.Empty
+        CellState.Disabled => "is_disabled",
+        CellState.Waiting => "is_waiting",
+        CellState.None => string.Empty,
+        _ => string.Empty
     };
 
     private string IconName => Type switch
@@ -37,7 +39,7 @@
 
     public async void OnMarked()
     {
-        if (IsDisabled || !OnClicked.HasDelegate)
+        if (CellState != CellState.None || !OnClicked.HasDelegate)
             return;
 
         await OnClicked.InvokeAsync(new CoordEventArgs(Column, Row));
