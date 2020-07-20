@@ -48,12 +48,9 @@ namespace BlazorApp.Client.Services
 
         public async Task MarkCoordinateAsync(Column column, int row)
         {
-            var shipMarked = await PostRequest<ShipMarkedDto, MarkCoordinateDto>(
+            var _ = await PostRequest<ShipMarkedDto, MarkCoordinateDto>(
                 $"gameplay/markcoordinate/{PlayerId}",
                 new MarkCoordinateDto(column, row));
-
-            //  TODO: Should pass this to event server so we can display the outcome of our action
-            Console.WriteLine($"Ship found: {shipMarked.ShipFound}, ship destroyed: {shipMarked.ShipDestroyed}");
         }
 
         public async Task PlayerReadyAsync(List<Ship> ships)
