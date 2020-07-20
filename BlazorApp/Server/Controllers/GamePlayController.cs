@@ -37,8 +37,11 @@ namespace BlazorApp.Server.Controllers
                 playerId,
                 CoordinateKey.Build(request.Column, request.Row));
 
-            await _pushNotificationService.ReloadGameBoardAsync(playerId);
             await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
+
+            var opponentPlayer = _playerManager.GetOpponent(playerId);
+            await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, new ShipMarkedDto(shipFound, shipDestroyed));
+            await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
 
             return Ok(new ShipMarkedDto(shipFound, shipDestroyed));
         }

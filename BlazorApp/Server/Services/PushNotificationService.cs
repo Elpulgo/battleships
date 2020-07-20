@@ -7,6 +7,7 @@ using BlazorApp.Server.Hubs;
 using BlazorApp.Server.Managers;
 using Core.Models;
 using Microsoft.AspNetCore.SignalR;
+using Shared;
 
 namespace BlazorApp.Server.Services
 {
@@ -14,7 +15,7 @@ namespace BlazorApp.Server.Services
     {
         Task GameModeChangedAllAsync(GameMode gameMode);
         Task GameModeChangedClientAsync(GameMode gameMode, Guid playerId);
-        Task ReloadGameBoardAsync(Guid playerId);
+        Task ReloadGameBoardAsync(Guid playerId, ShipMarkedDto result);
         Task ReloadOpponentGameBoardAsync(Guid playerId);
         Task PlayerTurnChangedAsync(Guid playerId);
     }
@@ -40,8 +41,8 @@ namespace BlazorApp.Server.Services
         public async Task GameModeChangedClientAsync(GameMode gameMode, Guid playerId)
             => await _hubContext.SendClient(GetConnectionId(playerId), gameMode, "GameModeChanged");
 
-        public async Task ReloadGameBoardAsync(Guid playerId)
-            => await _hubContext.SendClient(GetConnectionId(playerId), string.Empty, "ReloadGameBoard");
+        public async Task ReloadGameBoardAsync(Guid playerId, ShipMarkedDto result)
+            => await _hubContext.SendClient(GetConnectionId(playerId), result, "ReloadGameBoard");
 
         public async Task ReloadOpponentGameBoardAsync(Guid playerId)
             => await _hubContext.SendClient(GetConnectionId(playerId), string.Empty, "ReloadOpponentGameBoard");
