@@ -8,6 +8,13 @@
 @inject IGamePlayService GamePlayService
 
 <h3>@OpponentGameBoard?.Player?.Name</h3>
+<hr>
+@if(IsPlayerTurn){
+    <small>Your turn!</small>
+} else {
+    <small>Waiting on opponent to make a move!</small>
+}
+<hr>
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   
@@ -32,14 +39,16 @@
                             Type=cellType
                             Column=column
                             Row=row
-                            Color=color      
+                            Color=color    
+                            IsDisabled=!IsPlayerTurn  
                         />
                     } else {
                         <BlazorApp.Client.Components.Cell 
                             Type=cellType
                             Column=column
                             Row=row
-                            Color=color   
+                            Color=color 
+                            IsDisabled=!IsPlayerTurn  
                             OnClicked=@OnCoordinateClicked   
                         />
                     }
@@ -53,6 +62,9 @@
 @code {
     [CascadingParameter(Name = "OpponentGameBoard")]
     protected GameBoardBase OpponentGameBoard { get; set; }
+
+    [CascadingParameter(Name = "IsPlayerTurn")]
+    protected bool IsPlayerTurn { get; set; }
 
     public async void OnCoordinateClicked(CoordEventArgs eventArgs)
         => await GamePlayService.MarkCoordinateAsync(eventArgs.Column, eventArgs.Row);
