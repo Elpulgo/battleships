@@ -7,14 +7,12 @@
 
 @inject IGamePlayService GamePlayService
 
-<h6>@OpponentGameBoard?.Player?.Name</h6>
-<hr>
-@if(IsPlayerTurn){
-    <small class="green bold">Your turn!</small>
-} else {
-    <small class="red bold">Waiting for opponent to make a move..</small>
-}
-<hr>
+<BoardHeader
+    HeaderText=@($"{OpponentGameBoard?.Player?.Name} board")
+    InfoText=@(IsPlayerTurn ? "Your turn!" : "Waiting for opponent to make a move..")
+    InfoClassName=@(IsPlayerTurn ? "green bold" : "red bold")>
+</BoardHeader>
+
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   

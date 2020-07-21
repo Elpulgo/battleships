@@ -8,10 +8,12 @@
 @inject IEventListener EventListener
 @implements IDisposable
 
-<h6>Your board</h6>
-<hr>
-<small class="light_green bold">@OpponentMove</small>
-<hr>
+<BoardHeader
+    HeaderText="Your board"
+    InfoText=@OpponentMove
+    InfoClassName="light_green bold">
+</BoardHeader>
+
 <BoardWrapper>
     @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
     {   

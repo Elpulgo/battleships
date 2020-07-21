@@ -1,5 +1,4 @@
 .table-cell {
-  /*For mobile view... add responsive breakpoints here..*/
   max-width: 32px !important;
   min-height: 32px;
   border: 1px solid lightgrey;
@@ -9,16 +8,12 @@
 }
 
 .table-cell-column {
-  /*For mobile view... add responsive breakpoints here..*/
-
   max-width: 32px !important;
   padding: 0;
   text-align: center;
 }
 
 .table-cell-row {
-  /*For mobile view... add responsive breakpoints here..*/
-
   max-width: 32px !important;
   padding: 0;
   align-self: center;
@@ -52,4 +47,46 @@
 
 .input_width {
   max-width: 200px;
+}
+
+@media (max-width: 767.98px) {
+  .mobile_divider {
+    background-color: lightseagreen;
+    height: 0.1rem;
+    width: 100%;
+  }
+
+  .mobile_header_divider {
+    background-color: #eee;
+    height: 0.1rem;
+  }
+  .mobile {
+    display: block;
+    font-size: 0.8rem;
+    border: 1px solid #eee;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .desktop {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile_divider {
+    display: none;
+  }
+  .mobile {
+    display: none;
+  }
+
+  .desktop {
+    display: block;
+    border: 1px solid #eee;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
 }
