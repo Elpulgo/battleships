@@ -10,10 +10,7 @@ namespace BlazorApp.Client.Services
     public interface IMessageService
     {
         Task InitializeAsync();
-
         string HubConnectionId { get; }
-
-        bool IsConnected { get; }
     }
 
     public class MessageService : IMessageService, IDisposable
@@ -34,8 +31,6 @@ namespace BlazorApp.Client.Services
                        .Build();
         }
 
-        public bool IsConnected => _hubConnection.State == HubConnectionState.Connected;
-
         public async Task InitializeAsync()
         {
             _hubConnection.On<GameMode>("GameModeChanged", (gameMode) => _eventExecutor.GameModeChanged(gameMode));
@@ -49,6 +44,7 @@ namespace BlazorApp.Client.Services
             _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventExecutor.ReloadOpponentGameBoard());
 
             _hubConnection.On<bool>("PlayerTurnChanged", (isPlayerTurn) => _eventExecutor.PlayerTurnChanged(isPlayerTurn));
+            _hubConnection.On<string>("WinnerNominated", (winner) => _eventExecutor.WinnerNominated(winner));
 
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();

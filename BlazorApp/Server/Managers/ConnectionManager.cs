@@ -27,7 +27,7 @@ namespace BlazorApp.Server.Managers
             return string.Empty;
         }
 
-        public void Remove(Guid key, string connectionId)
+        public void Remove(Guid key)
         {
             lock (_connections)
             {

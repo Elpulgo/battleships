@@ -13,6 +13,7 @@ namespace BlazorApp.Client.Services
         public event EventHandler ReloadOpponentGameBoardEventChanged;
         public event EventHandler<bool> PlayerTurnEventChanged;
         public event EventHandler<(bool shipWasHit, bool shipWasDestroyed)> OpponentMoveFiredEventChanged;
+        public event EventHandler<string> WinnerNominatedEventChanged;
 
         public EventService()
         {
@@ -35,5 +36,8 @@ namespace BlazorApp.Client.Services
 
         public void OpponentMoveFired(bool shipWasHit, bool shipWasDestroyed)
             => OpponentMoveFiredEventChanged?.Invoke(this, (shipWasHit, shipWasDestroyed));
+
+        public void WinnerNominated(string winner)
+            => WinnerNominatedEventChanged?.Invoke(this, winner);
     }
 }

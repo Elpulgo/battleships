@@ -13,5 +13,6 @@ namespace BlazorApp.Client.Services
         void ReloadOpponentGameBoard();
         void PlayerTurnChanged(bool isPlayerTurn);
         void OpponentMoveFired(bool shipWasHit, bool shipWasDestroyed);
+        void WinnerNominated(string winner);
     }
 }

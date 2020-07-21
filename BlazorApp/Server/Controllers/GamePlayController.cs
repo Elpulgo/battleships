@@ -41,6 +41,15 @@ namespace BlazorApp.Server.Controllers
 
             var opponentPlayer = _playerManager.GetOpponent(playerId);
             await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, new ShipMarkedDto(shipFound, shipDestroyed));
+
+
+            if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
+            {
+                var player = _playerManager.GetPlayerById(playerId);
+                await _pushNotificationService.GameEndedAllAsync(player.Name);
+                return Ok(new ShipMarkedDto(shipFound, shipDestroyed));
+            }
+
             await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
 
             return Ok(new ShipMarkedDto(shipFound, shipDestroyed));

@@ -13,5 +13,7 @@ namespace BlazorApp.Client.Services
         event EventHandler ReloadOpponentGameBoardEventChanged;
         event EventHandler<bool> PlayerTurnEventChanged;
         event EventHandler<(bool shipWasHit, bool shipWasDestroyed)> OpponentMoveFiredEventChanged;
+        event EventHandler<string> WinnerNominatedEventChanged;
+
     }
 }

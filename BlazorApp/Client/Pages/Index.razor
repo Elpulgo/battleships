@@ -45,6 +45,7 @@
             </div>            
             break;
         case GameMode.GameEnded:
+            <h2>Aaaaaaand the winner is... @Winner</h2>
             break;
         default:
             break;
@@ -64,6 +65,7 @@
     protected GameBoardBase OpponentGameBoard { get; private set; }
     public bool IsPlayerTurn { get; private set; }
     public Player Player { get; private set; }
+    public string Winner { get; private set; } = string.Empty;
     public bool GameIsAvailable = false;
 
     protected override Task OnInitializedAsync()
@@ -82,6 +84,7 @@
         EventListener.ReloadGameBoardEventChanged += HandleGameBoardReload;
         EventListener.ReloadOpponentGameBoardEventChanged += HandleOpponentGameBoardReload;
         EventListener.PlayerTurnEventChanged += HandlePlayerTurnChanged;
+        EventListener.WinnerNominatedEventChanged += HandleWinnerNominatedChanged;
     }
 
     private async void HandleGameModeChanged(object sender, GameMode gameMode)
@@ -130,6 +133,12 @@
         StateHasChanged();
     }
 
+    private void HandleWinnerNominatedChanged(object sender, string winner)
+    {
+        Winner = winner;
+        StateHasChanged();
+    }
+
     public void Dispose()
     {
         EventListener.GameModeEventChanged -= HandleGameModeChanged;
@@ -139,5 +148,6 @@
         EventListener.ReloadGameBoardEventChanged -= HandleGameBoardReload;
         EventListener.ReloadOpponentGameBoardEventChanged -= HandleOpponentGameBoardReload;
         EventListener.PlayerTurnEventChanged -= HandlePlayerTurnChanged;
+        EventListener.WinnerNominatedEventChanged -= HandleWinnerNominatedChanged;
     }
 }
