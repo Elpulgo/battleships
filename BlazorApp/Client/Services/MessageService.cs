@@ -44,7 +44,7 @@ namespace BlazorApp.Client.Services
             _hubConnection.On<string>("ReloadOpponentGameBoard", (placeHolder) => _eventExecutor.ReloadOpponentGameBoard());
 
             _hubConnection.On<bool>("PlayerTurnChanged", (isPlayerTurn) => _eventExecutor.PlayerTurnChanged(isPlayerTurn));
-            _hubConnection.On<string>("WinnerNominated", (winner) => _eventExecutor.WinnerNominated(winner));
+            _hubConnection.On<Guid>("WinnerNominated", (winner) => _eventExecutor.WinnerNominated(winner));
 
             Console.WriteLine("Initializing hub..");
             await _hubConnection.StartAsync();

@@ -1,0 +1,58 @@
+@using Core.Utilities 
+@using Core.Models.Ships 
+@using Core.Models 
+@using Client.Models 
+@using static Core.Models.CoordinatesHelper
+
+<BoardHeader
+    HeaderText=@HeaderText()
+    InfoText="Final result on board."
+    InfoClassName="light_green bold">
+</BoardHeader>
+
+<BoardWrapper>
+    @foreach (var row in Enumerable.Range(1, Core.Utilities.GameConstants.MaxRowCount))
+    {   
+        <div class="row no-gutters">
+            <div class="col table-cell-row">
+                @row
+            </div>
+            @foreach(Column column in Enum.GetValues(typeof(Column))){              
+                var coordContainer = GameBoard.Matrix[CoordinateKey.Build(column, row)];
+
+                var (cellType, color) = 
+                    (coordContainer.IsShipDestroyed, coordContainer.HasShip, coordContainer.IsMarked) switch{
+                        (true, _, _) => (CellType.Target, coordContainer.Color),
+                        (false, true, true) => (CellType.Flag, Color.Red),
+                        (false, true, false) => (CellType.Flag, coordContainer.Color),
+                        (false, false, true) => (CellType.X, Color.LightGrey),
+                        _ => (CellType.None, Color.None)
+                    };
+
+                <BlazorApp.Client.Components.Cell 
+                    Type=cellType
+                    Column=column
+                    Row=row
+                    Color=color   
+                    CellState=CellState.Disabled  
+                />
+            }
+        </div>
+    }
+</BoardWrapper>
+
+
+@code {
+    [Parameter]
+    public GameBoardBase GameBoard { get; set; }
+
+    [Parameter]
+    public Guid WinningPlayerId { get; set; }
+
+    public string HeaderText(){
+        if(GameBoard.Player.Id == WinningPlayerId)
+            return $"{GameBoard.Player.Name} board. (WINNER)";
+        else 
+            return $"{GameBoard.Player.Name} board. (LOSER)";    
+    }
+}

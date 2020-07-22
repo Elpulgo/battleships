@@ -19,6 +19,7 @@ namespace BlazorApp.Client.Services
         Task PlayerReadyAsync(List<Ship> ships);
         Task LoadGameBoardAsync();
         Task LoadOpponentGameBoardAsync();
+        Task LoadFinalBoardsAsync();
         Task MarkCoordinateAsync(Column column, int row);
         Guid PlayerId { get; }
         bool IsPlayerSlotAvailable { get; }
@@ -93,6 +94,12 @@ namespace BlazorApp.Client.Services
             {
                 Console.WriteLine("Failed to create player: " + exception.Message);
             }
+        }
+
+        public async Task LoadFinalBoardsAsync()
+        {
+            var finalBoardsDto = await GetRequest<FinalBoardsDto>($"gameplay/finalboards/{PlayerId}");
+            _eventExecutor.FinalBoardsLoaded(finalBoardsDto.Board, finalBoardsDto.OpponentBoard);
         }
 
         private async Task<T> GetRequest<T>(string url)

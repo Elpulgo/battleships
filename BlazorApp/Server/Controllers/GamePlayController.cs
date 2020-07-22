@@ -46,7 +46,7 @@ namespace BlazorApp.Server.Controllers
             if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
             {
                 var player = _playerManager.GetPlayerById(playerId);
-                await _pushNotificationService.GameEndedAllAsync(player.Name);
+                await _pushNotificationService.GameEndedAllAsync(playerId);
                 return Ok(new ShipMarkedDto(shipFound, shipDestroyed));
             }
 
@@ -60,5 +60,12 @@ namespace BlazorApp.Server.Controllers
 
         [HttpGet("opponentgameboard/{playerid}")]
         public IActionResult GetOpponentGameBoard(Guid playerId) => Ok(_gameManager.GetOpponentBoard(playerId));
+
+        [HttpGet("finalboards/{playerId}")]
+        public IActionResult GetFinalBoards(Guid playerId)
+        {
+            var (board, opponentBoard) = _gameManager.GetAllBoards(playerId);
+            return Ok(new FinalBoardsDto(board, opponentBoard));
+        }
     }
 }

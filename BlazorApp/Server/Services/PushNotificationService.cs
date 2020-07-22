@@ -18,7 +18,7 @@ namespace BlazorApp.Server.Services
         Task ReloadGameBoardAsync(Guid playerId, ShipMarkedDto result);
         Task ReloadOpponentGameBoardAsync(Guid playerId);
         Task PlayerTurnChangedAsync(Guid playerId);
-        Task GameEndedAllAsync(string winningPlayer);
+        Task GameEndedAllAsync(Guid winningPlayerId);
     }
 
     public class PushNotificationService : IPushNotificationService
@@ -47,9 +47,9 @@ namespace BlazorApp.Server.Services
 
         public async Task ReloadOpponentGameBoardAsync(Guid playerId)
             => await _hubContext.SendClient(GetConnectionId(playerId), string.Empty, "ReloadOpponentGameBoard");
-        public async Task GameEndedAllAsync(string winningPlayer)
+        public async Task GameEndedAllAsync(Guid winningPlayerId)
         {
-            await _hubContext.SendAll(winningPlayer, "WinnerNominated");
+            await _hubContext.SendAll(winningPlayerId, "WinnerNominated");
             await GameModeChangedAllAsync(GameMode.GameEnded);
         }
 

@@ -23,6 +23,13 @@ namespace Core.Managers
         /// <returns><see cref="Core.Models.GameBoardBase"/></returns>
         GameBoardBase GetGameBoard(Guid playerId);
         /// <summary>
+        /// Get boards for all players, with all ships and marks visible.
+        /// Note that <paramref name="playerId"/> should be current player 
+        /// to get desired result.
+        /// </summary>
+        /// <returns><see cref="Core.Models.GameBoardBase"/></returns>
+        (GameBoardBase board, GameBoardBase opponentBoard) GetAllBoards(Guid playerId);
+        /// <summary>
         /// Get the board for opponent player. Note that <paramref name="playerId"/> should be current player 
         /// to get desired result.
         /// </summary>
@@ -112,6 +119,13 @@ namespace Core.Managers
             }
 
             throw new Exception($"Player with id '{playerId}' doesn't exist in this game!");
+        }
+
+        public (GameBoardBase board, GameBoardBase opponentBoard) GetAllBoards(Guid playerId)
+        {
+            var board = FindBoard(playerId);
+            var opponentBoard = FindBoard(_gameBoardLookup.SingleOrDefault(f => f.Key != playerId).Key);
+            return (board, opponentBoard);
         }
     }
 }

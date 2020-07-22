@@ -45,7 +45,17 @@
             </div>            
             break;
         case GameMode.GameEnded:
-            <h2>Aaaaaaand the winner is... @Winner</h2>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <FinalBoard GameBoard=@FinalBoardOpponent WinningPlayerId=@WinnerPlayerId></FinalBoard>
+                    </div>
+                    <div class="mobile_divider mt-4 mb-4"></div>
+                    <div class="col-xs-12 col-md-6">
+                        <FinalBoard GameBoard=@FinalBoard WinningPlayerId=@WinnerPlayerId></FinalBoard>
+                    </div>
+                </div>
+            </div>          
             break;
         default:
             break;
@@ -65,7 +75,10 @@
     protected GameBoardBase OpponentGameBoard { get; private set; }
     public bool IsPlayerTurn { get; private set; }
     public Player Player { get; private set; }
-    public string Winner { get; private set; } = string.Empty;
+    public Guid WinnerPlayerId { get; private set; }
+    public GameBoardBase FinalBoard { get; private set; }
+    public GameBoardBase FinalBoardOpponent { get; private set; }
+
     public bool GameIsAvailable = false;
 
     protected override Task OnInitializedAsync()
@@ -85,6 +98,7 @@
         EventListener.ReloadOpponentGameBoardEventChanged += HandleOpponentGameBoardReload;
         EventListener.PlayerTurnEventChanged += HandlePlayerTurnChanged;
         EventListener.WinnerNominatedEventChanged += HandleWinnerNominatedChanged;
+        EventListener.FinalBoardsEventChanged += HandleFinalBoardsChanged;
     }
 
     private async void HandleGameModeChanged(object sender, GameMode gameMode)
@@ -93,6 +107,11 @@
         {
             await GamePlayService.LoadGameBoardAsync();
             await GamePlayService.LoadOpponentGameBoardAsync();
+        }
+
+        if (gameMode == GameMode.GameEnded)
+        {
+            await GamePlayService.LoadFinalBoardsAsync();
         }
         GameMode = gameMode;
         StateHasChanged();
@@ -133,9 +152,16 @@
         StateHasChanged();
     }
 
-    private void HandleWinnerNominatedChanged(object sender, string winner)
+    private void HandleWinnerNominatedChanged(object sender, Guid winnerPlayerId)
     {
-        Winner = winner;
+        WinnerPlayerId = winnerPlayerId;
+        StateHasChanged();
+    }
+
+    private void HandleFinalBoardsChanged(object sender, (GameBoardBase Board, GameBoardBase OpponentBoard) boards)
+    {
+        FinalBoard = boards.Board;
+        FinalBoardOpponent = boards.OpponentBoard;
         StateHasChanged();
     }
 
@@ -149,5 +175,6 @@
         EventListener.ReloadOpponentGameBoardEventChanged -= HandleOpponentGameBoardReload;
         EventListener.PlayerTurnEventChanged -= HandlePlayerTurnChanged;
         EventListener.WinnerNominatedEventChanged -= HandleWinnerNominatedChanged;
+        EventListener.FinalBoardsEventChanged -= HandleFinalBoardsChanged;
     }
 }
