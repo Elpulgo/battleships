@@ -37,5 +37,13 @@ namespace BlazorApp.Server.Managers
                 }
             }
         }
+
+        public void Reset()
+        {
+            lock (_connections)
+            {
+                _connections.Clear();
+            }
+        }
     }
 }

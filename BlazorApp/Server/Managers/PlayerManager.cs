@@ -24,5 +24,11 @@ namespace BlazorApp.Server.Managers
         public Player GetPlayerById(Guid id) => Players.SingleOrDefault(s => s.Id == id);
 
         public Player GetOpponent(Guid id) => Players.SingleOrDefault(s => s.Id != id);
+
+        public void Reset()
+        {
+            Players.Clear();
+            IsPlayingVsComputer = false;
+        }
     }
 }

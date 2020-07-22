@@ -51,7 +51,6 @@ namespace BlazorApp.Server.Controllers
             }
 
             await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
-
             return Ok(new ShipMarkedDto(shipFound, shipDestroyed));
         }
 
@@ -65,7 +64,15 @@ namespace BlazorApp.Server.Controllers
         public IActionResult GetFinalBoards(Guid playerId)
         {
             var (board, opponentBoard) = _gameManager.GetAllBoards(playerId);
+            ResetGame();
             return Ok(new FinalBoardsDto(board, opponentBoard));
+        }
+
+        private void ResetGame()
+        {
+            _gameManager.Reset();
+            _playerManager.Reset();
+            _connectionManager.Reset();
         }
     }
 }

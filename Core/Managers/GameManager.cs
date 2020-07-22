@@ -62,6 +62,10 @@ namespace Core.Managers
         /// <returns>Indication if a ship was found on the coordinate, and if so, the ship has been destroyed.</returns>
         (bool shipFound, bool shipDestroyed) MarkCoordinate(Guid playerId, string coordinateKey);
 
+        /// <summary>
+        /// Reset the state of the game. Will only execute if any of the players boards have all ships destroyed.
+        /// </summary>
+        void Reset();
         bool IsAllBoardsSetup { get; }
     }
 
@@ -126,6 +130,17 @@ namespace Core.Managers
             var board = FindBoard(playerId);
             var opponentBoard = FindBoard(_gameBoardLookup.SingleOrDefault(f => f.Key != playerId).Key);
             return (board, opponentBoard);
+        }
+
+        public void Reset()
+        {
+            if (!_gameBoardLookup.Any(a => a.Value.IsAllDestroyed()))
+                return;
+            
+            lock (m_Lock)
+            {
+                _gameBoardLookup.Clear();
+            }
         }
     }
 }
