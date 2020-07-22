@@ -1,11 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using Core.Managers;
 using Shared;
 using Microsoft.AspNetCore.Mvc;
 using BlazorApp.Server.Services;
-using Core.Utilities;
-using BlazorApp.Server.Managers;
 
 namespace BlazorApp.Server.Controllers
 {
@@ -13,66 +10,38 @@ namespace BlazorApp.Server.Controllers
     [Route("[controller]")]
     public class GamePlayController : ControllerBase
     {
-        private readonly IGameManager _gameManager;
-        private readonly ConnectionManager _connectionManager;
-        private readonly PlayerManager _playerManager;
-        private readonly IPushNotificationService _pushNotificationService;
+        private readonly IGamePlayRelay _gamePlayRelay;
 
-        public GamePlayController(
-            IGameManager gameManager,
-            ConnectionManager connectionManager,
-            PlayerManager playerManager,
-            IPushNotificationService pushNotificationService)
+        public GamePlayController(IGamePlayRelay gamePlayRelay)
         {
-            _gameManager = gameManager;
-            _connectionManager = connectionManager;
-            _playerManager = playerManager;
-            _pushNotificationService = pushNotificationService;
+            _gamePlayRelay = gamePlayRelay;
         }
 
         [HttpPost("markcoordinate/{playerId}")]
         public async Task<IActionResult> MarkCoordinate([FromBody] MarkCoordinateDto request, Guid playerId)
         {
-            var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
-                playerId,
-                CoordinateKey.Build(request.Column, request.Row));
-
-            await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
-
-            var opponentPlayer = _playerManager.GetOpponent(playerId);
-            await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, new ShipMarkedDto(shipFound, shipDestroyed));
-
-
-            if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
-            {
-                var player = _playerManager.GetPlayerById(playerId);
-                await _pushNotificationService.GameEndedAllAsync(playerId);
-                return Ok(new ShipMarkedDto(shipFound, shipDestroyed));
-            }
-
-            await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
+            var (shipFound, shipDestroyed) = await _gamePlayRelay.MarkCoordinateAsync(
+                request.Column,
+                request.Row,
+                playerId
+            );
             return Ok(new ShipMarkedDto(shipFound, shipDestroyed));
         }
 
         [HttpGet("gameboard/{playerid}")]
-        public IActionResult GetGameBoard(Guid playerId) => Ok(_gameManager.GetGameBoard(playerId));
+        public IActionResult GetGameBoard(Guid playerId)
+            => Ok(_gamePlayRelay.GetGameBoard(playerId));
 
         [HttpGet("opponentgameboard/{playerid}")]
-        public IActionResult GetOpponentGameBoard(Guid playerId) => Ok(_gameManager.GetOpponentBoard(playerId));
+        public IActionResult GetOpponentGameBoard(Guid playerId)
+            => Ok(_gamePlayRelay.GetOpponentGameBoard(playerId));
 
         [HttpGet("finalboards/{playerId}")]
         public IActionResult GetFinalBoards(Guid playerId)
         {
-            var (board, opponentBoard) = _gameManager.GetAllBoards(playerId);
-            ResetGame();
+            var (board, opponentBoard) = _gamePlayRelay.GetFinalBoards(playerId);
+            _gamePlayRelay.ResetGame();
             return Ok(new FinalBoardsDto(board, opponentBoard));
-        }
-
-        private void ResetGame()
-        {
-            _gameManager.Reset();
-            _playerManager.Reset();
-            _connectionManager.Reset();
         }
     }
 }

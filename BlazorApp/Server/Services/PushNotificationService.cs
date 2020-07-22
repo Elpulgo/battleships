@@ -15,7 +15,7 @@ namespace BlazorApp.Server.Services
     {
         Task GameModeChangedAllAsync(GameMode gameMode);
         Task GameModeChangedClientAsync(GameMode gameMode, Guid playerId);
-        Task ReloadGameBoardAsync(Guid playerId, ShipMarkedDto result);
+        Task ReloadGameBoardAsync(Guid playerId, bool shipFound, bool shipDestroyed);
         Task ReloadOpponentGameBoardAsync(Guid playerId);
         Task PlayerTurnChangedAsync(Guid playerId);
         Task GameEndedAllAsync(Guid winningPlayerId);
@@ -42,8 +42,8 @@ namespace BlazorApp.Server.Services
         public async Task GameModeChangedClientAsync(GameMode gameMode, Guid playerId)
             => await _hubContext.SendClient(GetConnectionId(playerId), gameMode, "GameModeChanged");
 
-        public async Task ReloadGameBoardAsync(Guid playerId, ShipMarkedDto result)
-            => await _hubContext.SendClient(GetConnectionId(playerId), result, "ReloadGameBoard");
+        public async Task ReloadGameBoardAsync(Guid playerId, bool shipFound, bool shipDestroyed)
+            => await _hubContext.SendClient(GetConnectionId(playerId), new ShipMarkedDto(shipFound, shipDestroyed), "ReloadGameBoard");
 
         public async Task ReloadOpponentGameBoardAsync(Guid playerId)
             => await _hubContext.SendClient(GetConnectionId(playerId), string.Empty, "ReloadOpponentGameBoard");

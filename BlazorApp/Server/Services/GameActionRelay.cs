@@ -6,6 +6,7 @@ using BlazorApp.Server.Managers;
 using Core.Managers;
 using Core.Models;
 using Core.Models.Ships;
+using Core.Utilities;
 
 namespace BlazorApp.Server.Services
 {
@@ -97,6 +98,53 @@ namespace BlazorApp.Server.Services
                 throw new ArgumentOutOfRangeException("All players have not joined the gamed yet!");
 
             return _playerManager.Players.Skip(nextRandom).FirstOrDefault();
+        }
+
+        #endregion
+
+        #region Gameplay
+
+
+        public GameBoardBase GetGameBoard(Guid playerId)
+            => _gameManager.GetGameBoard(playerId);
+
+        public GameBoardBase GetOpponentGameBoard(Guid playerId)
+            => _gameManager.GetOpponentBoard(playerId);
+
+        public (GameBoardBase board, GameBoardBase opponentBoard) GetFinalBoards(Guid playerId)
+            => _gameManager.GetAllBoards(playerId);
+        public async Task<(bool ShipFound, bool ShipDestroyed)> MarkCoordinateAsync(
+            CoordinatesHelper.Column column,
+            int row,
+            Guid playerId)
+        {
+            var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
+                playerId,
+                CoordinateKey.Build(column, row));
+
+            await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
+
+            var opponentPlayer = _playerManager.GetOpponent(playerId);
+            await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, shipFound, shipDestroyed);
+
+            if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
+            {
+                var player = _playerManager.GetPlayerById(playerId);
+                await _pushNotificationService.GameEndedAllAsync(playerId);
+            }
+            else
+            {
+                await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
+            }
+
+            return (shipFound, shipDestroyed);
+        }
+
+        public void ResetGame()
+        {
+            _gameManager.Reset();
+            _playerManager.Reset();
+            _connectionManager.Reset();
         }
 
         #endregion
