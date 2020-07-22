@@ -6,6 +6,7 @@
 
 <BoardHeader
     HeaderText=@HeaderText()
+    HeaderClassName=@HeaderClassName
     InfoText="Final result on board."
     InfoClassName="light_green bold">
 </BoardHeader>
@@ -49,10 +50,19 @@
     [Parameter]
     public Guid WinningPlayerId { get; set; }
 
-    public string HeaderText(){
-        if(GameBoard.Player.Id == WinningPlayerId)
+    public string HeaderClassName
+    {
+        get
+        {
+            return GameBoard.Player.Id == WinningPlayerId ? "green bold" : "red bold";
+        }
+    }
+
+    public string HeaderText()
+    {
+        if (GameBoard.Player.Id == WinningPlayerId)
             return $"{GameBoard.Player.Name} board. (WINNER)";
-        else 
-            return $"{GameBoard.Player.Name} board. (LOSER)";    
+        else
+            return $"{GameBoard.Player.Name} board. (LOSER)";
     }
 }

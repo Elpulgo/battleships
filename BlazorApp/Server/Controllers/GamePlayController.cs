@@ -40,7 +40,6 @@ namespace BlazorApp.Server.Controllers
         public IActionResult GetFinalBoards(Guid playerId)
         {
             var (board, opponentBoard) = _gamePlayRelay.GetFinalBoards(playerId);
-            _gamePlayRelay.ResetGame();
             return Ok(new FinalBoardsDto(board, opponentBoard));
         }
     }

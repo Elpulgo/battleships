@@ -40,11 +40,11 @@ namespace BlazorApp.Server
             services.AddSingleton<GameServiceFactory>();
             services.AddSingleton<IGameManager, GameManager>();
 
+            services.AddTransient<IPushNotificationService, PushNotificationService>();
             services.AddSingleton<GameActionRelay>();
             services.AddSingleton<IGamePlayRelay>(provider => provider.GetRequiredService<GameActionRelay>());
             services.AddSingleton<ISetupRelay>(provider => provider.GetRequiredService<GameActionRelay>());
 
-            services.AddTransient<IPushNotificationService, PushNotificationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

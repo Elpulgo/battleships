@@ -14,17 +14,19 @@ namespace BlazorApp.Server.Services
     {
         private readonly GameServiceFactory _gameServiceFactory;
         private readonly ConnectionManager _connectionManager;
-        private readonly PushNotificationService _pushNotificationService;
-        private readonly GameManager _gameManager;
+        private readonly IPushNotificationService _pushNotificationService;
+        private readonly IGameManager _gameManager;
         private readonly PlayerManager _playerManager;
+        private List<Guid> _finalBoardRequests;
 
         public GameActionRelay(
             GameServiceFactory gameServiceFactory,
             ConnectionManager connectionManager,
-            PushNotificationService pushNotificationService,
-            GameManager gameManager,
+            IPushNotificationService pushNotificationService,
+            IGameManager gameManager,
             PlayerManager playerManager)
         {
+            _finalBoardRequests = new List<Guid>();
             _gameServiceFactory = gameServiceFactory;
             _connectionManager = connectionManager;
             _pushNotificationService = pushNotificationService;
@@ -112,7 +114,19 @@ namespace BlazorApp.Server.Services
             => _gameManager.GetOpponentBoard(playerId);
 
         public (GameBoardBase board, GameBoardBase opponentBoard) GetFinalBoards(Guid playerId)
-            => _gameManager.GetAllBoards(playerId);
+        {
+            _finalBoardRequests.Add(playerId);
+
+            var (board, opponentBoard) = _gameManager.GetAllBoards(playerId);
+
+            if (_playerManager.Players.All(s => _finalBoardRequests.Contains(s.Id)))
+            {
+                ResetGame();
+            }
+
+            return (board, opponentBoard);
+        }
+
         public async Task<(bool ShipFound, bool ShipDestroyed)> MarkCoordinateAsync(
             CoordinatesHelper.Column column,
             int row,
@@ -145,6 +159,7 @@ namespace BlazorApp.Server.Services
             _gameManager.Reset();
             _playerManager.Reset();
             _connectionManager.Reset();
+            _finalBoardRequests.Clear();
         }
 
         #endregion
