@@ -37,7 +37,12 @@ namespace BlazorApp.Server
             services.AddRazorPages();
             services.AddSingleton<ConnectionManager>();
             services.AddSingleton<PlayerManager>();
+            services.AddSingleton<GameServiceFactory>();
             services.AddSingleton<IGameManager, GameManager>();
+
+            services.AddSingleton<GameActionRelay>();
+            services.AddSingleton<IGamePlayRelay>(provider => provider.GetRequiredService<GameActionRelay>());
+            services.AddSingleton<ISetupRelay>(provider => provider.GetRequiredService<GameActionRelay>());
 
             services.AddTransient<IPushNotificationService, PushNotificationService>();
         }
