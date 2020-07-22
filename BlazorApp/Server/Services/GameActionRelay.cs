@@ -75,6 +75,9 @@ namespace BlazorApp.Server.Services
 
         public async Task PlayerIsReady(Guid playerId, List<Ship> ships)
         {
+
+            // Need special handling for comp
+            // Need to generate random board for computer and add to gamemanager
             var player = _playerManager.GetPlayerById(playerId);
 
             _gameManager.AddBoard(new GameBoardBase(player).WithShips(ships));
@@ -88,7 +91,6 @@ namespace BlazorApp.Server.Services
             await _pushNotificationService.GameModeChangedAllAsync(GameMode.GamePlay);
 
             var randomPlayer = GetRandomPlayer();
-
             await _pushNotificationService.PlayerTurnChangedAsync(randomPlayer.Id);
         }
 
@@ -119,7 +121,7 @@ namespace BlazorApp.Server.Services
 
             var (board, opponentBoard) = _gameManager.GetAllBoards(playerId);
 
-            if (_playerManager.Players.All(s => _finalBoardRequests.Contains(s.Id)))
+            if (_playerManager.Players.All(s => _finalBoardRequests.Contains(s.Id)) || _playerManager.IsPlayingVsComputer)
             {
                 ResetGame();
             }
@@ -132,12 +134,15 @@ namespace BlazorApp.Server.Services
             int row,
             Guid playerId)
         {
+            // Need special handling when playing vs computer
+            // This method need to be called from computer
             var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
                 playerId,
                 CoordinateKey.Build(column, row));
 
             await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
 
+            // This is not needed when playing vs computer?
             var opponentPlayer = _playerManager.GetOpponent(playerId);
             await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, shipFound, shipDestroyed);
 

@@ -17,8 +17,11 @@ namespace BlazorApp.Server.Managers
             Players = new List<Player>();
         }
 
-        public void PlayVsComputer() => IsPlayingVsComputer = true;
-
+        public void PlayVsComputer()
+        {
+            AddPlayerToGame(new Player("Computer", PlayerType.Computer));
+            IsPlayingVsComputer = true;
+        }
         public void AddPlayerToGame(Player player) => Players.Add(player);
 
         public Player GetPlayerById(Guid id) => Players.SingleOrDefault(s => s.Id == id);
