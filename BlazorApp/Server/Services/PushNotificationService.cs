@@ -18,6 +18,8 @@ namespace BlazorApp.Server.Services
         Task ReloadGameBoardAsync(Guid playerId, bool shipFound, bool shipDestroyed);
         Task ReloadOpponentGameBoardAsync(Guid playerId);
         Task PlayerTurnChangedAsync(Guid playerId);
+        Task PlayerWaitChangedAsync(Guid playerId);
+
         Task GameEndedAllAsync(Guid winningPlayerId);
     }
 
@@ -57,9 +59,11 @@ namespace BlazorApp.Server.Services
         {
             var connectionIdPlayerTurn = GetConnectionId(playerId);
             await _hubContext.SendClient(connectionIdPlayerTurn, true, "PlayerTurnChanged");
+        }
 
-            var opponentPlayer = _playerManager.GetOpponent(playerId);
-            var connectionIdPlayerWait = GetConnectionId(opponentPlayer.Id);
+        public async Task PlayerWaitChangedAsync(Guid playerId)
+        {
+            var connectionIdPlayerWait = GetConnectionId(playerId);
             await _hubContext.SendClient(connectionIdPlayerWait, false, "PlayerTurnChanged");
         }
 

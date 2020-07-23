@@ -7,6 +7,7 @@ using Core.Managers;
 using Core.Models;
 using Core.Models.Ships;
 using Core.Utilities;
+using static Core.Models.CoordinatesHelper;
 
 namespace BlazorApp.Server.Services
 {
@@ -75,12 +76,15 @@ namespace BlazorApp.Server.Services
 
         public async Task PlayerIsReady(Guid playerId, List<Ship> ships)
         {
-
-            // Need special handling for comp
-            // Need to generate random board for computer and add to gamemanager
             var player = _playerManager.GetPlayerById(playerId);
 
             _gameManager.AddBoard(new GameBoardBase(player).WithShips(ships));
+
+            if (_playerManager.IsPlayingVsComputer)
+            {
+                await PlayerReadyVsComputerAsync(playerId);
+                return;
+            }
 
             if (!_gameManager.IsAllBoardsSetup)
             {
@@ -91,7 +95,31 @@ namespace BlazorApp.Server.Services
             await _pushNotificationService.GameModeChangedAllAsync(GameMode.GamePlay);
 
             var randomPlayer = GetRandomPlayer();
+            var opponent = _playerManager.GetOpponent(randomPlayer.Id);
             await _pushNotificationService.PlayerTurnChangedAsync(randomPlayer.Id);
+            await _pushNotificationService.PlayerWaitChangedAsync(opponent.Id);
+        }
+
+        private async Task PlayerReadyVsComputerAsync(Guid playerId)
+        {
+            var computer = _playerManager.GetOpponent(playerId);
+            var computerShips = new ShipGenerator().Generate().ToList();
+
+            _gameManager.AddBoard(new GameBoardBase(computer).WithShips(computerShips));
+
+            await _pushNotificationService.GameModeChangedAllAsync(GameMode.GamePlay);
+
+            var randomPlayer = GetRandomPlayer();
+
+            // Fire to computer service here aswell..
+            if (randomPlayer.Id == playerId)
+            {
+                await _pushNotificationService.PlayerTurnChangedAsync(randomPlayer.Id);
+            }
+            else
+            {
+                await _pushNotificationService.PlayerWaitChangedAsync(randomPlayer.Id);
+            }
         }
 
         private Player GetRandomPlayer()
@@ -136,25 +164,30 @@ namespace BlazorApp.Server.Services
         {
             // Need special handling when playing vs computer
             // This method need to be called from computer
+
+            if (IsPlayerComputer(playerId))
+            {
+                return await HandleMarkCoordinateAsComputerAsync(playerId, column, row);
+            }
+
             var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
                 playerId,
                 CoordinateKey.Build(column, row));
 
-            await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
-
-            // This is not needed when playing vs computer?
-            var opponentPlayer = _playerManager.GetOpponent(playerId);
-            await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, shipFound, shipDestroyed);
 
             if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
             {
-                var player = _playerManager.GetPlayerById(playerId);
                 await _pushNotificationService.GameEndedAllAsync(playerId);
+                return (shipFound, shipDestroyed);
             }
-            else
-            {
-                await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
-            }
+
+            var opponentPlayer = _playerManager.GetOpponent(playerId);
+
+            await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, shipFound, shipDestroyed);
+            await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
+
+            await _pushNotificationService.PlayerTurnChangedAsync(opponentPlayer.Id);
+            await _pushNotificationService.PlayerWaitChangedAsync(playerId);
 
             return (shipFound, shipDestroyed);
         }
@@ -165,6 +198,39 @@ namespace BlazorApp.Server.Services
             _playerManager.Reset();
             _connectionManager.Reset();
             _finalBoardRequests.Clear();
+        }
+
+        private bool IsPlayerComputer(Guid playerId)
+        {
+            if (!_playerManager.IsPlayingVsComputer)
+                return false;
+
+            if (_playerManager.GetPlayerById(playerId).Type == PlayerType.Computer)
+                return true;
+
+            return false;
+        }
+
+        private async Task<(bool ShipFound, bool ShipDestroyed)> HandleMarkCoordinateAsComputerAsync(
+            Guid playerId,
+            Column column,
+            int row)
+        {
+            var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
+               playerId,
+               CoordinateKey.Build(column, row));
+
+            if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
+            {
+                await _pushNotificationService.GameEndedAllAsync(playerId);
+                return (shipFound, shipDestroyed);
+            }
+
+            var humanPlayer = _playerManager.GetOpponent(playerId);
+            await _pushNotificationService.ReloadGameBoardAsync(humanPlayer.Id, shipFound, shipDestroyed);
+            await _pushNotificationService.PlayerTurnChangedAsync(humanPlayer.Id);
+
+            return (shipFound, shipDestroyed);
         }
 
         #endregion
