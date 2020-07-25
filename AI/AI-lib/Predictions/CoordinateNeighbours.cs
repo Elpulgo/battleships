@@ -33,6 +33,8 @@ namespace AI_lib
 
         private void BuildNeighbours()
         {
+            _neighbourMap = new Dictionary<string, Neighbours>();
+
             foreach (Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
             {
                 foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
