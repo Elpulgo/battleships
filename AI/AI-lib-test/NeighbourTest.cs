@@ -93,5 +93,28 @@ namespace AI_lib_test
             var neighbour = CoordinateNeighbours.Instance.GetNeighbours(coordKey);
             Assert.True(string.IsNullOrEmpty(neighbour.NeighbourDown));
         }
+
+        [Theory]
+        [InlineData("B5")]
+        [InlineData("E2")]
+        [InlineData("D9")]
+        public void CoordKey_ShouldNotHaveNeighbour_InAllDirections(string coordKey)
+        {
+            var neighbour = CoordinateNeighbours.Instance.GetNeighbours(coordKey);
+            Assert.False(string.IsNullOrEmpty(neighbour.NeighbourUp));
+            Assert.False(string.IsNullOrEmpty(neighbour.NeighbourDown));
+            Assert.False(string.IsNullOrEmpty(neighbour.NeighbourLeft));
+            Assert.False(string.IsNullOrEmpty(neighbour.NeighbourRight));
+        }
+
+        [Theory]
+        [InlineData("K5")]
+        [InlineData("E11")]
+        [InlineData("D0")]
+        public void Neighbour_ShouldBeNull_WhenOutsideBounds(string coordKey)
+        {
+            var neighbour = CoordinateNeighbours.Instance.GetNeighbours(coordKey);
+            Assert.Null(neighbour);
+        }
     }
 }
