@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("AI-lib-test")]
 namespace AI_lib
 {
     internal class Neighbours

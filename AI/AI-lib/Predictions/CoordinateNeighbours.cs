@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Core.Models;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
+[assembly: InternalsVisibleTo("AI-lib-test")]
 namespace AI_lib
 {
     internal sealed class CoordinateNeighbours
@@ -81,7 +83,7 @@ namespace AI_lib
 
         private (bool Exist, string Key) GetNeighbourLeft(Column col, int row)
         {
-            if ((int)col == 0)
+            if ((int)col == 1)
                 return (false, string.Empty);
 
             var newCol = (Column)((int)col - 1);
