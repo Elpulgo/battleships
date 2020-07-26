@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Core.Models;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
-[assembly: InternalsVisibleTo("AI-lib-test")]
 namespace AI_lib
 {
     internal sealed class CoordinateNeighbours
