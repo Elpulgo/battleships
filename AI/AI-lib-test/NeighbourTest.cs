@@ -214,24 +214,28 @@ namespace AI_lib_test
             }
         }
 
-        // public class NeighbourGrouping : NeighbourTest
-        // {
-        //     [Theory]
-        //     [InlineData(new string[] { "A2", "A3", "A4" }, Direction.Vertical, true)]
-        //     [InlineData(new string[] { "B2", "A3", "A4" }, Direction.Vertical, false)]
-        //     [InlineData(new string[] { "B2", "C2", "C6" }, Direction.Horizontal, true)]
-        //     [InlineData(new string[] { "B5", "C2", "C6" }, Direction.Horizontal, false)]
-        //     public void Should_IndicateIfAllCoords_AreInSimilarDirection(
-        //         string[] coords,
-        //         Direction direction,
-        //         bool expectedOutcome)
-        //     {
-        //         var outcome = NeighbourCalculator.AreHits(
-        //             Direction.Vertical,
-        //             coords.ToList());
+        public class NeighbourGrouping : NeighbourTest
+        {
+            [Theory]
+            [InlineData(new string[] { "A2", "A3", "A4" }, 1, true)]
+            [InlineData(new string[] { "B2", "A3", "A4" }, 1, false)]
+            [InlineData(new string[] { "B2", "C2", "E2" }, 0, true)]
+            [InlineData(new string[] { "B5", "C2", "C6" }, 0, false)]
+            public void Should_IndicateIfAllCoords_AreInSimilarDirection(
+                string[] coords,
+                int direction,
+                bool expectedOutcome)
+            {
+                // Ugly hack to be able to use Direction, which is internal 
+                // and can't be used as param due to protection level of test..
+                var parsedDirection = (Direction)direction;
 
-        //         Assert.Equal(expectedOutcome, outcome);
-        //     }
-        // }
+                var outcome = NeighbourCalculator.AreHits(
+                    parsedDirection,
+                    coords.ToList());
+
+                Assert.Equal(expectedOutcome, outcome);
+            }
+        }
     }
 }
