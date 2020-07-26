@@ -6,6 +6,7 @@ using System.Linq;
 using Core.Models;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
+using System.IO;
 
 namespace AI_lib_test
 {
@@ -115,6 +116,91 @@ namespace AI_lib_test
         {
             var neighbour = CoordinateNeighbours.Instance.GetNeighbours(coordKey);
             Assert.Null(neighbour);
+        }
+
+        [Theory]
+        [InlineData(new string[] { "A2", "B2", "C2" }, "A1", "A3", "", "B2")]
+        [InlineData(new string[] { "E2", "B2", "C2" }, "B1", "B3", "A2", "C2")]
+        public void ShouldGet_MinHorizontalNeighbours_FromGivenCoords(
+            string[] coords,
+            string expectedUp,
+            string expectedDown,
+            string expectedLeft,
+            string expectedRight)
+        {
+            var neighbours = NeighbourCalculator.GetNeighbours(
+                coords.ToList(),
+                Direction.Horizontal,
+                AI_lib.Range.Min);
+
+            Assert.Equal(expectedUp, neighbours.NeighbourUp);
+            Assert.Equal(expectedDown, neighbours.NeighbourDown);
+            Assert.Equal(expectedLeft, neighbours.NeighbourLeft);
+            Assert.Equal(expectedRight, neighbours.NeighbourRight);
+        }
+
+        [Theory]
+        [InlineData(new string[] { "A2", "B2", "C2" }, "C1", "C3", "B2", "D2")]
+        [InlineData(new string[] { "E2", "B2", "C2" }, "E1", "E3", "D2", "F2")]
+        public void ShouldGet_MaxHorizontalNeighbours_FromGivenCoords(
+          string[] coords,
+          string expectedUp,
+          string expectedDown,
+          string expectedLeft,
+          string expectedRight)
+        {
+            var neighbours = NeighbourCalculator.GetNeighbours(
+                coords.ToList(),
+                Direction.Horizontal,
+                AI_lib.Range.Max);
+
+            Assert.Equal(expectedUp, neighbours.NeighbourUp);
+            Assert.Equal(expectedDown, neighbours.NeighbourDown);
+            Assert.Equal(expectedLeft, neighbours.NeighbourLeft);
+            Assert.Equal(expectedRight, neighbours.NeighbourRight);
+        }
+
+        [Theory]
+        [InlineData(new string[] { "A2", "A3", "A4" }, "A1", "A3", "", "B2")]
+        [InlineData(new string[] { "E1", "E2", "E3", "E10" }, "", "E2", "D1", "F1")]
+        public void ShouldGet_MinVerticalNeighbours_FromGivenCoords(
+          string[] coords,
+          string expectedUp,
+          string expectedDown,
+          string expectedLeft,
+          string expectedRight)
+        {
+            var neighbours = NeighbourCalculator.GetNeighbours(
+                coords.ToList(),
+                Direction.Vertical,
+                AI_lib.Range.Min);
+
+            Assert.Equal(expectedUp, neighbours.NeighbourUp);
+            Assert.Equal(expectedDown, neighbours.NeighbourDown);
+            Assert.Equal(expectedLeft, neighbours.NeighbourLeft);
+            Assert.Equal(expectedRight, neighbours.NeighbourRight);
+        }
+
+
+        [Theory]
+        [InlineData(new string[] { "A2", "A3", "A4" }, "A3", "A5", "", "B4")]
+        [InlineData(new string[] { "E1", "E2", "E3", "E10" }, "E9", "", "D10", "F10")]
+        public void ShouldGet_MaxVerticalNeighbours_FromGivenCoords(
+          string[] coords,
+          string expectedUp,
+          string expectedDown,
+          string expectedLeft,
+          string expectedRight)
+        {
+            var neighbours = NeighbourCalculator.GetNeighbours(
+                coords.ToList(),
+                Direction.Vertical,
+                AI_lib.Range.Max);
+
+            Assert.Equal(expectedUp, neighbours.NeighbourUp);
+            Assert.Equal(expectedDown, neighbours.NeighbourDown);
+            Assert.Equal(expectedLeft, neighbours.NeighbourLeft);
+            Assert.Equal(expectedRight, neighbours.NeighbourRight);
         }
     }
 }

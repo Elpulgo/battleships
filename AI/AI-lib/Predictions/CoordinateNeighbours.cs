@@ -67,7 +67,7 @@ namespace AI_lib
                 return (false, string.Empty);
 
             var newRow = row - 1;
-            var key = CoordinateKey.Build(col, row);
+            var key = CoordinateKey.Build(col, newRow);
             return (true, key);
         }
 
@@ -77,7 +77,7 @@ namespace AI_lib
                 return (false, string.Empty);
 
             var newRow = row + 1;
-            var key = CoordinateKey.Build(col, row);
+            var key = CoordinateKey.Build(col, newRow);
             return (true, key);
         }
 
