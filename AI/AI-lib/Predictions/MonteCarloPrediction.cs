@@ -15,11 +15,11 @@ namespace AI_lib
             _random = new Random();
         }
 
-        public (Column Column, int Row, Action<bool, bool> markFromResult) Predict(
+        public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
 
-            var resultFromMarkAction = new Action<bool, bool>(WasHit);
+            var resultFromMarkAction = new Action<MarkCoordinateCallback>(WasHit);
 
             Column column = Column.A;
             int row = 1;
@@ -43,7 +43,7 @@ namespace AI_lib
             return (column, row, resultFromMarkAction);
         }
 
-        private void WasHit(bool shipFound, bool shipDestroyed)
+        private void WasHit(MarkCoordinateCallback callback)
         {
 
         }

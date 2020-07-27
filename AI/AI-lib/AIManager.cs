@@ -26,7 +26,7 @@ namespace AI_lib
             InitializePredictors();
         }
 
-        public (Column Column, int Row, Action<bool, bool> resultFromMarkAction) PredictCoordinate(
+        public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) PredictCoordinate(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
             => _level switch
             {

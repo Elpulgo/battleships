@@ -11,7 +11,7 @@ namespace AI_lib
     /// </summary>
     public interface IAIManager
     {
-        (Column Column, int Row, Action<bool, bool> resultFromMarkAction) PredictCoordinate(
+        (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) PredictCoordinate(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState);
 
         void Reset();

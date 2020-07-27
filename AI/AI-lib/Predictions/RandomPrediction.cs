@@ -15,7 +15,7 @@ namespace AI_lib
             _random = new Random();
         }
 
-        public (Column Column, int Row, Action<bool, bool> callback) Predict(
+        public (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var prediction = PredictWithoutCallback(currentGameBoardState);
@@ -32,8 +32,8 @@ namespace AI_lib
 
             while (!availableCoordinate)
             {
-                var randomColumn = _random.Next(1, 10);
-                var randomRow = _random.Next(1, 10);
+                var randomColumn = _random.Next(1, GameConstants.MaxColumnCount);
+                var randomRow = _random.Next(1, GameConstants.MaxRowCount);
 
                 var key = CoordinateKey.Build((Column)randomColumn, randomRow);
                 if (!currentGameBoardState[key].IsMarked)
@@ -47,7 +47,7 @@ namespace AI_lib
             return (column, row);
         }
 
-        private Action<bool, bool> GetEmptyCallback()
-            => new Action<bool, bool>((_, _x) => { });
+        private Action<MarkCoordinateCallback> GetEmptyCallback()
+            => new Action<MarkCoordinateCallback>((_) => { });
     }
 }
