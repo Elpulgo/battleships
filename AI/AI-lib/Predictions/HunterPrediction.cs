@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Core.Models;
 using Core.Models.Ships;
@@ -29,59 +30,77 @@ namespace AI_lib
             _lastFiveHits = new List<string>();
         }
 
-        public (Column Column, int Row, Action<bool, bool> resultFromMarkAction) Predict(
+        public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             //  TODO: This should be done from the action.....
-            SetLastMarkResult(currentGameBoardState);
+            // SetLastMarkResult(currentGameBoardState);
 
 
             // Do something here... better naming aswell...?
-            var resultFromMarkAction = new Action<bool, bool>(WasHit);
+            var resultFromMarkCallback = new Action<MarkCoordinateCallback>(WasHit);
 
             if (!IsInHuntMode)
             {
                 var mark = _randomPrediction.Predict(currentGameBoardState);
                 _lastMark = CoordinateKey.Build(mark.Column, mark.Row);
-                return (mark.Column, mark.Row, resultFromMarkAction);
+                return (mark.Column, mark.Row, resultFromMarkCallback);
             }
 
             var (column, row) = PredictNext(currentGameBoardState);
 
-            return (column, row, resultFromMarkAction);
+            return (column, row, resultFromMarkCallback);
         }
 
-        private void WasHit(bool shipFound, bool shipDestroyed)
+        private void WasHit(MarkCoordinateCallback callback)
         {
-
-        }
-
-        private void SetLastMarkResult(
-            Dictionary<string, CoordinateContainerBase> currentGameBoardState)
-        {
-            if (string.IsNullOrEmpty(_lastMark))
-                return;
-
-            var coord = currentGameBoardState[_lastMark];
-
-            var markResult = (coord.IsMarked && coord.HasShip) ? true : false;
-
-            _lastMarkDestroyedShip = markResult == true && coord.IsShipDestroyed;
-
-            if (_lastMarkDestroyedShip)
+            if (callback.ShipDestroyed)
             {
                 _lastFiveHits.Clear();
                 return;
             }
 
-            if (markResult)
+            if (!callback.ShipFound)
+                return;
+
+            if (_lastFiveHits.Count < 5)
             {
-                _lastFiveHits = _lastFiveHits
-                    .Skip(1)
-                    .Append(coord.Key)
-                    .ToList();
+                _lastFiveHits.Add(callback.Key);
+                return;
             }
+
+            _lastFiveHits = _lastFiveHits
+                                .Skip(1)
+                                .Append(callback.Key)
+                                .ToList();
         }
+
+        // private void SetLastMarkResult(
+        //     Dictionary<string, CoordinateContainerBase> currentGameBoardState)
+        // {
+        //     if (string.IsNullOrEmpty(_lastMark))
+        //         return;
+
+        //     var coord = currentGameBoardState[_lastMark];
+
+        //     var markResult = (coord.IsMarked && coord.HasShip) ? true : false;
+
+        //     _lastMarkDestroyedShip = markResult == true && coord.IsShipDestroyed;
+
+        //     if (_lastMarkDestroyedShip)
+        //     {
+        //         _lastFiveHits.Clear();
+        //         return;
+        //     }
+
+        //     if (markResult)
+        //     {
+        //         _lastFiveHits = _lastFiveHits
+        //             .Skip(1)
+        //             .Append(coord.Key)
+        //             .ToList();
+        //     }
+        // }
 
         private (Column Column, int Row) PredictNext(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
@@ -213,13 +232,17 @@ namespace AI_lib
                     var randomNeighbour = neighbours.AvailableNeighbours[randomNeighbourIndex];
                     if (!currentGameBoardState[randomNeighbour].IsMarked)
                     {
+                        lastHitNeighboursNotMarked.Clear();
                         return (CoordinateKey.Parse(randomNeighbour));
                     }
 
                     neighbourCount--;
                 }
 
-                lastHitNeighboursNotMarked.Remove(hitCoordKey);
+                if (lastHitNeighboursNotMarked.Any())
+                {
+                    lastHitNeighboursNotMarked.Remove(hitCoordKey);
+                }
             }
 
             // If all neighbours for the last hits are marked, fallback to random prediction
