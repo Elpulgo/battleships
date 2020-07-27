@@ -29,28 +29,30 @@ This gives a cleaner perception of the actual state of the game and is easier to
 Benchmark for 1000 iterations of gameplay when playing as AI for the different Prediction algorithms.
 
 The test starts with 100 in score(all available boxes), which is not theoretically possible since we have 
-
-Aircraftcarrier  5
-Battleship 	 4
-Cruiser		 3
-Destroyer	 2
-Destroyer	 2
-Submarine	 2
-Submarine	 2
+```
+Aircraftcarrier 5
+Battleship 	 	4
+Cruiser		 	3
+Destroyer	 	2
+Destroyer	 	2
+Submarine	 	2
+Submarine	 	2
 ------------------
-Total 20
+Total 			20
+```
 
 That is a total of 20 boxes which need to be marked before the game can end.
 So practical max score is 80.
 Min score would be 0 if we need to hit exactly all boxes before we find the last marked ship box.
 
 Below is the score for the different algorithms based on 1000 iterations.
-
-		Min	Average		Max
-		---------------------------
+```
+			Min	Average		Max
+			-------------------
 Random		19	21.8		46
 Hunter		19	30.8		65
 MonteCarlo
+```
 
 ## Rules and gameplay
 + Max 2 players allowed
