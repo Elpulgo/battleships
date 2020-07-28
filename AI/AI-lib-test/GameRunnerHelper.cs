@@ -29,11 +29,11 @@ namespace AI_lib_test
                 var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
                 var (_, _x) = gameBoard.MarkCoordinate(CoordinateKey.Build(column, row));
 
+                maxScore--;
                 if (gameBoard.IsAllDestroyed())
                 {
                     return maxScore;
                 }
-                maxScore--;
             }
 
             return maxScore;
@@ -62,11 +62,11 @@ namespace AI_lib_test
                 }
                 action.Invoke(callback);
 
+                maxScore--;
                 if (gameBoard.IsAllDestroyed())
                 {
                     return maxScore;
                 }
-                maxScore--;
             }
 
             return maxScore;
