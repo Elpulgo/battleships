@@ -16,8 +16,8 @@ namespace AI_lib_test
         {
         }
 
-        [Theory]
-        [InlineData(100)]
+        [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        [InlineData(10)]
         public async Task BenchmarkPredictions_Random(int nrOfPredictions)
         {
             var scoreSum = new List<int>();
@@ -41,8 +41,8 @@ namespace AI_lib_test
             File.AppendAllText("benchmark-rand.txt", $"\n{min}\t {avg}\t {max}");
         }
 
-        [Theory]
-        [InlineData(100)]
+        [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        [InlineData(10)]
         public async Task BenchmarkPredictions_Hunter(int nrOfPredictions)
         {
             var scoreSum = new List<int>();
@@ -66,7 +66,7 @@ namespace AI_lib_test
             File.AppendAllText("benchmark-hunter.txt", $"\n{min}\t {avg}\t {max}");
         }
 
-        [Fact]
+        [Fact(Skip = "Should only run in debug mode since benchmark test")]
         public void Benchmark_AverageElapsedTime_PerPrediction_ForRandom()
         {
             var gameBoard = base.CreateGameBoard();
@@ -97,7 +97,7 @@ namespace AI_lib_test
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Should only run in debug mode since benchmark test")]
         public void Benchmark_AverageElapsedTime_PerPrediction_ForHunter()
         {
             var gameBoard = base.CreateGameBoard();

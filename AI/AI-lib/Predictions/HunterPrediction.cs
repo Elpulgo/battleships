@@ -10,13 +10,13 @@ namespace AI_lib
     internal class HunterPrediction
     {
         private readonly RandomPrediction _randomPrediction;
-        private readonly Random _random;
+        private readonly CryptoRandomizer _random;
         private List<string> _lastFiveHits;
         private bool IsInHuntMode => _lastFiveHits.Any();
         public HunterPrediction()
         {
             _randomPrediction = new RandomPrediction();
-            _random = new Random();
+            _random = new CryptoRandomizer();
             _lastFiveHits = new List<string>();
         }
 
@@ -98,7 +98,7 @@ namespace AI_lib
 
             if (isMinLeftOpenForMove && isMaxRightOpenForMove)
             {
-                var random = _random.Next(1);
+                var random = _random.Next(0, 1);
                 if (random > 0)
                 {
                     predictedCoord = CoordinateKey.Parse(minNeighbours.NeighbourLeft);
@@ -144,7 +144,7 @@ namespace AI_lib
 
             if (isMinUpOpenForMove && isMaxDownOpenForMove)
             {
-                var random = _random.Next(1);
+                var random = _random.Next(0, 1);
                 if (random > 0)
                 {
                     predictedCoord = CoordinateKey.Parse(minNeighbours.NeighbourUp);
@@ -181,7 +181,7 @@ namespace AI_lib
             // Take random neighbour for last hits and check if neighbours are already marked
             while (lastHitNeighboursNotMarked.Any())
             {
-                var random = _random.Next(lastHitNeighboursNotMarked.Count - 1);
+                var random = _random.Next(0, lastHitNeighboursNotMarked.Count - 1);
                 var hitCoordKey = lastHitNeighboursNotMarked[random];
                 var neighbours = CoordinateNeighbours.Instance.GetNeighbours(hitCoordKey);
                 var neighbourCount = neighbours.AvailableNeighbours.Count;

@@ -30,7 +30,7 @@ Benchmark for 1000 iterations of gameplay when playing as AI for the different P
 
 The test starts with 100 in score(all available boxes), which is not theoretically possible since we have 
 ```
-Aircraftcarrier 5
+Aircraftcarrier 	5
 Battleship 	 	4
 Cruiser		 	3
 Destroyer	 	2
@@ -46,13 +46,12 @@ So practical max score is 80.
 Min score would be 0 if we need to hit exactly all boxes before we find the last marked ship box.
 
 Below is the score for the different algorithms based on 1000 iterations.
-```
-			Min	Average		Max
-			-------------------
-Random		19	21.8		46
-Hunter		19	30.8		65
-MonteCarlo
-```
+
+| |Algorithm	|Min	|Average	|Max|
+|:--------------:|:--------------:|:--------------:|:--------------:|
+|Random|1|4.58|21|
+|Hunter|1|23.7|66|
+|MonteCarlo|0|0|0|
 
 ## Rules and gameplay
 + Max 2 players allowed
