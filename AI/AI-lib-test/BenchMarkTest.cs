@@ -22,7 +22,7 @@ namespace AI_lib_test
         }
 
         [Theory]
-        [InlineData(10)]
+        [InlineData(100)]
         public async Task BenchmarkPredictions_Random(int nrOfPredictions)
         {
             var scoreSum = new List<int>();
@@ -47,7 +47,7 @@ namespace AI_lib_test
         }
 
         [Theory]
-        [InlineData(10)]
+        [InlineData(100)]
         public async Task BenchmarkPredictions_Hunter(int nrOfPredictions)
         {
             var scoreSum = new List<int>();
@@ -103,12 +103,18 @@ namespace AI_lib_test
             foreach (var move in Enumerable.Range(1, maxScore))
             {
                 var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
-                var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(CoordinateKey.Build(column, row));
 
-                action.Invoke(new MarkCoordinateCallback(
-                    shipFound,
-                    shipDestroyed,
-                    CoordinateKey.Build(column, row)));
+                var key = CoordinateKey.Build(column, row);
+                var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
+
+                var callback = new MarkCoordinateCallback(shipFound, key);
+
+                if (shipDestroyed)
+                {
+                    var coordsForShip = gameBoard.GetCoordinatesForDestroyedShip(key);
+                    callback = callback.WithDestroyedShip(coordsForShip);
+                }
+                action.Invoke(callback);
 
                 maxScore--;
                 if (gameBoard.IsAllDestroyed())

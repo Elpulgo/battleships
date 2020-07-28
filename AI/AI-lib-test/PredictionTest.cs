@@ -3,6 +3,7 @@ using Xunit;
 using System.Linq;
 using Core.Models;
 using Core.Utilities;
+using System.Collections.Generic;
 
 namespace AI_lib_test
 {
@@ -66,12 +67,17 @@ namespace AI_lib_test
             foreach (var move in Enumerable.Range(1, maxScore))
             {
                 var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
-                var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(CoordinateKey.Build(column, row));
+                var key = CoordinateKey.Build(column, row);
+                var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
 
-                action.Invoke(new MarkCoordinateCallback(
-                    shipFound,
-                    shipDestroyed,
-                    CoordinateKey.Build(column, row)));
+                var callback = new MarkCoordinateCallback(shipFound, key);
+
+                if (shipDestroyed)
+                {
+                    var coordsForShip = gameBoard.GetCoordinatesForDestroyedShip(key);
+                    callback = callback.WithDestroyedShip(coordsForShip);
+                }
+                action.Invoke(callback);
 
                 maxScore--;
                 if (gameBoard.IsAllDestroyed())

@@ -82,6 +82,18 @@ namespace Core.Models
             return (true, ship.IsDestroyed);
         }
 
+        public List<string> GetCoordinatesForDestroyedShip(string key)
+        {
+            if (!Matrix[key].IsShipDestroyed)
+                return new List<string>();
+
+            var ship = _ships.SingleOrDefault(s => s.Coordinates.Select(c => c.Key).Contains(key));
+            if (ship == null || !ship.IsDestroyed)
+                return new List<string>();
+
+            return ship.Coordinates.Select(s => s.Key).ToList();
+        }
+
         private void FillMatrix()
         {
             foreach (Column column in Enum.GetValues(typeof(CoordinatesHelper.Column)))
