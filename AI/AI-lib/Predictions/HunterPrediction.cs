@@ -7,27 +7,25 @@ using static Core.Models.CoordinatesHelper;
 
 namespace AI_lib
 {
-    internal class HunterPrediction
+    internal class HunterPrediction : RandomPrediction
     {
-        private readonly RandomPrediction _randomPrediction;
         private readonly CryptoRandomizer _random;
-        private List<string> _lastFiveHits;
-        private bool IsInHuntMode => _lastFiveHits.Any();
+        private List<string> _hits;
+        private bool IsInHuntMode => _hits.Any();
         public HunterPrediction()
         {
-            _randomPrediction = new RandomPrediction();
             _random = new CryptoRandomizer();
-            _lastFiveHits = new List<string>();
+            _hits = new List<string>();
         }
 
-        public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) Predict(
+        public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var markCallback = new Action<MarkCoordinateCallback>(WasHit);
 
             if (!IsInHuntMode)
             {
-                var mark = _randomPrediction.Predict(currentGameBoardState);
+                var mark = base.Predict(currentGameBoardState);
                 return (mark.Column, mark.Row, markCallback);
             }
 
@@ -38,36 +36,27 @@ namespace AI_lib
 
         private void WasHit(MarkCoordinateCallback callback)
         {
+            if (!callback.ShipFound)
+                return;
+
             if (callback.ShipDestroyed)
             {
                 foreach (var coord in callback.DestroyedShipCoordinates)
                 {
-                    _lastFiveHits.Remove(coord);
+                    _hits.Remove(coord);
                 }
 
                 return;
             }
 
-            if (!callback.ShipFound)
-                return;
-
-            if (_lastFiveHits.Count < 5)
-            {
-                _lastFiveHits.Add(callback.Key);
-                return;
-            }
-
-            _lastFiveHits = _lastFiveHits
-                                .Skip(1)
-                                .Append(callback.Key)
-                                .ToList();
+            _hits.Add(callback.Key);
         }
 
         private (Column Column, int Row) PredictNext(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            var horizontal = NeighbourCalculator.AreHits(Direction.Horizontal, _lastFiveHits);
-            var vertical = NeighbourCalculator.AreHits(Direction.Vertical, _lastFiveHits);
+            var horizontal = NeighbourCalculator.AreHits(Direction.Horizontal, _hits);
+            var vertical = NeighbourCalculator.AreHits(Direction.Vertical, _hits);
 
             if ((horizontal && vertical) || (!horizontal && !vertical))
                 return GetRandomNeighbour(currentGameBoardState);
@@ -85,8 +74,8 @@ namespace AI_lib
             Dictionary<string, CoordinateContainerBase> currentGameBoardState,
             out (Column Column, int Row) predictedCoord)
         {
-            var minNeighbours = NeighbourCalculator.GetNeighbours(_lastFiveHits, Direction.Horizontal, Range.Min);
-            var maxNeighbours = NeighbourCalculator.GetNeighbours(_lastFiveHits, Direction.Horizontal, Range.Max);
+            var minNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Horizontal, Range.Min);
+            var maxNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Horizontal, Range.Max);
 
             var isMinLeftOpenForMove =
                 !string.IsNullOrEmpty(minNeighbours.NeighbourLeft) &&
@@ -131,8 +120,8 @@ namespace AI_lib
             Dictionary<string, CoordinateContainerBase> currentGameBoardState,
             out (Column Column, int Row) predictedCoord)
         {
-            var minNeighbours = NeighbourCalculator.GetNeighbours(_lastFiveHits, Direction.Vertical, Range.Min);
-            var maxNeighbours = NeighbourCalculator.GetNeighbours(_lastFiveHits, Direction.Vertical, Range.Max);
+            var minNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Vertical, Range.Min);
+            var maxNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Vertical, Range.Max);
 
             var isMinUpOpenForMove =
                 !string.IsNullOrEmpty(minNeighbours.NeighbourUp) &&
@@ -176,7 +165,7 @@ namespace AI_lib
         private (Column Column, int Row) GetRandomNeighbour(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            var lastHitNeighboursNotMarked = _lastFiveHits.Select(s => s).ToList();
+            var lastHitNeighboursNotMarked = _hits.Select(s => s).ToList();
 
             // Take random neighbour for last hits and check if neighbours are already marked
             while (lastHitNeighboursNotMarked.Any())
@@ -206,7 +195,7 @@ namespace AI_lib
             }
 
             // If all neighbours for the last hits are marked, fallback to random prediction
-            return _randomPrediction.PredictWithoutCallback(currentGameBoardState);
+            return base.PredictWithoutCallback(currentGameBoardState);
         }
     }
 }

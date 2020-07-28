@@ -7,14 +7,13 @@ using static Core.Models.CoordinatesHelper;
 
 namespace AI_lib
 {
-    internal class RandomPrediction
+    internal class RandomPrediction : PredictionBase
     {
-
         public RandomPrediction()
         {
         }
 
-        public (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
+        public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var prediction = PredictWithoutCallback(currentGameBoardState);

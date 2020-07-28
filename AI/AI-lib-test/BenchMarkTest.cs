@@ -17,7 +17,8 @@ namespace AI_lib_test
         }
 
         [Theory(Skip = "Should only run in debug mode since benchmark test")]
-        [InlineData(10)]
+        // [Theory]
+        [InlineData(100)]
         public async Task BenchmarkPredictions_Random(int nrOfPredictions)
         {
             var scoreSum = new List<int>();
@@ -42,7 +43,8 @@ namespace AI_lib_test
         }
 
         [Theory(Skip = "Should only run in debug mode since benchmark test")]
-        [InlineData(10)]
+        // [Theory]
+        [InlineData(100)]
         public async Task BenchmarkPredictions_Hunter(int nrOfPredictions)
         {
             var scoreSum = new List<int>();
