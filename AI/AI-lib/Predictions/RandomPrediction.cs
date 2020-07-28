@@ -27,10 +27,10 @@ namespace AI_lib
            Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var availableCoords = BuildFlattenedKeys(currentGameBoardState);
-            availableCoords.Shuffle();
-
             if (!availableCoords.Any())
                 throw new ArgumentOutOfRangeException("Can't predict a coordinate when all coordinates are marked! Game should have ended by now!");
+        
+            availableCoords.Shuffle();
 
             return CoordinateKey.Parse(availableCoords.First());
         }

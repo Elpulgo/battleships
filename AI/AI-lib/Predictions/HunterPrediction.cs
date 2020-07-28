@@ -184,19 +184,18 @@ namespace AI_lib
                 var random = _random.Next(lastHitNeighboursNotMarked.Count - 1);
                 var hitCoordKey = lastHitNeighboursNotMarked[random];
                 var neighbours = CoordinateNeighbours.Instance.GetNeighbours(hitCoordKey);
-
-                // Take random neighbour x times and return if not already marked
                 var neighbourCount = neighbours.AvailableNeighbours.Count;
+                // Take random neighbour until no neighbours left and return if not already marked
                 while (neighbourCount > 0)
                 {
-                    var randomNeighbourIndex = _random.Next(neighbours.AvailableNeighbours.Count - 1);
+                    var randomNeighbourIndex = _random.Next(0, neighbourCount - 1);
                     var randomNeighbour = neighbours.AvailableNeighbours[randomNeighbourIndex];
                     if (!currentGameBoardState[randomNeighbour].IsMarked)
                     {
                         lastHitNeighboursNotMarked.Clear();
+                        neighbourCount = 0;
                         return (CoordinateKey.Parse(randomNeighbour));
                     }
-
                     neighbourCount--;
                 }
 
