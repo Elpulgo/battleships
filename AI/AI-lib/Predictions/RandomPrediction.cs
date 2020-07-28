@@ -26,50 +26,25 @@ namespace AI_lib
         public (Column Column, int Row) PredictWithoutCallback(
            Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            Column column = Column.A;
-            int row = 1;
-
-            var availableCoords = BuildFlattenedKeys().ToList();
+            var availableCoords = BuildFlattenedKeys(currentGameBoardState);
             availableCoords.Shuffle();
 
-            
-            var availableCoordinate = false;
+            if (!availableCoords.Any())
+                throw new ArgumentOutOfRangeException("Can't predict a coordinate when all coordinates are marked! Game should have ended by now!");
 
-            while (!availableCoordinate && availableCoords.Count > 0)
-            {
-                var index = _random.Next(0, availableCoords.Count - 1);
-                var randomKey = availableCoords[index];
-
-                if (!currentGameBoardState[randomKey].IsMarked)
-                {
-                    var coord = CoordinateKey.Parse(randomKey);
-                    column = coord.Column;
-                    row = coord.Row;
-                    availableCoordinate = true;
-                    break;
-                }
-
-                availableCoords.Remove(randomKey);
-            }
-
-            return (column, row);
+            return CoordinateKey.Parse(availableCoords.First());
         }
-
-
 
         private Action<MarkCoordinateCallback> GetEmptyCallback()
             => new Action<MarkCoordinateCallback>((_) => { });
 
-        private IEnumerable<string> BuildFlattenedKeys()
-        {
-            foreach (var col in Enumerable.Range(1, GameConstants.MaxColumnCount))
-            {
-                foreach (var row in Enumerable.Range(1, GameConstants.MaxRowCount))
-                {
-                    yield return CoordinateKey.Build((Column)col, row);
-                }
-            }
-        }
+        private List<string> BuildFlattenedKeys(
+            Dictionary<string, CoordinateContainerBase> currentGameBoardState)
+            => currentGameBoardState
+                .Where(w => !w.Value.IsMarked)
+                .Select(s => s.Key)
+                .ToList();
+
     }
 
     internal static class Extensions

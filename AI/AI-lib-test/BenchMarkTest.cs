@@ -6,19 +6,14 @@ using Core.Models;
 using Core.Utilities;
 using System.IO;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace AI_lib_test
 {
-    public class BenchMarkTest
+    public class BenchMarkTest : GameRunnerHelper
     {
         public BenchMarkTest()
         {
-        }
-
-        public GameBoardBase CreateGameBoard()
-        {
-            var ships = new ShipGenerator().Generate().ToList();
-            return new GameBoardBase(new Player("test", PlayerType.Computer)).WithShips(ships);
         }
 
         [Theory]
@@ -32,7 +27,7 @@ namespace AI_lib_test
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    var result = RunRandomGame();
+                    var result = base.RunRandomGame();
                     scoreSum.Add(result);
                 }));
             }
@@ -57,7 +52,7 @@ namespace AI_lib_test
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    var result = RunHunterGame();
+                    var result = base.RunHunterGame();
                     scoreSum.Add(result);
                 }));
             }
@@ -71,38 +66,53 @@ namespace AI_lib_test
             File.AppendAllText("benchmark-hunter.txt", $"\n{min}\t {avg}\t {max}");
         }
 
-        private int RunRandomGame()
+        [Fact]
+        public void Benchmark_AverageElapsedTime_PerPrediction_ForRandom()
         {
-            var gameBoard = CreateGameBoard();
+            var gameBoard = base.CreateGameBoard();
+            var elapsed = new List<long>();
 
-            var maxCount = 100;
             var AIManager = new AIManager(AILevel.Random);
-
-            foreach (var move in Enumerable.Range(1, maxCount))
+            var maxScore = 100;
+            var stopWatch = new Stopwatch();
+            foreach (var move in Enumerable.Range(0, maxScore))
             {
+                stopWatch.Restart();
                 var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                stopWatch.Stop();
+
+                elapsed.Add(stopWatch.ElapsedMilliseconds);
+
                 var (_, _x) = gameBoard.MarkCoordinate(CoordinateKey.Build(column, row));
 
-                maxCount--;
                 if (gameBoard.IsAllDestroyed())
                 {
-                    break;
+                    var min = elapsed.Min();
+                    var avg = elapsed.Average();
+                    var max = elapsed.Max();
+
+                    File.AppendAllText("benchmark-random-elapsed-time.txt", $"\n{min} ms\t {avg} ms\t {max} ms");
+                    return;
                 }
             }
-
-            return maxCount;
         }
 
-        private int RunHunterGame()
+        [Fact]
+        public void Benchmark_AverageElapsedTime_PerPrediction_ForHunter()
         {
-            var gameBoard = CreateGameBoard();
+            var gameBoard = base.CreateGameBoard();
+            var elapsed = new List<long>();
 
-            var maxScore = 100;
             var AIManager = new AIManager(AILevel.Hunter);
-
-            foreach (var move in Enumerable.Range(1, maxScore))
+            var maxScore = 100;
+            var stopWatch = new Stopwatch();
+            foreach (var move in Enumerable.Range(0, maxScore))
             {
+                stopWatch.Restart();
                 var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                stopWatch.Stop();
+
+                elapsed.Add(stopWatch.ElapsedMilliseconds);
 
                 var key = CoordinateKey.Build(column, row);
                 var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
@@ -116,14 +126,16 @@ namespace AI_lib_test
                 }
                 action.Invoke(callback);
 
-                maxScore--;
                 if (gameBoard.IsAllDestroyed())
                 {
-                    break;
+                    var min = elapsed.Min();
+                    var avg = elapsed.Average();
+                    var max = elapsed.Max();
+
+                    File.AppendAllText("benchmark-hunter-elapsed-time.txt", $"\n{min} ms\t {avg} ms\t {max} ms");
+                    return;
                 }
             }
-
-            return maxScore;
         }
     }
 }
