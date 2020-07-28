@@ -47,11 +47,11 @@ Min score would be 0 if we need to hit exactly all boxes before we find the last
 
 Below is the score for the different algorithms based on 1000 iterations.
 
-| |Algorithm	|Min	|Average	|Max|
-|:--------------:|:--------------:|:--------------:|:--------------:|
-|Random|1|4.58|21|
-|Hunter|1|23.7|66|
-|MonteCarlo|0|0|0|
+|           | Min                        | Average                 | Max                                        |
+| --------- | :------------------------------------------:     | :----------------------:                 | :---------------------------:                            | 
+| Random|1|4.58|21|
+| Hunter|1|23.7|66|
+| MonteCarlo|0|0|0|
 
 ## Rules and gameplay
 + Max 2 players allowed
