@@ -15,14 +15,14 @@ namespace AI_lib_test
         public void Should_FinishRandomGameWithin_MaxBoxCount()
         {
             var numberOfMoves = base.RunRandomGame();
-            Assert.True(numberOfMoves > 0);
+            Assert.True(numberOfMoves >= 0);
         }
 
         [Fact]
         public void Should_FinishHunterGameWithin_MaxBoxCount()
         {
             var numberOfMoves = base.RunHunterGame();
-            Assert.True(numberOfMoves > 0);
+            Assert.True(numberOfMoves >= 0);
         }
     }
 }

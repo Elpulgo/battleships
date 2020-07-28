@@ -16,24 +16,21 @@ namespace AI_lib_test
         {
         }
 
-        [Theory(Skip = "Should only run in debug mode since benchmark test")]
-        // [Theory]
-        [InlineData(100)]
-        public async Task BenchmarkPredictions_Random(int nrOfPredictions)
+        // [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        [Theory]
+        [InlineData(1000)]
+        public void BenchmarkPredictions_Random(int nrOfPredictions)
         {
+            File.Delete("benchmark-random-index.txt");
+
             var scoreSum = new List<int>();
-            var tasks = new List<Task>();
 
             foreach (var index in Enumerable.Range(1, nrOfPredictions))
             {
-                tasks.Add(Task.Run(() =>
-                {
-                    var result = base.RunRandomGame();
-                    scoreSum.Add(result);
-                }));
+                var result = base.RunRandomGame();
+                scoreSum.Add(result);
+                File.AppendAllText("benchmark-random-index.txt", $"\n{index}");
             }
-
-            await Task.WhenAll(tasks);
 
             var avg = scoreSum.Average();
             var min = scoreSum.Min();
@@ -44,22 +41,20 @@ namespace AI_lib_test
 
         [Theory(Skip = "Should only run in debug mode since benchmark test")]
         // [Theory]
-        [InlineData(100)]
-        public async Task BenchmarkPredictions_Hunter(int nrOfPredictions)
+        [InlineData(1000)]
+        public void BenchmarkPredictions_Hunter(int nrOfPredictions)
         {
+            File.Delete("benchmark-hunter-index.txt");
+
             var scoreSum = new List<int>();
             var tasks = new List<Task>();
 
             foreach (var index in Enumerable.Range(1, nrOfPredictions))
             {
-                tasks.Add(Task.Run(() =>
-                {
-                    var result = base.RunHunterGame();
-                    scoreSum.Add(result);
-                }));
+                var result = base.RunHunterGame();
+                scoreSum.Add(result);
+                File.AppendAllText("benchmark-hunter-index.txt", $"\n{index}");
             }
-
-            await Task.WhenAll(tasks);
 
             var avg = scoreSum.Average();
             var min = scoreSum.Min();
