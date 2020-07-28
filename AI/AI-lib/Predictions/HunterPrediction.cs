@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Core.Models;
-using Core.Models.Ships;
 using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
@@ -13,18 +11,10 @@ namespace AI_lib
     {
         private readonly RandomPrediction _randomPrediction;
         private readonly Random _random;
-        // private List<(ShipType Type, int NrOfBoxes)> _remainingShips;
-        private string _lastMark = string.Empty;
-        private bool _lastMarkDestroyedShip = false;
         private List<string> _lastFiveHits;
-        private bool IsInHuntMode => (_lastFiveHits.Any() && !_lastMarkDestroyedShip);
+        private bool IsInHuntMode => _lastFiveHits.Any();
         public HunterPrediction()
         {
-            // _remainingShips = ShipConstants
-            //     .GetShipTypesPerPlayer()
-            //     .Select(shipType => (shipType, shipType.NrOfBoxes()))
-            //     .ToList();
-
             _randomPrediction = new RandomPrediction();
             _random = new Random();
             _lastFiveHits = new List<string>();
@@ -33,30 +23,28 @@ namespace AI_lib
         public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            //  TODO: This should be done from the action.....
-            // SetLastMarkResult(currentGameBoardState);
-
-
-            // Do something here... better naming aswell...?
-            var resultFromMarkCallback = new Action<MarkCoordinateCallback>(WasHit);
+            var markCallback = new Action<MarkCoordinateCallback>(WasHit);
 
             if (!IsInHuntMode)
             {
                 var mark = _randomPrediction.Predict(currentGameBoardState);
-                _lastMark = CoordinateKey.Build(mark.Column, mark.Row);
-                return (mark.Column, mark.Row, resultFromMarkCallback);
+                return (mark.Column, mark.Row, markCallback);
             }
 
             var (column, row) = PredictNext(currentGameBoardState);
 
-            return (column, row, resultFromMarkCallback);
+            return (column, row, markCallback);
         }
 
         private void WasHit(MarkCoordinateCallback callback)
         {
             if (callback.ShipDestroyed)
             {
-                _lastFiveHits.Clear();
+                foreach (var coord in callback.DestroyedShipCoordinates)
+                {
+                    _lastFiveHits.Remove(coord);
+                }
+
                 return;
             }
 
@@ -74,33 +62,6 @@ namespace AI_lib
                                 .Append(callback.Key)
                                 .ToList();
         }
-
-        // private void SetLastMarkResult(
-        //     Dictionary<string, CoordinateContainerBase> currentGameBoardState)
-        // {
-        //     if (string.IsNullOrEmpty(_lastMark))
-        //         return;
-
-        //     var coord = currentGameBoardState[_lastMark];
-
-        //     var markResult = (coord.IsMarked && coord.HasShip) ? true : false;
-
-        //     _lastMarkDestroyedShip = markResult == true && coord.IsShipDestroyed;
-
-        //     if (_lastMarkDestroyedShip)
-        //     {
-        //         _lastFiveHits.Clear();
-        //         return;
-        //     }
-
-        //     if (markResult)
-        //     {
-        //         _lastFiveHits = _lastFiveHits
-        //             .Skip(1)
-        //             .Append(coord.Key)
-        //             .ToList();
-        //     }
-        // }
 
         private (Column Column, int Row) PredictNext(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,16 +8,27 @@ namespace AI_lib
     {
         public MarkCoordinateCallback(
             bool shipFound,
-            bool shipDestroyed,
             string key)
         {
             ShipFound = shipFound;
-            ShipDestroyed = shipDestroyed;
             Key = key;
+            DestroyedShipCoordinates = new List<string>();
+        }
+
+        public MarkCoordinateCallback WithDestroyedShip(List<string> destroyedShipCoordinates)
+        {
+            if (destroyedShipCoordinates == null || !destroyedShipCoordinates.Any())
+                throw new ArgumentNullException("Coordinates for destroyed ship can't be null or empty");
+
+            ShipDestroyed = true;
+            DestroyedShipCoordinates = destroyedShipCoordinates;
+            return this;
         }
 
         public string Key { get; }
         public bool ShipFound { get; }
-        public bool ShipDestroyed { get; }
+        public bool ShipDestroyed { get; private set; }
+
+        public List<string> DestroyedShipCoordinates { get; private set; }
     }
 }
