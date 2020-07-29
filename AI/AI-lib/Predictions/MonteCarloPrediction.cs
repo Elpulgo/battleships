@@ -13,15 +13,26 @@ namespace AI_lib
     {
         private const int NumberOfSimulations = 20;
         private readonly ShipGenerator _shipGenerator;
-        public MonteCarloPrediciton()
+
+        public bool UseHunt { get; }
+
+        public MonteCarloPrediciton(bool useHunt)
         {
             _shipGenerator = new ShipGenerator();
+            UseHunt = useHunt;
         }
 
         public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var markCallback = new Action<MarkCoordinateCallback>(base.WasHit);
+
+            if (UseHunt && base.IsInHuntMode)
+            {
+                var hunterPrediction = base.PredictNext(currentGameBoardState);
+                return (hunterPrediction.Column, hunterPrediction.Row, markCallback);
+            }
+
             var prediction = PredictBySimulation(currentGameBoardState);
             return (prediction.Column, prediction.Row, markCallback);
         }

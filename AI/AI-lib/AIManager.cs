@@ -18,6 +18,7 @@ namespace AI_lib
         private RandomPrediction _randomPrediction;
         private HunterPrediction _hunterPrediction;
         private MonteCarloPrediciton _monteCarloPrediction;
+        private MonteCarloPrediciton _monteCarloPredictionWithHunt;
 
         public AIManager(AILevel level)
         {
@@ -32,20 +33,23 @@ namespace AI_lib
             {
                 AILevel.Random => _randomPrediction.Predict(currentGameBoardState),
                 AILevel.Hunter => _hunterPrediction.Predict(currentGameBoardState),
-                AILevel.MonteCarloAndHunt => _monteCarloPrediction.Predict(currentGameBoardState),
+                AILevel.MonteCarlo => _monteCarloPrediction.Predict(currentGameBoardState),
+                AILevel.MonteCarloAndHunt => _monteCarloPredictionWithHunt.Predict(currentGameBoardState),
                 _ => throw new ArgumentException("A level for the AI has not been set, can't do any prediction!")
             };
 
         public void Reset()
         {
-            // TODO: Reset all IPredictions...
+            InitializePredictors();
         }
 
         private void InitializePredictors()
         {
             _randomPrediction = new RandomPrediction();
             _hunterPrediction = new HunterPrediction();
-            _monteCarloPrediction = new MonteCarloPrediciton();
+            _monteCarloPrediction = new MonteCarloPrediciton(false);
+            _monteCarloPredictionWithHunt = new MonteCarloPrediciton(true);
+
         }
     }
 }

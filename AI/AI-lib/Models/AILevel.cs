@@ -4,6 +4,7 @@ namespace AI_lib
     {
         Random,
         Hunter,
+        MonteCarlo,
         MonteCarloAndHunt
     }
 }

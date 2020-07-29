@@ -52,7 +52,7 @@ namespace AI_lib
             _hits.Add(callback.Key);
         }
 
-        private (Column Column, int Row) PredictNext(
+        protected (Column Column, int Row) PredictNext(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var horizontal = NeighbourCalculator.AreHits(Direction.Horizontal, _hits);

@@ -52,6 +52,7 @@ Below is the score for the different algorithms based on 1000 iterations.
 | Random|0|3.86|24|
 | Hunter|0|30.567|70|
 | MonteCarlo|23|42.83|65|
+| MonteCarloWithHunt|22|52.48|75|
 
 ## Rules and gameplay
 + Max 2 players allowed
