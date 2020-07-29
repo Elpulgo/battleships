@@ -16,8 +16,8 @@ namespace AI_lib_test
         {
         }
 
-        // [Theory(Skip = "Should only run in debug mode since benchmark test")]
-        [Theory]
+        [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        // [Theory]
         [InlineData(1000)]
         public void BenchmarkPredictions_Random(int nrOfPredictions)
         {
@@ -29,14 +29,11 @@ namespace AI_lib_test
             {
                 var result = base.RunRandomGame();
                 scoreSum.Add(result);
-                File.AppendAllText("benchmark-random-index.txt", $"\n{index}");
+                var avg_ = scoreSum.Average();
+                var min_ = scoreSum.Min();
+                var max_ = scoreSum.Max();
+                File.AppendAllText("benchmark-random-index.txt", $"\n{index} \t {min_}\t{avg_}\t{max_}");
             }
-
-            var avg = scoreSum.Average();
-            var min = scoreSum.Min();
-            var max = scoreSum.Max();
-
-            File.AppendAllText("benchmark-rand.txt", $"\n{min}\t {avg}\t {max}");
         }
 
         [Theory(Skip = "Should only run in debug mode since benchmark test")]
@@ -53,14 +50,49 @@ namespace AI_lib_test
             {
                 var result = base.RunHunterGame();
                 scoreSum.Add(result);
-                File.AppendAllText("benchmark-hunter-index.txt", $"\n{index}");
+                var avg_ = scoreSum.Average();
+                var min_ = scoreSum.Min();
+                var max_ = scoreSum.Max();
+                File.AppendAllText("benchmark-hunter-index.txt", $"\n{index} \t {min_}\t{avg_}\t{max_}");
             }
+        }
 
-            var avg = scoreSum.Average();
-            var min = scoreSum.Min();
-            var max = scoreSum.Max();
+        [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        // [Theory]
+        [InlineData(100)]
+        public void BenchmarkPredictions_MonteCarlo(int nrOfPredictions)
+        {
+            File.Delete("benchmark-montecarlo-index.txt");
 
-            File.AppendAllText("benchmark-hunter.txt", $"\n{min}\t {avg}\t {max}");
+            var scoreSum = new List<int>();
+            var tasks = new List<Task>();
+
+            foreach (var index in Enumerable.Range(1, nrOfPredictions))
+            {
+                var result = base.RunMonteCarloGame();
+                scoreSum.Add(result);
+
+                var avg_ = scoreSum.Average();
+                var min_ = scoreSum.Min();
+                var max_ = scoreSum.Max();
+                File.AppendAllText("benchmark-montecarlo-index.txt", $"\n{index} \t {min_}\t{avg_}\t{max_}");
+            }
+        }
+
+        [Fact(Skip = "Should only run in debug mode since benchmark test")]
+        public void BenchMarkShipGenerator()
+        {
+            File.Delete("generate.txt");
+            var stopWatch = new Stopwatch();
+
+            for (int i = 0; i < 10; i++)
+            {
+                stopWatch.Start();
+                var ships = new ShipGenerator().Generate().ToList();
+                stopWatch.Stop();
+
+                File.AppendAllText("generate.txt", $"\n{i} \t {stopWatch.ElapsedMilliseconds} ms");
+            }
         }
 
         [Fact(Skip = "Should only run in debug mode since benchmark test")]

@@ -9,9 +9,9 @@ namespace AI_lib
 {
     internal class HunterPrediction : RandomPrediction
     {
-        private readonly CryptoRandomizer _random;
-        private List<string> _hits;
-        private bool IsInHuntMode => _hits.Any();
+        protected readonly CryptoRandomizer _random;
+        protected List<string> _hits;
+        protected bool IsInHuntMode => _hits.Any();
         public HunterPrediction()
         {
             _random = new CryptoRandomizer();
@@ -34,7 +34,7 @@ namespace AI_lib
             return (column, row, markCallback);
         }
 
-        private void WasHit(MarkCoordinateCallback callback)
+        protected void WasHit(MarkCoordinateCallback callback)
         {
             if (!callback.ShipFound)
                 return;
@@ -174,6 +174,7 @@ namespace AI_lib
                 var hitCoordKey = lastHitNeighboursNotMarked[random];
                 var neighbours = CoordinateNeighbours.Instance.GetNeighbours(hitCoordKey);
                 var neighbourCount = neighbours.AvailableNeighbours.Count;
+
                 // Take random neighbour until no neighbours left and return if not already marked
                 while (neighbourCount > 0)
                 {
@@ -181,21 +182,20 @@ namespace AI_lib
                     var randomNeighbour = neighbours.AvailableNeighbours[randomNeighbourIndex];
                     if (!currentGameBoardState[randomNeighbour].IsMarked)
                     {
-                        lastHitNeighboursNotMarked.Clear();
-                        neighbourCount = 0;
                         return (CoordinateKey.Parse(randomNeighbour));
                     }
+
                     neighbourCount--;
                 }
 
-                if (lastHitNeighboursNotMarked.Any())
-                {
-                    lastHitNeighboursNotMarked.Remove(hitCoordKey);
-                }
+                lastHitNeighboursNotMarked.Remove(hitCoordKey);
             }
 
             // If all neighbours for the last hits are marked, fallback to random prediction
-            return base.PredictWithoutCallback(currentGameBoardState);
+            return PredictRandom(currentGameBoardState);
         }
+
+        protected (Column Column, int Row) PredictRandom(Dictionary<string, CoordinateContainerBase> currentGameBoardState)
+            => base.PredictWithoutCallback(currentGameBoardState);
     }
 }

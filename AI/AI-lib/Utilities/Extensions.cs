@@ -10,6 +10,9 @@ namespace AI_lib
             var random = new CryptoRandomizer();
 
             int n = list.Count;
+            if (n <= 1)
+                return;
+                
             while (n > 1)
             {
                 n--;
