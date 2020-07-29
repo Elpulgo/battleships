@@ -57,8 +57,8 @@ namespace AI_lib_test
             }
         }
 
-        // [Theory(Skip = "Should only run in debug mode since benchmark test")]
-        [Theory]
+        [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        // [Theory]
         [InlineData(1000)]
         public void BenchmarkPredictions_MonteCarlo(int nrOfPredictions)
         {
