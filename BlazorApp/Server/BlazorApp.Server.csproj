@@ -12,6 +12,7 @@
     <ProjectReference Include="..\Client\BlazorApp.Client.csproj" />
     <ProjectReference Include="..\..\Core\Core.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\AI\AI-lib\AI-lib.csproj" />
   </ItemGroup>
 
 

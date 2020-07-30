@@ -11,6 +11,7 @@ using BlazorApp.Server.Managers;
 using Core.Models;
 using Core.Managers;
 using BlazorApp.Server.Services;
+using AI_lib;
 
 namespace BlazorApp.Server
 {
@@ -39,6 +40,7 @@ namespace BlazorApp.Server
             services.AddSingleton<PlayerManager>();
             services.AddSingleton<GameServiceFactory>();
             services.AddSingleton<IGameManager, GameManager>();
+            services.AddSingleton<IAIManager, AIManager>();
 
             services.AddTransient<IPushNotificationService, PushNotificationService>();
             services.AddSingleton<GameActionRelay>();

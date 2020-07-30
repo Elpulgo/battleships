@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BlazorApp.Shared;
 using Core.Models;
 using Core.Models.Ships;
+using Shared;
 
 namespace BlazorApp.Server.Services
 {
@@ -11,12 +13,13 @@ namespace BlazorApp.Server.Services
         bool IsPlayerSlotAvailable();
         bool IsOtherPlayerCreated();
         Task<Player> CreatePlayer(
-            string name, 
+            string name,
             PlayerType type,
-            bool playVsComputer, 
-            string connectionId);
+            string connectionId,
+            bool playVsComputer = false,
+            ComputerLevel computerLevel = ComputerLevel.None);
         Task PlayerIsReady(
-            Guid playerId, 
+            Guid playerId,
             List<Ship> ships);
     }
 }

@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AI_lib;
 using BlazorApp.Server.Managers;
+using BlazorApp.Shared;
 using Core.Managers;
 using Core.Models;
 using Core.Models.Ships;
 using Core.Utilities;
+using Shared;
 using static Core.Models.CoordinatesHelper;
 
 namespace BlazorApp.Server.Services
@@ -18,6 +21,7 @@ namespace BlazorApp.Server.Services
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IGameManager _gameManager;
         private readonly PlayerManager _playerManager;
+        private readonly IAIManager _AIManager;
         private List<Guid> _finalBoardRequests;
 
         public GameActionRelay(
@@ -25,7 +29,8 @@ namespace BlazorApp.Server.Services
             ConnectionManager connectionManager,
             IPushNotificationService pushNotificationService,
             IGameManager gameManager,
-            PlayerManager playerManager)
+            PlayerManager playerManager,
+            IAIManager AIManager)
         {
             _finalBoardRequests = new List<Guid>();
             _gameServiceFactory = gameServiceFactory;
@@ -33,6 +38,7 @@ namespace BlazorApp.Server.Services
             _pushNotificationService = pushNotificationService;
             _gameManager = gameManager;
             _playerManager = playerManager;
+            _AIManager = AIManager;
         }
 
         #region Setup
@@ -46,8 +52,9 @@ namespace BlazorApp.Server.Services
         public async Task<Player> CreatePlayer(
             string name,
             PlayerType type,
+            string connectionId,
             bool playVsComputer,
-            string connectionId)
+            ComputerLevel computerLevel)
         {
             if (_connectionManager.Count > 1)
                 throw new SetupException("Maximum number of players already in the game!");
@@ -59,7 +66,7 @@ namespace BlazorApp.Server.Services
             switch (playVsComputer, _connectionManager.Count)
             {
                 case (true, 1):
-                    _playerManager.PlayVsComputer();
+                    _playerManager.PlayVsComputer(computerLevel);
                     await _pushNotificationService.GameModeChangedClientAsync(GameMode.Setup, player.Id);
                     break;
                 case (false, 2):
@@ -111,7 +118,6 @@ namespace BlazorApp.Server.Services
 
             var randomPlayer = GetRandomPlayer();
 
-            // Fire to computer service here aswell..
             if (randomPlayer.Id == playerId)
             {
                 await _pushNotificationService.PlayerTurnChangedAsync(randomPlayer.Id);
@@ -119,6 +125,7 @@ namespace BlazorApp.Server.Services
             else
             {
                 await _pushNotificationService.PlayerWaitChangedAsync(randomPlayer.Id);
+                ExecuteComputerMove();
             }
         }
 
@@ -130,6 +137,46 @@ namespace BlazorApp.Server.Services
                 throw new ArgumentOutOfRangeException("All players have not joined the gamed yet!");
 
             return _playerManager.Players.Skip(nextRandom).FirstOrDefault();
+        }
+
+        #endregion
+
+        #region Computer
+
+        private (bool ShipFound, bool ShipDestroyed) ExecuteComputerMove()
+        {
+            var computerPlayer = _playerManager.Players.Single(s => s.Type == PlayerType.Computer);
+            var opponentGameBoard = _gameManager.GetOpponentBoard(computerPlayer.Id);
+
+            var (column, row, action) = _AIManager.PredictCoordinate(
+                ConvertToAILevel(_playerManager.ComputerLevel),
+                opponentGameBoard.Matrix);
+
+            var predictedKey = CoordinateKey.Build(column, row);
+
+            var result = _gameManager.MarkCoordinate(computerPlayer.Id, predictedKey);
+
+            var callback = new MarkCoordinateCallback(result.shipFound, predictedKey);
+
+            if (result.shipDestroyed)
+            {
+                var coordsForDestroyedShip = _gameManager
+                    .GetOpponentBoard(computerPlayer.Id)
+                    .GetCoordinatesForDestroyedShip(predictedKey);
+                callback.WithDestroyedShip(coordsForDestroyedShip);
+            }
+
+            action.Invoke(callback);
+            return result;
+
+            AILevel ConvertToAILevel(ComputerLevel level) => level switch
+            {
+                ComputerLevel.Childish => AILevel.Random,
+                ComputerLevel.Easy => AILevel.Hunter,
+                ComputerLevel.Hard => AILevel.MonteCarlo,
+                ComputerLevel.Impossible => AILevel.MonteCarloAndHunt,
+                _ => throw new ArgumentException("Can't play vs computer and have no level!")
+            };
         }
 
         #endregion
@@ -162,14 +209,6 @@ namespace BlazorApp.Server.Services
             int row,
             Guid playerId)
         {
-            // Need special handling when playing vs computer
-            // This method need to be called from computer
-
-            if (IsPlayerComputer(playerId))
-            {
-                return await HandleMarkCoordinateAsComputerAsync(playerId, column, row);
-            }
-
             var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
                 playerId,
                 CoordinateKey.Build(column, row));
@@ -182,6 +221,12 @@ namespace BlazorApp.Server.Services
             }
 
             var opponentPlayer = _playerManager.GetOpponent(playerId);
+
+            if (_playerManager.IsPlayingVsComputer)
+            {
+                await HandleComputerMoveAsync(playerId, opponentPlayer.Id);
+                return (shipFound, shipDestroyed);
+            }
 
             await _pushNotificationService.ReloadGameBoardAsync(opponentPlayer.Id, shipFound, shipDestroyed);
             await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
@@ -211,26 +256,27 @@ namespace BlazorApp.Server.Services
             return false;
         }
 
-        private async Task<(bool ShipFound, bool ShipDestroyed)> HandleMarkCoordinateAsComputerAsync(
+        private async Task HandleComputerMoveAsync(
             Guid playerId,
-            Column column,
-            int row)
+            Guid computerId)
         {
-            var (shipFound, shipDestroyed) = _gameManager.MarkCoordinate(
-               playerId,
-               CoordinateKey.Build(column, row));
+            await _pushNotificationService.ReloadOpponentGameBoardAsync(playerId);
+            await _pushNotificationService.PlayerWaitChangedAsync(playerId);
 
-            if (_gameManager.IsAllShipsDestroyedForOpponent(playerId))
+            var result = ExecuteComputerMove();
+
+            // Simulate computer thinking..
+            await Task.Delay(3000);
+
+            await _pushNotificationService.ReloadGameBoardAsync(playerId, result.ShipFound, result.ShipDestroyed);
+
+            if (_gameManager.IsAllShipsDestroyedForOpponent(computerId))
             {
-                await _pushNotificationService.GameEndedAllAsync(playerId);
-                return (shipFound, shipDestroyed);
+                await _pushNotificationService.GameEndedAllAsync(computerId);
+                return;
             }
 
-            var humanPlayer = _playerManager.GetOpponent(playerId);
-            await _pushNotificationService.ReloadGameBoardAsync(humanPlayer.Id, shipFound, shipDestroyed);
-            await _pushNotificationService.PlayerTurnChangedAsync(humanPlayer.Id);
-
-            return (shipFound, shipDestroyed);
+            await _pushNotificationService.PlayerTurnChangedAsync(playerId);
         }
 
         #endregion

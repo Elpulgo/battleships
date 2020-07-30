@@ -1,35 +1,55 @@
 @using Core.Models
 @using Client.Services
+@using BlazorApp.Shared
 
 @inject IGamePlayService GamePlayService
 
-<h6>Create Player</h6>
-<div class="form-group">
-    <input class="form-control input_width" id="name" @bind="Name" />
-    <small id="namehelp" class="form-text text-muted">Name</small>
-</div>
+<div class="container d-flex" style="justify-content:center; height: 100vh;">
+    <div class="row">
+        <div class="col-12">
+            <h6>Create Player</h6>
+            <div class="form-group">
+                <input class="form-control input_width" id="name" @bind="Name" />
+                <small id="namehelp" class="form-text text-muted">Name</small>
+            </div>
 
-@if(!IsOtherPlayerConnected){
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="opponentType" @bind="IsOpponentComputer" />
-        <label class="form-check-label" for="opponentType">Play vs Computer</label>
+            @if(!IsOtherPlayerConnected){
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="opponentType" @bind="IsOpponentComputer" />
+                    <label class="form-check-label" for="opponentType">Play vs Computer</label>
+                </div>
+                @if(IsOpponentComputer){
+                    <div class="form-group">
+                        <label for="product">Product</label>
+                        <select id="computerLevel" class="form-control" @bind="ComputerLevel">
+                            <option value="@ComputerLevel.Childish">Childish</option>
+                            <option value="@ComputerLevel.Easy">Easy</option>
+                            <option value="@ComputerLevel.Hard">Hard</option>
+                            <option value="@ComputerLevel.Impossible">Impossible</option>
+                        </select>
+                    </div>
+                }
+            }
+
+            <div class="form-group pt-2">
+                <button class="btn btn-success" @onclick=@OnReady>Create</button>
+            </div>
+
+            @if(ShowError){
+                <ErrorMessage Error=@ErrorText></ErrorMessage>
+            }
+        </div>
     </div>
-}
-
-<div class="form-group pt-2">
-    <button class="btn btn-success" @onclick=@OnReady>Create</button>
 </div>
-
-@if(ShowError){
-    <ErrorMessage Error="Name can't be empty!"></ErrorMessage>
-}
 
 @code {
     [Parameter]
     public bool IsOtherPlayerConnected { get; set; }
     public string Name { get; set; }
     public bool IsOpponentComputer { get; set; } = false;
+    public ComputerLevel ComputerLevel { get; set; } = ComputerLevel.None;
     public bool ShowError { get; set; }
+    public string ErrorText { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,16 +57,26 @@
         IsOpponentComputer = false;
     }
 
+    public void SetComputerLevel(ComputerLevel level) => ComputerLevel = level;
+
     public async Task OnReady()
     {
         ShowError = false;
 
         if (string.IsNullOrEmpty(Name))
         {
+            ErrorText = "Name can't be empty!";
             ShowError = true;
             return;
         }
 
-        await GamePlayService.CreatePlayerAsync(Name, PlayerType.Human, IsOpponentComputer);
+        if (IsOpponentComputer && ComputerLevel == ComputerLevel.None)
+        {
+            ErrorText = "Need to select a computer difficulty!";
+            ShowError = true;
+            return;
+        }
+
+        await GamePlayService.CreatePlayerAsync(Name, PlayerType.Human, IsOpponentComputer, ComputerLevel);
     }
 }

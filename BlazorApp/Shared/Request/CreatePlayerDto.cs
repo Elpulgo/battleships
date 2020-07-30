@@ -1,3 +1,4 @@
+using BlazorApp.Shared;
 using Core.Models;
 
 namespace Shared
@@ -11,11 +12,13 @@ namespace Shared
         public CreatePlayerDto(
             PlayerType type,
             string name,
-            bool playVsComputer)
+            bool playVsComputer = false,
+            ComputerLevel computerLevel = ComputerLevel.None)
         {
             Type = type;
             Name = name;
             PlayVsComputer = playVsComputer;
+            ComputerLevel = computerLevel;
         }
 
         public PlayerType Type { get; set; }
@@ -23,5 +26,6 @@ namespace Shared
         public string Name { get; set; }
 
         public bool PlayVsComputer { get; set; }
+        public ComputerLevel ComputerLevel { get; set; } = ComputerLevel.None;
     }
 }

@@ -30,7 +30,7 @@ namespace BlazorApp.Server.Controllers
         {
             try
             {
-                var player = await _setupRelay.CreatePlayer(dto.Name, dto.Type, dto.PlayVsComputer, connectionId);
+                var player = await _setupRelay.CreatePlayer(dto.Name, dto.Type, connectionId, dto.PlayVsComputer, dto.ComputerLevel);
                 return Ok(player);
             }
             catch (SetupException ex)

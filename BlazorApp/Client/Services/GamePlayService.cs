@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using BlazorApp.Shared;
 using Core.Models;
 using Core.Models.Ships;
 using Shared;
@@ -12,7 +13,7 @@ namespace BlazorApp.Client.Services
 {
     public interface IGamePlayService
     {
-        Task CreatePlayerAsync(string name, PlayerType type, bool playVsComputer);
+        Task CreatePlayerAsync(string name, PlayerType type, bool playVsComputer, ComputerLevel computerLevel);
         Task<bool> IsPlayerSlotAvailableAsync();
         Task<bool> IsOtherPlayerCreated();
         Task PreLoadPlayerSlotAvailable();
@@ -79,13 +80,13 @@ namespace BlazorApp.Client.Services
 
         public Task<bool> IsOtherPlayerCreated() => GetRequest<bool>("setup/IsOtherPlayerCreated");
 
-        public async Task CreatePlayerAsync(string name, PlayerType type, bool playVsComputer)
+        public async Task CreatePlayerAsync(string name, PlayerType type, bool playVsComputer, ComputerLevel computerLevel = ComputerLevel.None)
         {
             try
             {
                 var player = await PostRequest<Player, CreatePlayerDto>(
                     $"setup/createplayer/{_messageService.HubConnectionId}",
-                    new CreatePlayerDto(type, name, playVsComputer));
+                    new CreatePlayerDto(type, name, playVsComputer, computerLevel));
 
                 PlayerId = player.Id;
                 _eventExecutor.PlayerCreated(player);
