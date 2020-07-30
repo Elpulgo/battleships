@@ -7,7 +7,7 @@ Based on 3 projects;
 + Console app, with an implementation of the game in a terminal.
 + Core library, models and business logic to be reused in a console application and reused between
 client and server side blazor.
-+ ComputerAlgorihm, library to handle logic if playing vs a computer.
++ AI-lib, library to handle logic if playing vs a computer.
 
 The design is based on an event driven approach, where the user do an action, a GameManager handles
 the state of the game, and based on the outcome of the action, events are then invoked to the players of the game.
@@ -24,9 +24,15 @@ than each component should listen in on the events, or do requests to the server
 
 This gives a cleaner perception of the actual state of the game and is easier to reason with from a coding perspective.
 
-## Benchmark
+## Algorithms & Benchmark
 
-Benchmark for 1000 iterations of gameplay when playing as AI for the different Prediction algorithms.
+When playing vs the computer, there are 4 possible levels of difficulty.
+- Random, as the name suggest, fire random shots across the board.
+- Hunter, if a coordinate is hit, try and find neighbour coordinates until the ship is destroyed. Fallback to random if no hits available per round.
+- MonteCarlo, use a probability simulation, simulating 20 random gameboards for all ships per round, where 1 score is 1 coordinate where a ship exist. Then take the coordinate with the highest score.
+- MonteCarloWithHunt, as MonteCarlo, but will fallback to Hunt when any hits occur.
+
+Benchmark for 1000 iterations of gameplay when playing as AI for the different prediction algorithms.
 
 The test starts with 100 in score(all available boxes), which is not theoretically possible since we have 
 ```
@@ -50,7 +56,7 @@ Below is the score for the different algorithms based on 1000 iterations.
 |           | Min                        | Average                 | Max                                        |
 | --------- | :------------------------------------------:     | :----------------------:                 | :---------------------------:                            | 
 | Random|0|3.86|24|
-| Hunter|0|30.567|70|
+| Hunter|0|6.78|35|
 | MonteCarlo|23|42.83|65|
 | MonteCarloWithHunt|22|52.48|75|
 

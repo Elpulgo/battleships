@@ -11,33 +11,30 @@ namespace AI_lib
 {
     internal class MonteCarloPrediciton : HunterPrediction
     {
+        private static readonly Lazy<MonteCarloPrediciton> lazy
+        = new Lazy<MonteCarloPrediciton>(() => new MonteCarloPrediciton());
+
+        public static new MonteCarloPrediciton Instance { get { return lazy.Value; } }
+
         private const int NumberOfSimulations = 20;
         private readonly ShipGenerator _shipGenerator;
 
-        public bool UseHunt { get; }
-
-        public MonteCarloPrediciton(bool useHunt)
+        protected MonteCarloPrediciton()
         {
             _shipGenerator = new ShipGenerator();
-            UseHunt = useHunt;
         }
 
         public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
+            base.BuildHits(currentGameBoardState);
             var markCallback = new Action<MarkCoordinateCallback>(base.WasHit);
-
-            if (UseHunt && base.IsInHuntMode)
-            {
-                var hunterPrediction = base.PredictNext(currentGameBoardState);
-                return (hunterPrediction.Column, hunterPrediction.Row, markCallback);
-            }
 
             var prediction = PredictBySimulation(currentGameBoardState);
             return (prediction.Column, prediction.Row, markCallback);
         }
 
-        private (Column Column, int Row) PredictBySimulation(
+        protected (Column Column, int Row) PredictBySimulation(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var orderedByHighestProbability = SimulateShipsOnBoard();

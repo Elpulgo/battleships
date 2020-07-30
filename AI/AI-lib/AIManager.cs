@@ -1,55 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Models;
-using Core.Utilities;
 using static Core.Models.CoordinatesHelper;
 
 namespace AI_lib
 {
-    /// <summary>
-    /// Intended to be used as a singleton since it will hold
-    /// information about the board to calculate predictions during the game
-    /// </summary>
     public class AIManager : IAIManager
     {
-        private readonly AILevel _level;
-        private Random _random;
-        private RandomPrediction _randomPrediction;
-        private HunterPrediction _hunterPrediction;
-        private MonteCarloPrediciton _monteCarloPrediction;
-        private MonteCarloPrediciton _monteCarloPredictionWithHunt;
-
-        public AIManager(AILevel level)
+        public AIManager()
         {
-            _level = level;
-            _random = new Random();
-            InitializePredictors();
         }
 
         public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) PredictCoordinate(
+            AILevel level,
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
-            => _level switch
+            => level switch
             {
-                AILevel.Random => _randomPrediction.Predict(currentGameBoardState),
-                AILevel.Hunter => _hunterPrediction.Predict(currentGameBoardState),
-                AILevel.MonteCarlo => _monteCarloPrediction.Predict(currentGameBoardState),
-                AILevel.MonteCarloAndHunt => _monteCarloPredictionWithHunt.Predict(currentGameBoardState),
+                AILevel.Random => RandomPrediction.Instance.Predict(currentGameBoardState),
+                AILevel.Hunter => HunterPrediction.Instance.Predict(currentGameBoardState),
+                AILevel.MonteCarlo => MonteCarloPrediciton.Instance.Predict(currentGameBoardState),
+                AILevel.MonteCarloAndHunt => MonteCarloWithHuntPrediciton.Instance.Predict(currentGameBoardState),
                 _ => throw new ArgumentException("A level for the AI has not been set, can't do any prediction!")
             };
-
-        public void Reset()
-        {
-            InitializePredictors();
-        }
-
-        private void InitializePredictors()
-        {
-            _randomPrediction = new RandomPrediction();
-            _hunterPrediction = new HunterPrediction();
-            _monteCarloPrediction = new MonteCarloPrediciton(false);
-            _monteCarloPredictionWithHunt = new MonteCarloPrediciton(true);
-
-        }
     }
 }

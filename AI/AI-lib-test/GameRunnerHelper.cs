@@ -23,11 +23,11 @@ namespace AI_lib_test
             var gameBoard = CreateGameBoard();
 
             var maxScore = 100;
-            var AIManager = new AIManager(AILevel.Random);
+            var AIManager = new AIManager();
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                var (column, row, action) = AIManager.PredictCoordinate(AILevel.Random, gameBoard.ForOpponent().Matrix);
                 var (_, _x) = gameBoard.MarkCoordinate(CoordinateKey.Build(column, row));
 
                 maxScore--;
@@ -45,11 +45,11 @@ namespace AI_lib_test
             var gameBoard = CreateGameBoard();
 
             var maxScore = 100;
-            var AIManager = new AIManager(AILevel.Hunter);
+            var AIManager = new AIManager();
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                var (column, row, action) = AIManager.PredictCoordinate(AILevel.Hunter, gameBoard.ForOpponent().Matrix);
 
                 var key = CoordinateKey.Build(column, row);
                 var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
@@ -78,11 +78,44 @@ namespace AI_lib_test
             var gameBoard = CreateGameBoard();
 
             var maxScore = 100;
-            var AIManager = new AIManager(AILevel.MonteCarloAndHunt);
+            var AIManager = new AIManager();
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                var (column, row, action) = AIManager.PredictCoordinate(AILevel.MonteCarlo, gameBoard.ForOpponent().Matrix);
+
+                var key = CoordinateKey.Build(column, row);
+                var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
+
+                var callback = new MarkCoordinateCallback(shipFound, key);
+
+                if (shipDestroyed)
+                {
+                    var coordsForShip = gameBoard.GetCoordinatesForDestroyedShip(key);
+                    callback = callback.WithDestroyedShip(coordsForShip);
+                }
+                action.Invoke(callback);
+
+                maxScore--;
+                if (gameBoard.IsAllDestroyed())
+                {
+                    return maxScore;
+                }
+            }
+
+            return maxScore;
+        }
+
+        public int RunMonteCarloWithHuntGame()
+        {
+            var gameBoard = CreateGameBoard();
+
+            var maxScore = 100;
+            var AIManager = new AIManager();
+
+            foreach (var move in Enumerable.Range(0, maxScore))
+            {
+                var (column, row, action) = AIManager.PredictCoordinate(AILevel.MonteCarloAndHunt, gameBoard.ForOpponent().Matrix);
 
                 var key = CoordinateKey.Build(column, row);
                 var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);

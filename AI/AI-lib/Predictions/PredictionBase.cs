@@ -8,6 +8,7 @@ namespace AI_lib
     internal abstract class PredictionBase
     {
 
+        public static PredictionBase Instance { get; }
         public PredictionBase()
         {
         }

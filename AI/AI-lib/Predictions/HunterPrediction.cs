@@ -9,10 +9,16 @@ namespace AI_lib
 {
     internal class HunterPrediction : RandomPrediction
     {
+        private static readonly Lazy<HunterPrediction> lazy
+           = new Lazy<HunterPrediction>(() => new HunterPrediction());
+
+        public static new HunterPrediction Instance { get { return lazy.Value; } }
+
         protected readonly CryptoRandomizer _random;
         protected List<string> _hits;
         protected bool IsInHuntMode => _hits.Any();
-        public HunterPrediction()
+
+        protected HunterPrediction()
         {
             _random = new CryptoRandomizer();
             _hits = new List<string>();
@@ -21,6 +27,7 @@ namespace AI_lib
         public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
+            BuildHits(currentGameBoardState);
             var markCallback = new Action<MarkCoordinateCallback>(WasHit);
 
             if (!IsInHuntMode)
@@ -29,9 +36,25 @@ namespace AI_lib
                 return (mark.Column, mark.Row, markCallback);
             }
 
-            var (column, row) = PredictNext(currentGameBoardState);
+            var (column, row) = PredictRandom(currentGameBoardState);
 
             return (column, row, markCallback);
+        }
+
+        protected void BuildHits(Dictionary<string, CoordinateContainerBase> currentGameBoardState)
+        {
+            var hits = currentGameBoardState
+                .Where(w => (w.Value.IsMarked && w.Value.HasShip && !w.Value.IsShipDestroyed))
+                .Select(s => s.Key)
+                .ToList();
+
+            if (hits.Any())
+            {
+                _hits = hits;
+                return;
+            }
+
+            _hits.Clear();
         }
 
         protected void WasHit(MarkCoordinateCallback callback)
@@ -52,7 +75,7 @@ namespace AI_lib
             _hits.Add(callback.Key);
         }
 
-        protected (Column Column, int Row) PredictNext(
+        protected (Column Column, int Row) PredictHunter(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var horizontal = NeighbourCalculator.AreHits(Direction.Horizontal, _hits);

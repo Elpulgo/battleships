@@ -18,7 +18,7 @@ namespace AI_lib_test
 
         [Theory(Skip = "Should only run in debug mode since benchmark test")]
         // [Theory]
-        [InlineData(1000)]
+        [InlineData(10)]
         public void BenchmarkPredictions_Random(int nrOfPredictions)
         {
             File.Delete("benchmark-random-index.txt");
@@ -36,9 +36,9 @@ namespace AI_lib_test
             }
         }
 
-        [Theory(Skip = "Should only run in debug mode since benchmark test")]
-        // [Theory]
-        [InlineData(1000)]
+        // [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        [Theory]
+        [InlineData(500)]
         public void BenchmarkPredictions_Hunter(int nrOfPredictions)
         {
             File.Delete("benchmark-hunter-index.txt");
@@ -59,7 +59,7 @@ namespace AI_lib_test
 
         [Theory(Skip = "Should only run in debug mode since benchmark test")]
         // [Theory]
-        [InlineData(1000)]
+        [InlineData(10)]
         public void BenchmarkPredictions_MonteCarlo(int nrOfPredictions)
         {
             File.Delete("benchmark-montecarlo-index.txt");
@@ -76,6 +76,28 @@ namespace AI_lib_test
                 var min_ = scoreSum.Min();
                 var max_ = scoreSum.Max();
                 File.AppendAllText("benchmark-montecarlo-index.txt", $"\n{index} \t {min_}\t{avg_}\t{max_}");
+            }
+        }
+
+        [Theory(Skip = "Should only run in debug mode since benchmark test")]
+        // [Theory]
+        [InlineData(10)]
+        public void BenchmarkPredictions_MonteCarloWithHunt(int nrOfPredictions)
+        {
+            File.Delete("benchmark-montecarlowithhunt-index.txt");
+
+            var scoreSum = new List<int>();
+            var tasks = new List<Task>();
+
+            foreach (var index in Enumerable.Range(1, nrOfPredictions))
+            {
+                var result = base.RunMonteCarloWithHuntGame();
+                scoreSum.Add(result);
+
+                var avg_ = scoreSum.Average();
+                var min_ = scoreSum.Min();
+                var max_ = scoreSum.Max();
+                File.AppendAllText("benchmark-montecarlowithhunt-index.txt", $"\n{index} \t {min_}\t{avg_}\t{max_}");
             }
         }
 
@@ -101,13 +123,13 @@ namespace AI_lib_test
             var gameBoard = base.CreateGameBoard();
             var elapsed = new List<long>();
 
-            var AIManager = new AIManager(AILevel.Random);
+            var AIManager = new AIManager();
             var maxScore = 100;
             var stopWatch = new Stopwatch();
             foreach (var move in Enumerable.Range(0, maxScore))
             {
                 stopWatch.Restart();
-                var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                var (column, row, action) = AIManager.PredictCoordinate(AILevel.Random, gameBoard.ForOpponent().Matrix);
                 stopWatch.Stop();
 
                 elapsed.Add(stopWatch.ElapsedMilliseconds);
@@ -132,13 +154,13 @@ namespace AI_lib_test
             var gameBoard = base.CreateGameBoard();
             var elapsed = new List<long>();
 
-            var AIManager = new AIManager(AILevel.Hunter);
+            var AIManager = new AIManager();
             var maxScore = 100;
             var stopWatch = new Stopwatch();
             foreach (var move in Enumerable.Range(0, maxScore))
             {
                 stopWatch.Restart();
-                var (column, row, action) = AIManager.PredictCoordinate(gameBoard.ForOpponent().Matrix);
+                var (column, row, action) = AIManager.PredictCoordinate(AILevel.Hunter, gameBoard.ForOpponent().Matrix);
                 stopWatch.Stop();
 
                 elapsed.Add(stopWatch.ElapsedMilliseconds);

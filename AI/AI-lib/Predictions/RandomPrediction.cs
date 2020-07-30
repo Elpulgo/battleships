@@ -9,7 +9,12 @@ namespace AI_lib
 {
     internal class RandomPrediction : PredictionBase
     {
-        public RandomPrediction()
+        private static readonly Lazy<RandomPrediction> lazy
+            = new Lazy<RandomPrediction>(() => new RandomPrediction());
+
+        public static new RandomPrediction Instance { get { return lazy.Value; } }
+
+        protected RandomPrediction()
         {
         }
 
@@ -26,7 +31,7 @@ namespace AI_lib
             var availableCoords = BuildFlattenedKeys(currentGameBoardState);
             if (!availableCoords.Any())
                 throw new ArgumentOutOfRangeException("Can't predict a coordinate when all coordinates are marked! Game should have ended by now!");
-        
+
             availableCoords.Shuffle();
 
             return CoordinateKey.Parse(availableCoords.First());
