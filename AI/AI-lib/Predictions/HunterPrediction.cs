@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Core.Models;
 using Core.Utilities;
@@ -36,7 +37,7 @@ namespace AI_lib
                 return (mark.Column, mark.Row, markCallback);
             }
 
-            var (column, row) = PredictRandom(currentGameBoardState);
+            var (column, row) = PredictHunter(currentGameBoardState);
 
             return (column, row, markCallback);
         }
@@ -48,13 +49,7 @@ namespace AI_lib
                 .Select(s => s.Key)
                 .ToList();
 
-            if (hits.Any())
-            {
-                _hits = hits;
-                return;
-            }
-
-            _hits.Clear();
+            _hits = hits;
         }
 
         protected void WasHit(MarkCoordinateCallback callback)

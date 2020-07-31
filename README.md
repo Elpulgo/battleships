@@ -56,7 +56,7 @@ Below is the score for the different algorithms based on 1000 iterations.
 |           | Min                        | Average                 | Max                                        |
 | --------- | :------------------------------------------:     | :----------------------:                 | :---------------------------:                            | 
 | Random|0|3.86|24|
-| Hunter|0|6.78|35|
+| Hunter|0|29.96|63|
 | MonteCarlo|23|42.83|65|
 | MonteCarloWithHunt|22|52.48|75|
 
