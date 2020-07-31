@@ -148,26 +148,13 @@ namespace BlazorApp.Server.Services
             var computerPlayer = _playerManager.Players.Single(s => s.Type == PlayerType.Computer);
             var opponentGameBoard = _gameManager.GetOpponentBoard(computerPlayer.Id);
 
-            var (column, row, action) = _AIManager.PredictCoordinate(
+            var (column, row) = _AIManager.PredictCoordinate(
                 ConvertToAILevel(_playerManager.ComputerLevel),
                 opponentGameBoard.Matrix);
 
             var predictedKey = CoordinateKey.Build(column, row);
 
-            var result = _gameManager.MarkCoordinate(computerPlayer.Id, predictedKey);
-
-            var callback = new MarkCoordinateCallback(result.shipFound, predictedKey);
-
-            if (result.shipDestroyed)
-            {
-                var coordsForDestroyedShip = _gameManager
-                    .GetOpponentBoard(computerPlayer.Id)
-                    .GetCoordinatesForDestroyedShip(predictedKey);
-                callback.WithDestroyedShip(coordsForDestroyedShip);
-            }
-
-            action.Invoke(callback);
-            return result;
+            return _gameManager.MarkCoordinate(computerPlayer.Id, predictedKey);
 
             AILevel ConvertToAILevel(ComputerLevel level) => level switch
             {
