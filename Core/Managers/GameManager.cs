@@ -134,9 +134,6 @@ namespace Core.Managers
 
         public void Reset()
         {
-            if (!_gameBoardLookup.Any(a => a.Value.IsAllDestroyed()))
-                return;
-            
             lock (m_Lock)
             {
                 _gameBoardLookup.Clear();

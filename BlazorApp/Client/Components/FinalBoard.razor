@@ -61,8 +61,10 @@
     public string HeaderText()
     {
         if (GameBoard.Player.Id == WinningPlayerId)
-            return $"{GameBoard.Player.Name} board. (WINNER)";
+            return $"{GameBoard.Player.Name} board. (WINNER) Moves: {MoveCount}";
         else
-            return $"{GameBoard.Player.Name} board. (LOSER)";
+            return $"{GameBoard.Player.Name} board. (LOSER) Moves: {MoveCount}";
     }
+
+    private int MoveCount => GameBoard.Matrix.Values.Count(c => c.IsMarked);
 }
