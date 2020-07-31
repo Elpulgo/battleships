@@ -15,13 +15,13 @@ namespace AI_lib
         public static new HunterPrediction Instance { get { return lazy.Value; } }
 
         protected readonly CryptoRandomizer _random;
-        protected List<string> _hits;
-        protected bool IsInHuntMode => _hits.Any();
+        protected List<string> Hits { get; private set; }
+        protected bool IsInHuntMode => Hits.Any();
 
         protected HunterPrediction()
         {
             _random = new CryptoRandomizer();
-            _hits = new List<string>();
+            Hits = new List<string>();
         }
 
         public override (Column Column, int Row) Predict(
@@ -37,19 +37,17 @@ namespace AI_lib
 
         protected void BuildHits(Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            var hits = currentGameBoardState
+            Hits = currentGameBoardState
                 .Where(w => (w.Value.IsMarked && w.Value.HasShip && !w.Value.IsShipDestroyed))
                 .Select(s => s.Key)
                 .ToList();
-
-            _hits = hits;
         }
 
         protected (Column Column, int Row) PredictHunter(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            var horizontal = NeighbourCalculator.AreHits(Direction.Horizontal, _hits);
-            var vertical = NeighbourCalculator.AreHits(Direction.Vertical, _hits);
+            var horizontal = NeighbourCalculator.AreHits(Direction.Horizontal, Hits);
+            var vertical = NeighbourCalculator.AreHits(Direction.Vertical, Hits);
 
             if ((horizontal && vertical) || (!horizontal && !vertical))
                 return GetRandomNeighbour(currentGameBoardState);
@@ -67,8 +65,8 @@ namespace AI_lib
             Dictionary<string, CoordinateContainerBase> currentGameBoardState,
             out (Column Column, int Row) predictedCoord)
         {
-            var minNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Horizontal, Range.Min);
-            var maxNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Horizontal, Range.Max);
+            var minNeighbours = NeighbourCalculator.GetNeighbours(Hits, Direction.Horizontal, Range.Min);
+            var maxNeighbours = NeighbourCalculator.GetNeighbours(Hits, Direction.Horizontal, Range.Max);
 
             var isMinLeftOpenForMove =
                 !string.IsNullOrEmpty(minNeighbours.NeighbourLeft) &&
@@ -113,8 +111,8 @@ namespace AI_lib
             Dictionary<string, CoordinateContainerBase> currentGameBoardState,
             out (Column Column, int Row) predictedCoord)
         {
-            var minNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Vertical, Range.Min);
-            var maxNeighbours = NeighbourCalculator.GetNeighbours(_hits, Direction.Vertical, Range.Max);
+            var minNeighbours = NeighbourCalculator.GetNeighbours(Hits, Direction.Vertical, Range.Min);
+            var maxNeighbours = NeighbourCalculator.GetNeighbours(Hits, Direction.Vertical, Range.Max);
 
             var isMinUpOpenForMove =
                 !string.IsNullOrEmpty(minNeighbours.NeighbourUp) &&
@@ -158,7 +156,7 @@ namespace AI_lib
         private (Column Column, int Row) GetRandomNeighbour(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
-            var lastHitNeighboursNotMarked = _hits.Select(s => s).ToList();
+            var lastHitNeighboursNotMarked = Hits.Select(s => s).ToList();
 
             // Take random neighbour for last hits and check if neighbours are already marked
             while (lastHitNeighboursNotMarked.Any())
