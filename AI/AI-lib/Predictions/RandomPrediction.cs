@@ -18,15 +18,8 @@ namespace AI_lib
         {
         }
 
-        public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
+        public override (Column Column, int Row) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
-        {
-            var prediction = PredictWithoutCallback(currentGameBoardState);
-            return (prediction.Column, prediction.Row, GetEmptyCallback());
-        }
-
-        public (Column Column, int Row) PredictWithoutCallback(
-           Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             var availableCoords = BuildFlattenedKeys(currentGameBoardState);
             if (!availableCoords.Any())
@@ -36,9 +29,6 @@ namespace AI_lib
 
             return CoordinateKey.Parse(availableCoords.First());
         }
-
-        private Action<MarkCoordinateCallback> GetEmptyCallback()
-            => new Action<MarkCoordinateCallback>((_) => { });
 
         private List<string> BuildFlattenedKeys(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)

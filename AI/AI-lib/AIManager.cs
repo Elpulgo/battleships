@@ -11,7 +11,7 @@ namespace AI_lib
         {
         }
 
-        public (Column Column, int Row, Action<MarkCoordinateCallback> resultFromMark) PredictCoordinate(
+        public (Column Column, int Row) PredictCoordinate(
             AILevel level,
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
             => level switch

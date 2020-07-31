@@ -2,7 +2,6 @@ using AI_lib;
 using System.Linq;
 using Core.Models;
 using Core.Utilities;
-using System.IO;
 
 namespace AI_lib_test
 {
@@ -27,7 +26,7 @@ namespace AI_lib_test
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(AILevel.Random, gameBoard.ForOpponent().Matrix);
+                var (column, row) = AIManager.PredictCoordinate(AILevel.Random, gameBoard.ForOpponent().Matrix);
                 var (_, _x) = gameBoard.MarkCoordinate(CoordinateKey.Build(column, row));
 
                 maxScore--;
@@ -49,19 +48,10 @@ namespace AI_lib_test
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(AILevel.Hunter, gameBoard.ForOpponent().Matrix);
+                var (column, row) = AIManager.PredictCoordinate(AILevel.Hunter, gameBoard.ForOpponent().Matrix);
 
                 var key = CoordinateKey.Build(column, row);
                 var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
-
-                var callback = new MarkCoordinateCallback(shipFound, key);
-
-                if (shipDestroyed)
-                {
-                    var coordsForShip = gameBoard.GetCoordinatesForDestroyedShip(key);
-                    callback = callback.WithDestroyedShip(coordsForShip);
-                }
-                action.Invoke(callback);
 
                 maxScore--;
                 if (gameBoard.IsAllDestroyed())
@@ -82,19 +72,10 @@ namespace AI_lib_test
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(AILevel.MonteCarlo, gameBoard.ForOpponent().Matrix);
+                var (column, row) = AIManager.PredictCoordinate(AILevel.MonteCarlo, gameBoard.ForOpponent().Matrix);
 
                 var key = CoordinateKey.Build(column, row);
                 var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
-
-                var callback = new MarkCoordinateCallback(shipFound, key);
-
-                if (shipDestroyed)
-                {
-                    var coordsForShip = gameBoard.GetCoordinatesForDestroyedShip(key);
-                    callback = callback.WithDestroyedShip(coordsForShip);
-                }
-                action.Invoke(callback);
 
                 maxScore--;
                 if (gameBoard.IsAllDestroyed())
@@ -115,19 +96,10 @@ namespace AI_lib_test
 
             foreach (var move in Enumerable.Range(0, maxScore))
             {
-                var (column, row, action) = AIManager.PredictCoordinate(AILevel.MonteCarloAndHunt, gameBoard.ForOpponent().Matrix);
+                var (column, row) = AIManager.PredictCoordinate(AILevel.MonteCarloAndHunt, gameBoard.ForOpponent().Matrix);
 
                 var key = CoordinateKey.Build(column, row);
                 var (shipFound, shipDestroyed) = gameBoard.MarkCoordinate(key);
-
-                var callback = new MarkCoordinateCallback(shipFound, key);
-
-                if (shipDestroyed)
-                {
-                    var coordsForShip = gameBoard.GetCoordinatesForDestroyedShip(key);
-                    callback = callback.WithDestroyedShip(coordsForShip);
-                }
-                action.Invoke(callback);
 
                 maxScore--;
                 if (gameBoard.IsAllDestroyed())

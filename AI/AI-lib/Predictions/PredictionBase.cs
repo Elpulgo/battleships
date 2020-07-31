@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Core.Models;
 using static Core.Models.CoordinatesHelper;
@@ -13,7 +12,7 @@ namespace AI_lib
         {
         }
 
-        public abstract (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
+        public abstract (Column Column, int Row) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState);
     }
 }

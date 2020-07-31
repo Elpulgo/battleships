@@ -16,20 +16,14 @@ namespace AI_lib
         {
         }
 
-        public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
+        public override (Column Column, int Row) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             base.BuildHits(currentGameBoardState);
-            var markCallback = new Action<MarkCoordinateCallback>(base.WasHit);
 
-            if (base.IsInHuntMode)
-            {
-                var hunterPrediction = base.PredictHunter(currentGameBoardState);
-                return (hunterPrediction.Column, hunterPrediction.Row, markCallback);
-            }
-
-            var prediction = base.PredictBySimulation(currentGameBoardState);
-            return (prediction.Column, prediction.Row, markCallback);
+            return base.IsInHuntMode ?
+                base.PredictHunter(currentGameBoardState) :
+                base.PredictBySimulation(currentGameBoardState);
         }
     }
 }

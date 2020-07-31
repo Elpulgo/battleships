@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Core.Models;
 using Core.Utilities;
@@ -25,21 +24,15 @@ namespace AI_lib
             _hits = new List<string>();
         }
 
-        public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
+        public override (Column Column, int Row) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             BuildHits(currentGameBoardState);
-            var markCallback = new Action<MarkCoordinateCallback>(WasHit);
 
             if (!IsInHuntMode)
-            {
-                var mark = base.Predict(currentGameBoardState);
-                return (mark.Column, mark.Row, markCallback);
-            }
+                return base.Predict(currentGameBoardState);
 
-            var (column, row) = PredictHunter(currentGameBoardState);
-
-            return (column, row, markCallback);
+            return PredictHunter(currentGameBoardState);
         }
 
         protected void BuildHits(Dictionary<string, CoordinateContainerBase> currentGameBoardState)
@@ -50,24 +43,6 @@ namespace AI_lib
                 .ToList();
 
             _hits = hits;
-        }
-
-        protected void WasHit(MarkCoordinateCallback callback)
-        {
-            if (!callback.ShipFound)
-                return;
-
-            if (callback.ShipDestroyed)
-            {
-                foreach (var coord in callback.DestroyedShipCoordinates)
-                {
-                    _hits.Remove(coord);
-                }
-
-                return;
-            }
-
-            _hits.Add(callback.Key);
         }
 
         protected (Column Column, int Row) PredictHunter(
@@ -214,6 +189,6 @@ namespace AI_lib
         }
 
         protected (Column Column, int Row) PredictRandom(Dictionary<string, CoordinateContainerBase> currentGameBoardState)
-            => base.PredictWithoutCallback(currentGameBoardState);
+            => base.Predict(currentGameBoardState);
     }
 }

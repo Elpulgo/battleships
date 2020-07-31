@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Core.Models;
 using Core.Models.Ships;
@@ -24,14 +23,12 @@ namespace AI_lib
             _shipGenerator = new ShipGenerator();
         }
 
-        public override (Column Column, int Row, Action<MarkCoordinateCallback> callback) Predict(
+        public override (Column Column, int Row) Predict(
             Dictionary<string, CoordinateContainerBase> currentGameBoardState)
         {
             base.BuildHits(currentGameBoardState);
-            var markCallback = new Action<MarkCoordinateCallback>(base.WasHit);
 
-            var prediction = PredictBySimulation(currentGameBoardState);
-            return (prediction.Column, prediction.Row, markCallback);
+            return PredictBySimulation(currentGameBoardState);
         }
 
         protected (Column Column, int Row) PredictBySimulation(
