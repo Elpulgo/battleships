@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+  server:
+    restart: always
+    privileged: true
+    image: elpulgo/battleships-blazor:latest
+    ports:      
+      - "5020:5000"
+    networks:
+      - blazor
+
+networks:
+  blazor:
