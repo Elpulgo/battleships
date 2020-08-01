@@ -6,13 +6,12 @@ services:
     privileged: true
     container_name: battleships-blazor
     ports:      
-      - "5001:5001"
-      - "5000:5000"
+      - "5020:5000"
     networks:
-      - overlay
+      - blazor
     build:
       context: .
       dockerfile: Dockerfile
 
 networks:
-  overlay:
+  blazor:
