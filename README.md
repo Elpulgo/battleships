@@ -1,5 +1,7 @@
-# battleships
-An implementation of Battleships game. 
+# Intro
+An implementation of Battleships game. Primarily to try out and learn Blazor Webassembly.
+Can play vs another player, och vs computer, which can play the game with 4 options of difficulty.
+See below section for that. 
 
 ## Architecture
 Based on 3 projects;
@@ -63,15 +65,15 @@ Below is the score for the different algorithms based on 1000 iterations.
 ## Rules and gameplay
 + Max 2 players allowed
 + Can play vs computer
++ Board consist of 10 * 10 boxes, with 7 ships, with a total of 20 boxes.
++ Enter player name, and select to play vs player or computer
++ Wait for other player to join game on same local ip
++ Setup the board, either through selecting coordinates yourself, or by randomly generating the ships.
++ Play the game, first to sink opponent ships win
 
 ## How to use
-```
-$ docker...
-```
-
-
-## Install
-+ `
++ Download source code and compile BlazorApp.Server.csproj
++ Pull as docker image from Docker Hub: ```docker pull elpulgo/battleships-blazor:latest```
 
 ## Screen
 

@@ -3,6 +3,7 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 EXPOSE 5001
+EXPOSE 5000
 
 # Copy projects and build
 # Blazor server
@@ -22,7 +23,6 @@ RUN dotnet publish ./Server/BlazorApp.Server.csproj -c Release -o /app
 # Final
 FROM base AS final
 ENV ASPNETCORE_URLS=http://+:5000
-ENV ASPNETCORE_HTTPS_PORT=https://+5001
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "BlazorApp.Server.dll"]
