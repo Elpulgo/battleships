@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using System.Linq;
 using BlazorApp.Server.Hubs;
 using BlazorApp.Server.Managers;
-using Core.Models;
 using Core.Managers;
 using BlazorApp.Server.Services;
 using AI_lib;

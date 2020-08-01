@@ -1,0 +1,18 @@
+version: '3.5'
+
+services:
+  server:
+    restart: always
+    privileged: true
+    container_name: battleships-blazor
+    ports:      
+      - "5001:5001"
+      - "5000:5000"
+    networks:
+      - overlay
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+networks:
+  overlay:
