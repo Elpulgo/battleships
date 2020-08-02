@@ -1,6 +1,6 @@
 # What is this?
 An implementation of Battleships game. Primarily to try out and learn Blazor Webassembly.
-Can play vs another player, och vs computer, which can play the game with 4 options of difficulty.
+Can play vs another player, or vs computer, which can play the game with 4 options of difficulty.
 See below section for that. 
 
 ## Install
